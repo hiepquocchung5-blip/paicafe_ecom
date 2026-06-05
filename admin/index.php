@@ -22,10 +22,6 @@ $recent_redemptions = $can_manage_rewards ? $pdo->query("SELECT u.username, lr.t
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap');
     
-    :root {
-        --cafe-orange: #ea580c;
-    }
-
     .premium-glass {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(12px);
@@ -177,7 +173,7 @@ $recent_redemptions = $can_manage_rewards ? $pdo->query("SELECT u.username, lr.t
         
         <div class="stat-card premium-glass p-7 rounded-3xl group border-l-4 border-l-purple-500/50">
             <p class="text-[10px] font-black text-purple-500/60 uppercase tracking-widest mb-1">Logistics</p>
-            <h3 class="text-3xl font-black text-white mb-4"><?= e($ready_for_pickup) ?> <span class="text-xs font-normal text-gray-500 ml-1">READY</span></h3>
+            <h3 class="text-3xl font-black text-slate-800 dark:text-white mb-4"><?= e($ready_for_pickup) ?> <span class="text-xs font-normal text-slate-500 ml-1">READY</span></h3>
             <div class="w-full bg-slate-200 dark:bg-white/5 h-1 rounded-full overflow-hidden">
                 <div class="bg-purple-500 h-full w-[<?= min(100, $ready_for_pickup * 10) ?>%]"></div>
             </div>
@@ -220,7 +216,7 @@ $recent_redemptions = $can_manage_rewards ? $pdo->query("SELECT u.username, lr.t
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-white/5">
                             <th class="p-4 text-[10px] uppercase font-black text-slate-400 dark:text-gray-500 tracking-[0.2em]">Sequence</th>
-                            <th class="p-4 text-[10px] uppercase font-black text-slate-400 dark:text-gray-500 tracking-[0.2em]">State</th>
+                            <th class="p-4 text-[10px] uppercase font-black text-gray-500 tracking-[0.2em]">State</th>
                             <th class="p-4 text-[10px] uppercase font-black text-slate-400 dark:text-gray-500 tracking-[0.2em]">Timestamp</th>
                         </tr>
                     </thead>
@@ -311,8 +307,10 @@ function dashboardNotifications() {
             }, 10000);
         },
         checkForNewRedemptions() {
-            // Use relative path to avoid root-level resolution issues in subfolder environments
-            fetch('../api/get_new_redemptions.php')
+            // Point to the dedicated admin API location
+            const apiUrl = 'api/get_new_redemptions.php';
+            
+            fetch(apiUrl)
                 .then(response => {
                     if (!response.ok) {
                         return response.text().then(text => {
