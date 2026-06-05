@@ -27,8 +27,14 @@ require_admin_login();
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-900">
-<div class="flex h-full overflow-hidden" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-slate-50 text-slate-900 transition-colors duration-300" 
+      x-data="{ 
+        sidebarOpen: false, 
+        darkMode: localStorage.getItem('darkMode') === 'true' 
+      }" 
+      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      :class="{ 'dark': darkMode }">
+<div class="flex h-full overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
     
     <!-- Sidebar -->
     <div class="hidden lg:flex lg:flex-shrink-0">
@@ -67,32 +73,37 @@ require_admin_login();
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden relative">
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center z-10">
+        <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-between items-center z-10 transition-colors duration-300">
             <div class="flex items-center space-x-4">
                 <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-bars-staggered text-xl"></i>
                 </button>
                 <div class="hidden sm:block">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Authenticated Session</p>
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight leading-none">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Authenticated Session</p>
+                    <h2 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">
                         Welcome back, <?= e($_SESSION['admin_username']) ?>
                     </h2>
                 </div>
             </div>
             
             <div class="flex items-center space-x-6">
+                <!-- Theme Toggle -->
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-all">
+                    <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+
                 <div class="hidden md:flex flex-col items-end">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/20">
                         System Active
                     </span>
                 </div>
-                <div class="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
-                    <i class="fas fa-user-shield text-slate-400"></i>
+                <div class="h-10 w-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <i class="fas fa-user-shield text-slate-400 dark:text-slate-500"></i>
                 </div>
             </div>
         </header>
         
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 custom-scrollbar relative">
-            <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-50 pointer-events-none"></div>
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-950 custom-scrollbar relative transition-colors duration-300">
+            <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-50 pointer-events-none"></div>
             <div class="relative z-0 p-8">
 

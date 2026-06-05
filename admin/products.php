@@ -4,7 +4,15 @@ require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
 include __DIR__ . '/partials/header.php'; // This includes all the admin UI
 
+// --- Permission Check ---
+if (!has_permission('manage_products')) {
+    die('Access Denied. You do not have permission to manage products.');
+}
+
 $errors = [];
+$flash_message = $_SESSION['flash_message'] ?? null;
+$flash_message_type = $_SESSION['flash_message_type'] ?? 'success';
+unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 
 // --- Handle Form Submissions (Create/Update) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,12 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $_SESSION['flash_message'] = 'Product created successfully.';
+                log_activity($pdo, "Created product: " . $name_en);
             } elseif ($action === 'update') {
                 $sql = "UPDATE products SET name_en=?, name_mm=?, description_en=?, description_mm=?, price=?, discount_percentage=?, category_id=?, image=?, is_available=?, is_special_today=? WHERE id=?";
                 $params[] = $id;
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $_SESSION['flash_message'] = 'Product updated successfully.';
+                log_activity($pdo, "Updated product ID #$id");
             }
         } catch (Exception $e) {
             $_SESSION['flash_message'] = 'Error: ' . $e->getMessage();
@@ -52,18 +62,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['flash_message'] = implode(' ', $errors);
         $_SESSION['flash_message_type'] = 'error';
     }
-    header('Location: products.php'); // Redirect to clear form
-    // exit();
+    header('Location: products.php');
+    exit();
 }
 
 // --- Handle Delete Action ---
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
-    $stmt->execute([$id]);
-    $_SESSION['flash_message'] = 'Product deleted successfully.';
+    try {
+        $id = (int)$_GET['id'];
+        $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
+        $stmt->execute([$id]);
+        $_SESSION['flash_message'] = 'Product deleted successfully.';
+        log_activity($pdo, "Deleted product ID #$id");
+    } catch (Exception $e) {
+        $_SESSION['flash_message'] = 'Delete failed: This product might be linked to orders.';
+        $_SESSION['flash_message_type'] = 'error';
+    }
     header('Location: products.php');
-    // exit();
+    exit();
 }
 
 // --- Pagination Logic ---
@@ -82,14 +98,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
 
 $categories = $pdo->query("SELECT id, name_en FROM categories ORDER BY name_en")->fetchAll();
 
-// Get total count for pagination
 $sql_count = "SELECT COUNT(*) FROM products WHERE name_en LIKE ?";
 $stmt_count = $pdo->prepare($sql_count);
 $stmt_count->execute(['%' . $search_term . '%']);
 $total_products = $stmt_count->fetchColumn();
 $total_pages = ceil($total_products / $limit);
 
-// Fetch paginated products
 $sql = "
     SELECT p.*, c.name_en as category_name,
            (SELECT SUM(r.quantity_used * i.cost) 
@@ -102,178 +116,221 @@ $sql = "
     ORDER BY p.id DESC
     LIMIT :limit OFFSET :offset
 ";
-// FIX: Use bindValue to explicitly set parameter types for LIMIT and OFFSET
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':search', '%' . $search_term . '%');
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $products = $stmt->fetchAll();
-
-// --- Display Flash Messages ---
-$flash_message = $_SESSION['flash_message'] ?? null;
-$flash_message_type = $_SESSION['flash_message_type'] ?? 'success';
-unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 ?>
 
-<!-- Alpine.js container for managing form visibility -->
-<div class="container mx-auto px-4" x-data="{ showForm: <?= $product_to_edit ? 'true' : 'false' ?> }">
+<div class="max-w-7xl mx-auto" x-data="{ showForm: <?= $product_to_edit ? 'true' : 'false' ?> }">
     
-    <!-- Sticky Header for Search and Add -->
-    <div class="sticky top-0 z-10 bg-gray-100 py-4 mb-6">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
-            <h1 class="text-3xl font-bold">Manage Products</h1>
-            <div class="flex items-center gap-4">
-                <form method="GET" class="flex-grow">
-                    <div class="relative">
-                        <input type="text" name="search" placeholder="Search by name..." value="<?= e($search_term) ?>" class="form-input w-full md:w-64 pl-10">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    </div>
-                </form>
-                <button @click="showForm = !showForm" class="btn-brand flex-shrink-0">
-                    <i class="fas" :class="showForm ? 'fa-times' : 'fa-plus'"></i>
-                    <span class="hidden sm:inline ml-2" x-text="showForm ? 'Close Form' : 'Add New'"></span>
-                </button>
+    <!-- Header & Search -->
+    <div class="flex flex-col lg:flex-row justify-between lg:items-end mb-10 gap-6">
+        <div>
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-1.5 h-6 bg-orange-600 rounded-full"></div>
+                <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Inventory Assets</h2>
             </div>
+            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">Product Matrix</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Managing <?= number_format($total_products) ?> active SKUs across the network.</p>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <form method="GET" class="relative group">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors"></i>
+                <input type="text" name="search" placeholder="Search sequence..." value="<?= e($search_term) ?>" 
+                       class="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-3 text-sm font-bold focus:outline-none focus:border-orange-500/50 w-72 transition-all">
+            </form>
+            <button @click="showForm = !showForm" 
+                    class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 flex items-center space-x-3">
+                <i class="fas" :class="showForm ? 'fa-times' : 'fa-plus'"></i>
+                <span x-text="showForm ? 'Abort Entry' : 'Inject Asset'"></span>
+            </button>
         </div>
     </div>
 
     <!-- Flash Messages -->
     <?php if ($flash_message): ?>
-        <div class="p-4 mb-6 rounded-lg <?= $flash_message_type === 'success' ? 'bg-green-100 border-l-4 border-green-500 text-green-700' : 'bg-red-100 border-l-4 border-red-500 text-red-700' ?>">
-            <p><?= e($flash_message) ?></p>
+        <div class="mb-8 p-5 rounded-2xl border flex items-center space-x-4 <?= $flash_message_type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500' ?>">
+            <i class="fas <?= $flash_message_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle' ?>"></i>
+            <p class="text-xs font-black uppercase tracking-widest"><?= e($flash_message) ?></p>
         </div>
     <?php endif; ?>
 
-    <!-- Add/Edit Product Form (Collapsible) -->
-    <div x-show="showForm" x-transition class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 class="text-2xl font-bold mb-4"><?= $product_to_edit ? 'Edit Product' : 'Add New Product' ?></h2>
-        <form action="products.php" method="POST">
+    <!-- Entry Terminal (Form) -->
+    <div x-show="showForm" x-transition x-cloak 
+         class="mb-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-10 shadow-2xl">
+        <h2 class="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-8">
+            <?= $product_to_edit ? 'Edit Existing Protocol' : 'New Asset Protocol' ?>
+        </h2>
+        
+        <form action="products.php" method="POST" class="space-y-8">
             <input type="hidden" name="action" value="<?= $product_to_edit ? 'update' : 'create' ?>">
             <?php if ($product_to_edit): ?>
                 <input type="hidden" name="id" value="<?= e($product_to_edit['id']) ?>">
             <?php endif; ?>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-gray-700">Name (EN)</label>
-                    <input type="text" name="name_en" class="form-input" value="<?= e($product_to_edit['name_en'] ?? '') ?>" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Alias (EN)</label>
+                    <input type="text" name="name_en" required value="<?= e($product_to_edit['name_en'] ?? '') ?>"
+                           class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
                 </div>
-                <div>
-                    <label class="block text-gray-700">Name (MM)</label>
-                    <input type="text" name="name_mm" class="form-input" value="<?= e($product_to_edit['name_mm'] ?? '') ?>">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Alias (MM)</label>
+                    <input type="text" name="name_mm" value="<?= e($product_to_edit['name_mm'] ?? '') ?>"
+                           class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block text-gray-700">Description (EN)</label>
-                    <textarea name="description_en" class="form-input"><?= e($product_to_edit['description_en'] ?? '') ?></textarea>
+                <div class="md:col-span-2 space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Metadata / Description</label>
+                    <textarea name="description_en" rows="3"
+                              class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all"><?= e($product_to_edit['description_en'] ?? '') ?></textarea>
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block text-gray-700">Description (MM)</label>
-                    <textarea name="description_mm" class="form-input"><?= e($product_to_edit['description_mm'] ?? '') ?></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 md:col-span-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Base Valuation (KS)</label>
+                        <input type="number" name="price" required step="1" value="<?= e($product_to_edit['price'] ?? '') ?>"
+                               class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Discount Ratio (%)</label>
+                        <input type="number" name="discount_percentage" step="0.01" min="0" max="100" value="<?= e($product_to_edit['discount_percentage'] ?? '0') ?>"
+                               class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Cluster / Category</label>
+                        <select name="category_id" class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all appearance-none">
+                            <option value="">UNCATEGORIZED</option>
+                            <?php foreach($categories as $category): ?>
+                                <option value="<?= $category['id'] ?>" <?= isset($product_to_edit) && $product_to_edit['category_id'] == $category['id'] ? 'selected' : '' ?>>
+                                    <?= e(strtoupper($category['name_en'])) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-gray-700">Price (Ks)</label>
-                    <input type="number" name="price" step="1" class="form-input" value="<?= e($product_to_edit['price'] ?? '') ?>" required>
+
+                <div class="md:col-span-2 space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Visual Source (URL)</label>
+                    <div class="flex items-center space-x-4">
+                        <input type="text" name="image_url" placeholder="https://..." value="<?= e($product_to_edit['image'] ?? '') ?>"
+                               class="flex-1 bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <?php if (!empty($product_to_edit['image'])): ?>
+                            <img src="<?= e($product_to_edit['image']) ?>" class="h-14 w-14 object-cover rounded-xl border-2 border-white dark:border-slate-800 shadow-lg">
+                        <?php endif; ?>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-gray-700">Discount Percentage (%)</label>
-                    <input type="number" name="discount_percentage" step="0.01" min="0" max="100" class="form-input" value="<?= e($product_to_edit['discount_percentage'] ?? '0') ?>">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Category</label>
-                    <select name="category_id" class="form-input bg-white">
-                        <option value="">Select a category</option>
-                        <?php foreach($categories as $category): ?>
-                            <option value="<?= $category['id'] ?>" <?= isset($product_to_edit) && $product_to_edit['category_id'] == $category['id'] ? 'selected' : '' ?>>
-                                <?= e($category['name_en']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-gray-700">Image URL</label>
-                    <input type="text" name="image_url" placeholder="https://example.com/image.jpg" class="form-input" value="<?= e($product_to_edit['image'] ?? '') ?>">
-                    <?php if (isset($product_to_edit) && !empty($product_to_edit['image'])): ?>
-                        <img src="<?= e($product_to_edit['image']) ?>" alt="Current Image" class="h-20 w-20 object-cover rounded mt-2">
-                    <?php endif; ?>
-                </div>
-                <div class="md:col-span-2 flex space-x-6">
-                    <label class="flex items-center"><input type="checkbox" name="is_available" value="1" class="mr-2" <?= isset($product_to_edit) ? ($product_to_edit['is_available'] ? 'checked' : '') : 'checked' ?>> Is Available</label>
-                    <label class="flex items-center"><input type="checkbox" name="is_special_today" value="1" class="mr-2" <?= isset($product_to_edit) && $product_to_edit['is_special_today'] ? 'checked' : '' ?>> Today's Special</label>
+
+                <div class="md:col-span-2 flex items-center space-x-8 px-2">
+                    <label class="flex items-center cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" name="is_available" value="1" class="sr-only" <?= isset($product_to_edit) ? ($product_to_edit['is_available'] ? 'checked' : '') : 'checked' ?>>
+                            <div class="w-10 h-6 bg-slate-200 dark:bg-slate-800 rounded-full transition-colors group-hover:bg-slate-300 dark:group-hover:bg-slate-700"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"></div>
+                        </div>
+                        <span class="ml-3 text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300">Available</span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" name="is_special_today" value="1" class="sr-only" <?= isset($product_to_edit) && $product_to_edit['is_special_today'] ? 'checked' : '' ?>>
+                            <div class="w-10 h-6 bg-slate-200 dark:bg-slate-800 rounded-full transition-colors group-hover:bg-slate-300 dark:group-hover:bg-slate-700"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"></div>
+                        </div>
+                        <span class="ml-3 text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300">Daily Special</span>
+                    </label>
                 </div>
             </div>
-            <div class="mt-6">
-                <button type="submit" class="btn-brand"><?= $product_to_edit ? 'Update Product' : 'Create Product' ?></button>
+
+            <div class="flex items-center space-x-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button type="submit" class="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-xl">
+                    <?= $product_to_edit ? 'Update Matrix' : 'Authorize Asset' ?>
+                </button>
                 <?php if ($product_to_edit): ?>
-                    <a href="products.php" class="ml-4 text-gray-600 hover:underline">Cancel Edit</a>
+                    <a href="products.php" class="text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cancel Protocol</a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
 
-    <!-- Product List -->
-    <div class="bg-white rounded-lg shadow-md">
-        
-        <!-- MOBILE VIEW: Cards (hidden on large screens) -->
-        <div class="lg:hidden">
-            <?php if (empty($products)): ?>
-                <p class="p-6 text-center text-gray-500">No products found for "<?= e($search_term) ?>".</p>
-            <?php endif; ?>
-            <?php foreach($products as $product): ?>
-            <div class="flex items-center p-4 border-b">
-                <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-16 h-16 object-cover rounded-lg mr-4">
-                <div class="flex-grow">
-                    <p class="font-bold text-gray-800"><?= e($product['name_en']) ?></p>
-                    <p class="text-sm text-orange-600 font-semibold"><?= number_format($product['price']) ?> Ks</p>
-                    <span class="px-2 py-1 text-xs font-semibold rounded-full <?= $product['is_available'] ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800' ?>">
-                        <?= $product['is_available'] ? 'Available' : 'Unavailable' ?>
-                    </span>
-                </div>
-                <div class="flex flex-col space-y-2">
-                    <a href="products.php?action=edit&id=<?= e($product['id']) ?>" class="btn-outline text-xs py-1 px-2">Edit</a>
-                    <a href="products.php?action=delete&id=<?= e($product['id']) ?>" class="btn-danger text-xs py-1 px-2" onclick="return confirm('Are you sure?');">Delete</a>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- DESKTOP VIEW: Table (hidden on small screens) -->
-        <div class="hidden lg:block overflow-x-auto">
+    <!-- Inventory Terminal (List) -->
+    <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl shadow-slate-200/50 dark:shadow-none">
+        <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-gray-100"><th class="p-3">Image</th><th class="p-3">Name</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Cost</th><th class="p-3">Profit</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr>
+                    <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Visual</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Asset Specs</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Category</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Pricing Link</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Net Margin</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Operational</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Actions</th>
+                    </tr>
                 </thead>
-                <tbody>
-                    <?php if (empty($products)): ?>
-                        <tr><td colspan="8" class="p-6 text-center text-gray-500">No products found for "<?= e($search_term) ?>".</td></tr>
-                    <?php endif; ?>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php foreach($products as $product): 
                         $discounted_price = $product['price'] - ($product['price'] * ($product['discount_percentage'] / 100));
                         $profit = $discounted_price - ($product['cogs'] ?? 0);
                     ?>
-                    <tr class="border-b">
-                        <td class="p-3"><img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" alt="<?= e($product['name_en']) ?>" class="h-12 w-12 object-cover rounded"></td>
-                        <td class="p-3 font-medium"><?= e($product['name_en']) ?></td>
-                        <td class="p-3 text-gray-600"><?= e($product['category_name'] ?? 'N/A') ?></td>
-                        <td class="p-3">
+                    <tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all duration-200">
+                        <td class="p-6">
+                            <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-full h-full object-cover">
+                            </div>
+                        </td>
+                        <td class="p-6">
+                            <p class="text-sm font-black text-slate-800 dark:text-white group-hover:text-orange-600 transition-colors uppercase"><?= e($product['name_en']) ?></p>
+                            <p class="text-[9px] font-mono text-slate-400 dark:text-slate-500 uppercase mt-1">ID: <?= sprintf("%05d", $product['id']) ?></p>
+                        </td>
+                        <td class="p-6">
+                            <span class="text-[10px] font-black uppercase text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+                                <?= e($product['category_name'] ?? 'GLOBAL') ?>
+                            </span>
+                        </td>
+                        <td class="p-6">
                             <?php if ($product['discount_percentage'] > 0): ?>
-                                <span class="line-through text-gray-400 text-sm"><?= number_format($product['price']) ?></span><br>
-                                <span class="font-bold text-orange-600"><?= number_format($discounted_price) ?></span>
-                                <span class="text-xs bg-red-100 text-red-600 px-1 rounded ml-1">-<?= (float)$product['discount_percentage'] ?>%</span>
+                                <p class="text-[10px] text-slate-400 line-through leading-none"><?= number_format($product['price']) ?></p>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <p class="text-sm font-black text-orange-600"><?= number_format($discounted_price) ?></p>
+                                    <span class="text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black">-<?= (float)$product['discount_percentage'] ?>%</span>
+                                </div>
                             <?php else: ?>
-                                <?= number_format($product['price']) ?>
+                                <p class="text-sm font-black text-slate-800 dark:text-white"><?= number_format($product['price']) ?> <span class="text-[10px] text-slate-400 font-normal">KS</span></p>
                             <?php endif; ?>
-                            Ks
                         </td>
-                        <td class="p-3 text-red-600"><?= number_format($product['cogs'] ?? 0, 2) ?> Ks</td>
-                        <td class="p-3 font-bold <?= $profit > 0 ? 'text-green-600' : 'text-red-600' ?>"><?= number_format($profit, 2) ?> Ks</td>
-                        <td class="p-3">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full <?= $product['is_available'] ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800' ?>"><?= $product['is_available'] ? 'Available' : 'Unavailable' ?></span>
-                            <?php if ($product['is_special_today']): ?><span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-200 text-yellow-800 ml-1">Special</span><?php endif; ?>
+                        <td class="p-6">
+                            <p class="text-xs font-black <?= $profit > 0 ? 'text-emerald-500' : 'text-red-500' ?>">
+                                <?= number_format($profit) ?> <span class="text-[8px] opacity-50 uppercase">Margin</span>
+                            </p>
+                            <p class="text-[9px] font-mono text-slate-400 mt-1">COGS: <?= number_format($product['cogs'] ?? 0) ?></p>
                         </td>
-                        <td class="p-3 flex space-x-4">
-                            <a href="products.php?action=edit&id=<?= e($product['id']) ?>" class="text-blue-500 hover:underline">Edit</a>
-                            <a href="products.php?action=delete&id=<?= e($product['id']) ?>" class="text-red-500 hover:underline" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                        <td class="p-6">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full <?= $product['is_available'] ? 'bg-emerald-500' : 'bg-red-500' ?>"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest <?= $product['is_available'] ? 'text-emerald-500' : 'text-red-500' ?>">
+                                    <?= $product['is_available'] ? 'Online' : 'Offline' ?>
+                                </span>
+                            </div>
+                            <?php if ($product['is_special_today']): ?>
+                                <span class="text-[8px] font-black uppercase tracking-widest text-orange-500 mt-1 block">★ Sync Feature</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="p-6">
+                            <div class="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="products.php?action=edit&id=<?= e($product['id']) ?>" 
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+                                    <i class="fas fa-pen-nib text-xs"></i>
+                                </a>
+                                <a href="products.php?action=delete&id=<?= e($product['id']) ?>" 
+                                   onclick="return confirm('Confirm asset termination?');"
+                                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                                    <i class="fas fa-trash-alt text-xs"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -281,20 +338,27 @@ unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
             </table>
         </div>
         
-        <!-- Pagination Links -->
-        <div class="p-4 flex justify-between items-center">
-            <div><span class="text-sm text-gray-600">Page <?= $page ?> of <?= $total_pages ?> (Total: <?= $total_products ?> products)</span></div>
+        <!-- Pager -->
+        <div class="p-8 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-950/30">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sector <?= $page ?> / <?= $total_pages ?></span>
             <div class="flex space-x-2">
                 <?php if ($page > 1): ?>
-                    <a href="?page=<?= $page - 1 ?>&search=<?= e($search_term) ?>" class="btn-outline text-sm py-1 px-3">&larr; Previous</a>
+                    <a href="?page=<?= $page - 1 ?>&search=<?= e($search_term) ?>" 
+                       class="px-5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all">Previous</a>
                 <?php endif; ?>
                 <?php if ($page < $total_pages): ?>
-                    <a href="?page=<?= $page + 1 ?>&search=<?= e($search_term) ?>" class="btn-brand text-sm py-1 px-3">Next &rarr;</a>
+                    <a href="?page=<?= $page + 1 ?>&search=<?= e($search_term) ?>" 
+                       class="px-5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all">Next</a>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
 
-<?php include 'partials/footer.php'; ?>
+<style>
+    /* Switch Style */
+    input:checked ~ .dot { transform: translateX(100%); background-color: #ea580c; }
+    input:checked ~ .bg-slate-200 { background-color: rgba(234, 88, 12, 0.2); }
+</style>
 
+<?php include 'partials/footer.php'; ?>
