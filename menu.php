@@ -188,8 +188,13 @@ include 'includes/header.php';
                     </div>
 
                     <div class="flex justify-between items-center mt-auto pt-3 border-t border-gray-100">
-                        <span class="text-xl sm:text-2xl font-bold text-orange-600" 
-                              x-text="`${product.price} Ks`"></span>
+                        <div class="flex flex-col">
+                            <template x-if="product.discount_percentage > 0">
+                                <span class="text-xs text-gray-400 line-through" x-text="`${product.price} Ks`"></span>
+                            </template>
+                            <span class="text-xl sm:text-2xl font-bold text-orange-600" 
+                                  x-text="`${product.discount_percentage > 0 ? (product.price - (product.price * product.discount_percentage / 100)) : product.price} Ks` "></span>
+                        </div>
                         <button @click="addToCart(product.id, $data)"
                                 :disabled="busy"
                                 class="btn-brand p-2 sm:p-3 h-10 sm:h-12 w-10 sm:w-12 rounded-full flex items-center justify-center ml-2 transition-all hover:scale-105">

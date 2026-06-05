@@ -26,16 +26,27 @@ try {
     // 1. Calculate totals from the database to ensure price accuracy
     $product_ids = array_keys($cart);
     $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
-    $stmt = $pdo->prepare("SELECT id, price FROM products WHERE id IN ($placeholders)");
+    $stmt = $pdo->prepare("SELECT id, price, discount_percentage FROM products WHERE id IN ($placeholders)");
     $stmt->execute($product_ids);
-    $db_products = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    $db_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $products_lookup = [];
+    foreach ($db_products as $row) {
+        $products_lookup[$row['id']] = $row;
+    }
 
     $subtotal = 0;
+    $final_prices = [];
     foreach ($cart as $product_id => $item) {
-        if (!isset($db_products[$product_id])) {
+        if (!isset($products_lookup[$product_id])) {
             throw new Exception("Product with ID {$product_id} not found.");
         }
-        $subtotal += $db_products[$product_id] * $item['quantity'];
+        $base_price = $products_lookup[$product_id]['price'];
+        $discount = $products_lookup[$product_id]['discount_percentage'];
+        $final_price = $base_price - ($base_price * ($discount / 100));
+        
+        $subtotal += $final_price * $item['quantity'];
+        $final_prices[$product_id] = $final_price;
     }
 
     $tax_rate_stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'tax_percentage'");
@@ -62,7 +73,7 @@ try {
     // 4. Insert order items
     $item_stmt = $pdo->prepare("INSERT INTO order_items (order_id, product_id, quantity, price_per_item) VALUES (?, ?, ?, ?)");
     foreach ($cart as $product_id => $item) {
-        $item_stmt->execute([$order_id, $product_id, $item['quantity'], $db_products[$product_id]]);
+        $item_stmt->execute([$order_id, $product_id, $item['quantity'], $final_prices[$product_id]]);
     }
 
     // 5. Record the payment

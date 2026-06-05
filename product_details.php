@@ -110,7 +110,17 @@ include 'includes/header.php';
 
                 <!-- Price & Add to Cart: Fixed bottom on mobile for sticky access -->
                 <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-0 mt-auto pt-4 border-t border-gray-100">
-                    <span class="text-2xl sm:text-3xl font-bold text-orange-600 self-center sm:self-auto order-2 sm:order-1"><?= number_format($product['price'], 2) ?> Ks</span>
+                    <div class="flex flex-col items-center sm:items-start">
+                        <?php if ($product['discount_percentage'] > 0): ?>
+                            <span class="text-sm text-gray-400 line-through"><?= number_format($product['price']) ?> Ks</span>
+                            <div class="flex items-center">
+                                <span class="text-2xl sm:text-3xl font-bold text-orange-600"><?= number_format($product['price'] - ($product['price'] * $product['discount_percentage'] / 100)) ?> Ks</span>
+                                <span class="ml-2 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">-<?= (float)$product['discount_percentage'] ?>%</span>
+                            </div>
+                        <?php else: ?>
+                            <span class="text-2xl sm:text-3xl font-bold text-orange-600"><?= number_format($product['price']) ?> Ks</span>
+                        <?php endif; ?>
+                    </div>
                     <button 
                         @click="addToCart(<?= $product['id'] ?>, this)" 
                         :disabled="busy" 

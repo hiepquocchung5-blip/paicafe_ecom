@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             trim($_POST['description_en'] ?? ''),
             trim($_POST['description_mm'] ?? ''),
             $_POST['price'] ?? 0,
+            $_POST['discount_percentage'] ?? 0,
             !empty($_POST['category_id']) ? $_POST['category_id'] : null,
             trim($_POST['image_url'] ?? ''),
             isset($_POST['is_available']) ? 1 : 0,
@@ -32,12 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             if ($action === 'create') {
-                $sql = "INSERT INTO products (name_en, name_mm, description_en, description_mm, price, category_id, image, is_available, is_special_today) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO products (name_en, name_mm, description_en, description_mm, price, discount_percentage, category_id, image, is_available, is_special_today) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $_SESSION['flash_message'] = 'Product created successfully.';
             } elseif ($action === 'update') {
-                $sql = "UPDATE products SET name_en=?, name_mm=?, description_en=?, description_mm=?, price=?, category_id=?, image=?, is_available=?, is_special_today=? WHERE id=?";
+                $sql = "UPDATE products SET name_en=?, name_mm=?, description_en=?, description_mm=?, price=?, discount_percentage=?, category_id=?, image=?, is_available=?, is_special_today=? WHERE id=?";
                 $params[] = $id;
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -175,6 +176,10 @@ unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
                     <input type="number" name="price" step="1" class="form-input" value="<?= e($product_to_edit['price'] ?? '') ?>" required>
                 </div>
                 <div>
+                    <label class="block text-gray-700">Discount Percentage (%)</label>
+                    <input type="number" name="discount_percentage" step="0.01" min="0" max="100" class="form-input" value="<?= e($product_to_edit['discount_percentage'] ?? '0') ?>">
+                </div>
+                <div>
                     <label class="block text-gray-700">Category</label>
                     <select name="category_id" class="form-input bg-white">
                         <option value="">Select a category</option>
@@ -243,13 +248,23 @@ unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
                         <tr><td colspan="8" class="p-6 text-center text-gray-500">No products found for "<?= e($search_term) ?>".</td></tr>
                     <?php endif; ?>
                     <?php foreach($products as $product): 
-                        $profit = $product['price'] - ($product['cogs'] ?? 0);
+                        $discounted_price = $product['price'] - ($product['price'] * ($product['discount_percentage'] / 100));
+                        $profit = $discounted_price - ($product['cogs'] ?? 0);
                     ?>
                     <tr class="border-b">
                         <td class="p-3"><img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" alt="<?= e($product['name_en']) ?>" class="h-12 w-12 object-cover rounded"></td>
                         <td class="p-3 font-medium"><?= e($product['name_en']) ?></td>
                         <td class="p-3 text-gray-600"><?= e($product['category_name'] ?? 'N/A') ?></td>
-                        <td class="p-3"><?= number_format($product['price']) ?> Ks</td>
+                        <td class="p-3">
+                            <?php if ($product['discount_percentage'] > 0): ?>
+                                <span class="line-through text-gray-400 text-sm"><?= number_format($product['price']) ?></span><br>
+                                <span class="font-bold text-orange-600"><?= number_format($discounted_price) ?></span>
+                                <span class="text-xs bg-red-100 text-red-600 px-1 rounded ml-1">-<?= (float)$product['discount_percentage'] ?>%</span>
+                            <?php else: ?>
+                                <?= number_format($product['price']) ?>
+                            <?php endif; ?>
+                            Ks
+                        </td>
                         <td class="p-3 text-red-600"><?= number_format($product['cogs'] ?? 0, 2) ?> Ks</td>
                         <td class="p-3 font-bold <?= $profit > 0 ? 'text-green-600' : 'text-red-600' ?>"><?= number_format($profit, 2) ?> Ks</td>
                         <td class="p-3">

@@ -7,7 +7,7 @@ require_admin_login();
 
 try {
     $products = $pdo->query("
-        SELECT p.id, p.name_en, p.price, p.image, c.name_en as category_name
+        SELECT p.id, p.name_en, p.price, p.discount_percentage, p.image, c.name_en as category_name
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
         WHERE p.is_available = 1

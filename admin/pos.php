@@ -59,10 +59,20 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 <div x-show="!loading && filteredProducts.length === 0" class="text-center py-10 text-gray-500">No products found.</div>
                 <div x-show="!loading" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                     <template x-for="product in filteredProducts" :key="product.id">
-                        <div @click="addToCart(product)" class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer p-2 flex flex-col text-center">
+                        <div @click="addToCart(product)" class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer p-2 flex flex-col text-center relative overflow-hidden">
+                            <template x-if="product.discount_percentage > 0">
+                                <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-1 py-0.5 rounded-bl-lg font-bold">
+                                    -<span x-text="parseFloat(product.discount_percentage)"></span>%
+                                </div>
+                            </template>
                             <img :src="product.image || '/assets/uploads/placeholder.png'" class="w-full h-16 md:h-24 object-cover rounded-md mb-2">
                             <h3 class="font-semibold text-gray-700 flex-grow text-xs md:text-sm" x-text="product.name_en"></h3>
-                            <p class="text-blue-600 font-bold text-sm md:text-base" x-text="formatCurrency(product.price)"></p>
+                            <div class="flex flex-col items-center">
+                                <template x-if="product.discount_percentage > 0">
+                                    <span class="text-[10px] text-gray-400 line-through" x-text="formatCurrency(product.price)"></span>
+                                </template>
+                                <p class="text-blue-600 font-bold text-sm md:text-base" x-text="formatCurrency(product.price - (product.price * product.discount_percentage / 100))"></p>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -201,7 +211,10 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 return f;
             },
             
-            addToCart(p) { if(this.cart[p.id]){this.cart[p.id].quantity++;}else{this.cart[p.id]={name:p.name_en,price:parseFloat(p.price),quantity:1, image: p.image};}},
+            addToCart(p) { 
+                const finalPrice = p.price - (p.price * (p.discount_percentage || 0) / 100);
+                if(this.cart[p.id]){this.cart[p.id].quantity++;}else{this.cart[p.id]={name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
+            },
             updateQuantity(id, amt) { if(this.cart[id]){this.cart[id].quantity+=amt; if(this.cart[id].quantity<=0){delete this.cart[id];}}},
             manualUpdateQuantity(id, val) { const q = parseInt(val); if(!isNaN(q) && q > 0){this.cart[id].quantity=q;}else{delete this.cart[id];}},
             removeFromCart(id) { delete this.cart[id]; },
