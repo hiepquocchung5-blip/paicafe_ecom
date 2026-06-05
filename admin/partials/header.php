@@ -8,7 +8,13 @@ require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_admin_login();
 ?>
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full" 
+      x-data="{ 
+        sidebarOpen: false, 
+        darkMode: localStorage.getItem('darkMode') === 'true' 
+      }" 
+      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,14 +33,8 @@ require_admin_login();
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-900 transition-colors duration-300" 
-      x-data="{ 
-        sidebarOpen: false, 
-        darkMode: localStorage.getItem('darkMode') === 'true' 
-      }" 
-      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
-      :class="{ 'dark': darkMode }">
-<div class="flex h-full overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="flex h-full overflow-hidden">
     
     <!-- Sidebar -->
     <div class="hidden lg:flex lg:flex-shrink-0">
@@ -88,8 +88,8 @@ require_admin_login();
             
             <div class="flex items-center space-x-6">
                 <!-- Theme Toggle -->
-                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-all">
-                    <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
+                    <i class="fas" :class="darkMode ? 'fa-sun text-yellow-500' : 'fa-moon text-blue-500'"></i>
                 </button>
 
                 <div class="hidden md:flex flex-col items-end">
