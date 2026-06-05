@@ -1,0 +1,24 @@
+<?php
+header('Content-Type: application/json');
+require_once 'includes/db_connect.php';
+require_once 'includes/functions.php';
+
+if (!is_admin_logged_in()) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+    exit();
+}
+
+// Check for redemptions in the last 10 seconds with 'pending' status
+$stmt = $pdo->prepare("
+    SELECT u.username, lr.title 
+    FROM reward_redemptions rr
+    JOIN users u ON rr.user_id = u.id
+    JOIN loyalty_rewards lr ON rr.reward_id = lr.id
+    WHERE rr.status = 'pending' AND rr.redeemed_at >= NOW() - INTERVAL 10 SECOND
+");
+$stmt->execute();
+$new_redemptions = $stmt->fetchAll();
+
+echo json_encode(['status' => 'success', 'new_redemptions' => $new_redemptions]);
+?>

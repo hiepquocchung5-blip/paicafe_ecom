@@ -1,0 +1,24 @@
+#
+# Paicafe - ADMIN Area Configuration File
+#
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Set the base directory for all admin rewrites
+    RewriteBase /admin/
+
+    # Prevent direct access to partial files like header.php, footer.php, etc.
+    RewriteRule ^partials/ - [F,L]
+    RewriteRule ^_order_table_content\.php$ - [F,L]
+
+    # Don't apply the main rule to files or directories that actually exist
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirect all other admin-related requests to the admin index.php router
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
+
+# Block directory browsing for added security
+Options -Indexes

@@ -1,0 +1,40 @@
+[14-Nov-2025 04:49:19 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 04:49:19 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 12:22:49 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 12:22:49 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 12:24:13 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 12:24:13 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/api/../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/get_products.php on line 4
+[14-Nov-2025 12:28:47 UTC] PHP Warning:  require_once(../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/submit_pos_order.php on line 3
+[14-Nov-2025 12:28:47 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/submit_pos_order.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/submit_pos_order.php on line 3
+[14-Nov-2025 12:31:43 UTC] PHP Warning:  require_once(../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:45 UTC] PHP Warning:  require_once(../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:45 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:45 UTC] PHP Warning:  require_once(../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:45 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:57 UTC] PHP Warning:  require_once(../includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3
+[14-Nov-2025 12:31:57 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/api/apply_coupon.php on line 3

@@ -1,0 +1,90 @@
+
+:root {
+    --brand-primary: #EA580C; /* orange-600 */
+    --brand-secondary: #F97316; /* orange-500 */
+    --text-dark: #333333;
+    --border-light: #E5E7EB; /* gray-200 */
+    --font-sans: 'Poppins', sans-serif;
+}
+
+/* ... (the rest of your stylesheet remains the same) ... */
+body {
+    font-family: var(--font-sans);
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+}
+
+/*
+--------------------------------
+2. Reusable Components
+--------------------------------
+*/
+
+.btn-brand {
+    @apply inline-block px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 ease-in-out;
+    background-color: var(--brand-primary);
+}
+.btn-brand:hover {
+    background-color: var(--brand-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline {
+    @apply inline-block px-6 py-3 rounded-lg font-semibold shadow-sm transition-all duration-300 ease-in-out;
+    background-color: transparent;
+    color: var(--brand-primary);
+    border: 2px solid var(--brand-primary);
+}
+.btn-outline:hover {
+    background-color: var(--brand-primary);
+    color: white;
+}
+
+/* FIX: A single, clean style for all form inputs */
+.form-input {
+    @apply w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-md transition;
+}
+.form-input:focus {
+    @apply outline-none border-transparent ring-2 ring-orange-500;
+}
+/*
+--------------------------------
+Print Styles for Vouchers & Receipts
+--------------------------------
+*/
+@media print {
+    /* Hide all elements on the page by default */
+    body > *:not(.voucher-print-area) {
+        display: none;
+    }
+
+    /* Ensure the body itself is plain white for printing */
+    body {
+        background-color: #FFFFFF;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Style the printable area */
+    .voucher-print-area {
+        /* Make the voucher take up the full print page */
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        
+        /* Remove screen styles like shadows that look bad on paper */
+        box-shadow: none !important;
+        border: none !important;
+        
+        /* Force it to be visible */
+        display: block;
+        visibility: visible;
+    }
+}

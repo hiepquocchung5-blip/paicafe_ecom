@@ -1,0 +1,51 @@
+[04-Nov-2025 08:02:11 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/error_log_viewer.php on line 21
+[04-Nov-2025 13:46:06 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 53
+[07-Nov-2025 04:52:18 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 53
+[09-Nov-2025 03:19:48 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 53
+[11-Nov-2025 07:36:28 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 53
+[14-Nov-2025 04:37:32 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 53
+[14-Nov-2025 04:40:39 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 159
+[14-Nov-2025 04:40:39 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 279
+[14-Nov-2025 04:40:39 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 305
+[14-Nov-2025 04:40:50 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 159
+[14-Nov-2025 04:40:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 279
+[14-Nov-2025 04:40:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 305
+[14-Nov-2025 04:41:31 UTC] PHP Warning:  Undefined variable $API_BASE_URL in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 159
+[14-Nov-2025 04:41:31 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 279
+[14-Nov-2025 04:41:31 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:12) in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 305
+[14-Nov-2025 04:45:59 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 2
+[14-Nov-2025 04:45:59 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/pos.php on line 2
+[21-Nov-2025 05:06:42 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[21-Nov-2025 05:08:19 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[21-Nov-2025 05:09:08 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[21-Nov-2025 06:52:36 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[22-Nov-2025 09:12:42 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[22-Nov-2025 09:13:19 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[13-Jan-2026 07:40:15 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php on line 2
+[13-Jan-2026 07:40:15 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php on line 2
+[13-Jan-2026 07:41:17 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/tables.php on line 41
+[27-Mar-2026 01:24:24 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/permissions.php on line 2
+[27-Mar-2026 01:24:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/permissions.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/permissions.php on line 2
+[13-May-2026 09:32:22 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 64
+[13-May-2026 09:32:48 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[17-May-2026 08:11:27 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[27-May-2026 06:12:28 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[27-May-2026 10:14:12 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[27-May-2026 10:14:28 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[27-May-2026 10:14:47 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[31-May-2026 07:25:18 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 54
+[03-Jun-2026 06:57:47 UTC] PHP Warning:  require_once(/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php): Failed to open stream: No such file or directory in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php on line 2
+[03-Jun-2026 06:57:47 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/zmmlpszw/public_html/paicafe.online/public/admin/includes/db_connect.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/zmmlpszw/public_html/paicafe.online/public/admin/redemptions.php on line 2
+[04-Jun-2026 04:10:16 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/zmmlpszw/public_html/paicafe.online/public/admin/partials/header.php:10) in /home/zmmlpszw/public_html/paicafe.online/public/admin/products.php on line 64

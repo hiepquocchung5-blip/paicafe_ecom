@@ -1,0 +1,5 @@
+activity log
+// 👇 ADD THIS LOGGING CODE 👇
+        $log_stmt = $pdo->prepare("INSERT INTO activity_logs (action) VALUES (?)");
+        $log_stmt->execute(["New user registered: " . htmlspecialchars($username)]);
+        // 👆 END OF LOGGING CODE 👆
