@@ -8,46 +8,91 @@ require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_admin_login();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paicafe - Admin Panel</title>
+    <title>PAICAFE Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-gray-100">
-<div class="flex h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-slate-50 text-slate-900">
+<div class="flex h-full overflow-hidden" x-data="{ sidebarOpen: false }">
     
-    <!-- Desktop Sidebar -->
+    <!-- Sidebar -->
     <div class="hidden lg:flex lg:flex-shrink-0">
-        <div class="flex flex-col w-64 bg-gray-800 text-white">
-            <?php include 'sidebar_content.php'; // Reusable sidebar content ?>
+        <div class="flex flex-col w-72 bg-[#0f172a] text-white">
+            <?php include 'sidebar_content.php'; ?>
         </div>
     </div>
 
     <!-- Mobile Sidebar -->
-    <div x-show="sidebarOpen" class="fixed inset-0 flex z-40 lg:hidden" @click.away="sidebarOpen = false">
-        <div class="fixed inset-0 bg-black opacity-50"></div>
-        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800 text-white">
-            <?php include 'sidebar_content.php'; // Re-use the same sidebar content ?>
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 flex z-40 lg:hidden" 
+         x-cloak>
+        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" @click="sidebarOpen = false"></div>
+        <div x-show="sidebarOpen"
+             x-transition:enter="transition ease-in-out duration-300 transform"
+             x-transition:enter-start="-translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in-out duration-300 transform"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="-translate-x-full"
+             class="relative flex-1 flex flex-col max-w-xs w-full bg-[#0f172a] text-white shadow-2xl">
+            <div class="absolute top-0 right-0 -mr-12 pt-4">
+                <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+            <?php include 'sidebar_content.php'; ?>
         </div>
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="bg-white shadow-md p-4 flex justify-between items-center">
-            <button @click.stop="sidebarOpen = !sidebarOpen" class="lg:hidden text-gray-500 focus:outline-none">
-                <i class="fas fa-bars fa-lg"></i>
-            </button>
-            <div class="flex items-center space-x-2">
-                <h2 class="text-xl font-semibold">Welcome, <?= e($_SESSION['admin_username']) ?>!</h2>
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">
-                    <?= e(ucfirst($_SESSION['user_type'])) ?>
-                </span>
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center z-10">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-600 focus:outline-none">
+                    <i class="fas fa-bars-staggered text-xl"></i>
+                </button>
+                <div class="hidden sm:block">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Authenticated Session</p>
+                    <h2 class="text-lg font-black text-slate-800 tracking-tight leading-none">
+                        Welcome back, <?= e($_SESSION['admin_username']) ?>
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <div class="hidden md:flex flex-col items-end">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                        System Active
+                    </span>
+                </div>
+                <div class="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
+                    <i class="fas fa-user-shield text-slate-400"></i>
+                </div>
             </div>
         </header>
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 custom-scrollbar relative">
+            <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-50 pointer-events-none"></div>
+            <div class="relative z-0 p-8">
 

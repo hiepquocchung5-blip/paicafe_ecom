@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 // FIX: Use the correct relative paths to go up from /api/ to /includes/
 require_once __DIR__ . '/../includes/db_connect.php';
-require_once __DIR__ . '/../includes/functions_admin.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 // --- SECURITY CHECK ---
 // We must start the session to check admin login status

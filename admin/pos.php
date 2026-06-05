@@ -10,68 +10,176 @@ $categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
 $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paicafe POS</title>
+    <title>PAICAFE POS | Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        .pos-scroll::-webkit-scrollbar { width: 5px; }
-        .pos-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
-        .pos-scroll::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        #rotate-overlay { display: none; position: fixed; inset: 0; background-color: #1a202c; color: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #rotate-overlay i { font-size: 5rem; margin-bottom: 1rem; animation: rotate-anim 2.5s ease-in-out infinite; }
-        @keyframes rotate-anim { 0% { transform: rotate(0deg); } 40% { transform: rotate(90deg); } 60% { transform: rotate(90deg); } 100% { transform: rotate(0deg); } }
-        @media (max-width: 768px) and (orientation: portrait) { #rotate-overlay { display: flex; } .pos-container { display: none; } }
-        @media print { body > *:not(.voucher-print-area) { display: none !important; } .no-print { display: none !important; } .voucher-print-area { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: none !important; display: block; visibility: visible; } }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-card:hover {
+            background: rgba(234, 88, 12, 0.1);
+            border-color: rgba(234, 88, 12, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .active-category {
+            background: #ea580c !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        }
+
+        #rotate-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: #0f172a; 
+            z-index: 1000; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        @media (max-width: 1024px) and (orientation: portrait) {
+            #rotate-overlay { display: flex; }
+        }
+
+        @media print {
+            body { background: white; color: black; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-200" x-data="posSystem(<?= htmlspecialchars(json_encode($categories)) ?>, <?= $tax_rate ?>)">
+<body class="h-full" x-data="posSystem(<?= htmlspecialchars(json_encode($categories)) ?>, <?= $tax_rate ?>)">
     
-    <div id="rotate-overlay">
-        <i class="fas fa-mobile-alt"></i>
-        <h2 class="text-2xl font-bold">Please Rotate Your Device</h2>
-        <p class="mt-2 text-lg">The POS interface is best viewed in landscape mode.</p>
+    <!-- ROTATE NOTIFICATION -->
+    <div id="rotate-overlay" class="text-center p-10">
+        <div class="w-24 h-24 bg-orange-600/10 rounded-3xl flex items-center justify-center mb-6 animate-bounce">
+            <i class="fas fa-rotate text-orange-500 text-4xl"></i>
+        </div>
+        <h2 class="text-2xl font-black tracking-tight text-white">ROTATE DEVICE</h2>
+        <p class="text-slate-400 mt-2">The POS terminal requires landscape orientation for optimal operation.</p>
     </div>
 
-    <div class="pos-container flex flex-col md:flex-row h-screen font-sans">
+    <!-- MAIN POS INTERFACE -->
+    <div class="flex h-full overflow-hidden">
         
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white shadow-md p-2 flex justify-between items-center no-print">
-                <h1 class="text-xl font-bold text-gray-800">Point of Sale</h1>
-                <div class="flex items-center space-x-2">
-                    <input type="text" x-model.debounce.300ms="searchTerm" placeholder="Search..." class="form-input w-40 sm:w-64 py-2">
-                    <a href="/index.php" class="text-gray-600 hover:text-orange-600" title="Dashboard"><i class="fas fa-tachometer-alt fa-lg"></i></a>
+        <!-- LEFT: PRODUCT GRID -->
+        <div class="flex-1 flex flex-col min-w-0 border-r border-white/5">
+            <!-- Header -->
+            <header class="glass-panel px-6 py-4 flex items-center justify-between no-print">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/20">
+                        <i class="fas fa-terminal text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black tracking-tighter text-white">POS TERMINAL</h1>
+                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Node_01 Active</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" x-model.debounce.300ms="searchTerm" placeholder="Search product..." 
+                               class="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50 w-64 transition-all">
+                    </div>
+                    <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-house-user"></i>
+                    </a>
                 </div>
             </header>
-            <div class="bg-white p-2 border-y no-print">
-                <div class="flex space-x-2 overflow-x-auto pb-1">
-                    <button @click="selectedCategory = 'All'" :class="{ 'bg-orange-500 text-white': selectedCategory === 'All' }" class="px-3 py-1 text-sm rounded-lg font-semibold flex-shrink-0">All</button>
-                    <template x-for="category in categories"><button @click="selectedCategory = category" :class="{ 'bg-orange-500 text-white': selectedCategory === category }" x-text="category" class="px-3 py-1 text-sm rounded-lg font-semibold flex-shrink-0"></button></template>
+
+            <!-- Categories -->
+            <div class="bg-slate-900/50 border-b border-white/5 px-6 py-3 no-print">
+                <div class="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-1">
+                    <button @click="selectedCategory = 'All'" 
+                            :class="selectedCategory === 'All' ? 'active-category' : 'bg-white/5 text-slate-400 hover:bg-white/10'"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                        All Items
+                    </button>
+                    <template x-for="category in categories">
+                        <button @click="selectedCategory = category" 
+                                :class="selectedCategory === category ? 'active-category' : 'bg-white/5 text-slate-400 hover:bg-white/10'"
+                                x-text="category"
+                                class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                        </button>
+                    </template>
                 </div>
             </div>
-            <main class="flex-1 p-2 md:p-4 overflow-y-auto pos-scroll">
-                <div x-show="loading" class="text-center py-10 text-gray-500">Loading products...</div>
-                <div x-show="!loading && filteredProducts.length === 0" class="text-center py-10 text-gray-500">No products found.</div>
-                <div x-show="!loading" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
+
+            <!-- Products Grid -->
+            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#0f172a]/50">
+                <div x-show="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
+                    <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-orange-600"></i>
+                    <p class="font-mono text-xs uppercase tracking-widest">Initializing Inventory...</p>
+                </div>
+
+                <div x-show="!loading && filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full text-slate-600">
+                    <i class="fas fa-box-open text-5xl mb-4 opacity-20"></i>
+                    <p class="font-mono text-xs uppercase tracking-widest">No matching assets found.</p>
+                </div>
+
+                <div x-show="!loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     <template x-for="product in filteredProducts" :key="product.id">
-                        <div @click="addToCart(product)" class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer p-2 flex flex-col text-center relative overflow-hidden">
+                        <div @click="addToCart(product)" 
+                             class="product-card group rounded-2xl p-3 cursor-pointer flex flex-col relative overflow-hidden">
+                            
+                            <!-- Discount Badge -->
                             <template x-if="product.discount_percentage > 0">
-                                <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-1 py-0.5 rounded-bl-lg font-bold">
+                                <div class="absolute top-0 right-0 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded-bl-xl z-10 shadow-lg">
                                     -<span x-text="parseFloat(product.discount_percentage)"></span>%
                                 </div>
                             </template>
-                            <img :src="product.image || '/assets/uploads/placeholder.png'" class="w-full h-16 md:h-24 object-cover rounded-md mb-2">
-                            <h3 class="font-semibold text-gray-700 flex-grow text-xs md:text-sm" x-text="product.name_en"></h3>
-                            <div class="flex flex-col items-center">
+
+                            <div class="aspect-square rounded-xl overflow-hidden mb-3 bg-slate-800">
+                                <img :src="product.image || '/assets/uploads/placeholder.png'" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            
+                            <h3 class="text-xs font-bold text-slate-200 line-clamp-2 mb-2 flex-grow" x-text="product.name_en"></h3>
+                            
+                            <div class="flex flex-col mt-auto">
                                 <template x-if="product.discount_percentage > 0">
-                                    <span class="text-[10px] text-gray-400 line-through" x-text="formatCurrency(product.price)"></span>
+                                    <span class="text-[10px] text-slate-500 line-through leading-none" x-text="formatCurrency(product.price)"></span>
                                 </template>
-                                <p class="text-blue-600 font-bold text-sm md:text-base" x-text="formatCurrency(product.price - (product.price * product.discount_percentage / 100))"></p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-orange-500 font-black text-sm" x-text="formatCurrency(product.price - (product.price * product.discount_percentage / 100))"></p>
+                                    <div class="w-6 h-6 rounded-lg bg-orange-600/10 flex items-center justify-center group-hover:bg-orange-600 transition-colors">
+                                        <i class="fas fa-plus text-[10px] text-orange-500 group-hover:text-white"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -79,127 +187,265 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             </main>
         </div>
 
-        <div class="w-full md:w-96 bg-white shadow-2xl flex flex-col">
-            <div class="flex-1 p-4 pos-scroll overflow-y-auto">
-                <h2 class="text-xl font-bold border-b pb-2 mb-4">Current Order</h2>
-                <div x-show="Object.keys(cart).length === 0" class="text-gray-500 text-center py-10"><p>Click on a product to add it.</p></div>
-                <div class="space-y-3">
-                    <template x-for="(item, productId) in cart" :key="productId">
-                        <div class="flex items-center"><div class="flex-grow pr-2"><p class="font-semibold" x-text="item.name"></p><p class="text-sm text-gray-500" x-text="formatCurrency(item.price)"></p></div><div class="flex items-center"><button @click="updateQuantity(productId, -1)" class="px-2 py-1 bg-gray-200 rounded-l">-</button><input type="text" :value="item.quantity" @change="manualUpdateQuantity(productId, $event.target.value)" class="w-12 text-center border-t border-b"><button @click="updateQuantity(productId, 1)" class="px-2 py-1 bg-gray-200 rounded-r">+</button></div><p class="w-20 text-right font-semibold" x-text="formatCurrency(item.price * item.quantity)"></p><button @click="removeFromCart(productId)" class="ml-3 text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button></div>
-                    </template>
+        <!-- RIGHT: CHECKOUT SIDEBAR -->
+        <div class="w-[400px] flex flex-col glass-panel shadow-2xl z-20">
+            <!-- Header -->
+            <div class="p-6 border-b border-white/5 bg-white/[0.02]">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-black text-white tracking-tight uppercase">Current Tray</h2>
+                    <button @click="resetOrder()" class="text-[10px] font-black text-slate-500 hover:text-red-500 uppercase tracking-widest transition-colors">
+                        Clear Tray
+                    </button>
                 </div>
             </div>
-            <div class="p-4 border-t bg-gray-50 no-print">
-                <div class="space-y-1 text-lg">
-                    <div class="flex justify-between"><span>Subtotal</span><span x-text="formatCurrency(totals.subtotal)"></span></div>
-                    <div x-show="couponDiscount > 0" class="flex justify-between text-red-500">
-                        <span>Discount (<span x-text="couponCode"></span>)</span>
-                        <span x-text="'-' + formatCurrency(couponDiscount)"></span>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+                <template x-if="Object.keys(cart).length === 0">
+                    <div class="h-full flex flex-col items-center justify-center text-slate-600 text-center opacity-40">
+                        <i class="fas fa-shopping-basket text-5xl mb-4"></i>
+                        <p class="text-xs font-mono uppercase tracking-widest leading-loose">Waiting for input...<br>Scan or select product.</p>
                     </div>
-                    <div class="flex justify-between"><span>Tax (<span x-text="taxRate * 100"></span>%)</span><span x-text="formatCurrency(totals.tax)"></span></div>
-                </div>
-                <div class="flex justify-between items-center text-2xl font-bold text-orange-600 border-t-2 pt-2 mt-2">
-                    <span>Total</span>
-                    <span x-text="formatCurrency(totals.final)"></span>
-                </div>
-                <button @click="openPaymentModal = true" :disabled="Object.keys(cart).length === 0" class="w-full mt-4 btn-brand py-4 text-xl"><i class="fas fa-credit-card mr-2"></i> Charge</button>
+                </template>
+
+                <template x-for="(item, productId) in cart" :key="productId">
+                    <div class="flex items-center bg-white/5 rounded-2xl p-3 border border-white/5 group">
+                        <div class="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden flex-shrink-0">
+                            <img :src="item.image || '/assets/uploads/placeholder.png'" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow px-3 min-w-0">
+                            <p class="text-xs font-bold text-white truncate" x-text="item.name"></p>
+                            <p class="text-[10px] text-orange-500 font-black mt-0.5" x-text="formatCurrency(item.price)"></p>
+                        </div>
+                        <div class="flex items-center bg-black/20 rounded-xl p-1">
+                            <button @click="updateQuantity(productId, -1)" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
+                                <i class="fas fa-minus text-[8px] text-slate-400"></i>
+                            </button>
+                            <input type="text" :value="item.quantity" @change="manualUpdateQuantity(productId, $event.target.value)" 
+                                   class="w-8 text-center bg-transparent border-none text-xs font-black text-white focus:ring-0">
+                            <button @click="updateQuantity(productId, 1)" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
+                                <i class="fas fa-plus text-[8px] text-slate-400"></i>
+                            </button>
+                        </div>
+                        <button @click="removeFromCart(productId)" class="ml-2 w-8 h-8 flex items-center justify-center text-slate-600 hover:text-red-500 transition-colors">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </template>
             </div>
-        </div>
-    </div>
-    
-    <div x-show="openPaymentModal" @keydown.escape.window="openPaymentModal = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4 no-print" style="display: none;">
-        <div @click.away="openPaymentModal = false" class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
-            <h2 class="text-2xl font-bold mb-4">Complete Payment</h2>
-            <div class="overflow-y-auto space-y-4 pr-2">
-                <p class="text-5xl text-center font-bold" x-text="formatCurrency(totals.final)"></p>
-                <div class="mb-4">
-                    <label class="block font-semibold">Coupon Code</label>
-                    <div class="flex space-x-2"><input type="text" x-model="couponCode" placeholder="Optional" class="form-input flex-grow"><button type="button" @click="applyCoupon()" class="btn-secondary flex-shrink-0">Apply</button></div>
-                    <p x-text="couponMessage" class="text-sm mt-1" :class="couponDiscount > 0 ? 'text-green-600' : 'text-red-600'"></p>
-                </div>
-                <div><label class="block font-semibold">Payment Method</label><select x-model="paymentMethod" @change="amountTendered = null" class="form-input mt-1 bg-white"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
-                <div x-show="paymentMethod === 'Cash'" class="space-y-4">
-                    <div><label class="block font-semibold">Amount Tendered</label><input type="number" x-model.number="amountTendered" class="form-input mt-1 text-lg"></div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><button @click="amountTendered = 5000" class="py-2 bg-gray-200 rounded">5,000</button><button @click="amountTendered = 10000" class="py-2 bg-gray-200 rounded">10,000</button><button @click="amountTendered = 20000" class="py-2 bg-gray-200 rounded">20,000</button><button @click="amountTendered = totals.final" class="py-2 bg-gray-200 rounded">Exact</button></div>
-                    <div x-show="amountTendered >= totals.final" class="text-center bg-blue-100 p-3 rounded-lg"><span class="text-lg font-semibold text-blue-800">Change Due: </span><span class="text-2xl font-bold text-blue-800" x-text="formatCurrency(amountTendered - totals.final)"></span></div>
+
+            <!-- Footer / Totals -->
+            <div class="p-6 bg-slate-900/80 border-t border-white/5 space-y-4 no-print">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-500 uppercase tracking-widest">Subtotal</span>
+                        <span class="text-slate-200" x-text="formatCurrency(totals.subtotal)"></span>
+                    </div>
+                    <template x-if="couponDiscount > 0">
+                        <div class="flex justify-between text-xs font-bold text-emerald-500">
+                            <span class="uppercase tracking-widest">Voucher (<span x-text="couponCode"></span>)</span>
+                            <span x-text="'-' + formatCurrency(couponDiscount)"></span>
+                        </div>
+                    </template>
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-500 uppercase tracking-widest">Gov Tax (<span x-text="taxRate * 100"></span>%)</span>
+                        <span class="text-slate-200" x-text="formatCurrency(totals.tax)"></span>
+                    </div>
                 </div>
                 
-                <div>
-                    <label class="block font-semibold">Customer Phone (for points)</label>
-                    <div class="flex space-x-2">
-                        <input type="tel" x-model="customerPhone" placeholder="Optional" class="form-input flex-grow">
-                        <button type="button" @click="findCustomer()" class="btn-secondary flex-shrink-0">Find</button>
+                <div class="pt-4 border-t border-white/5 flex justify-between items-end">
+                    <div>
+                        <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-1">Payable Total</p>
+                        <h3 class="text-4xl font-black text-white tracking-tighter leading-none" x-text="formatCurrency(totals.final)"></h3>
                     </div>
-                    <p x-text="customerMessage" class="text-sm mt-1" :class="{
-                        'text-green-600': customerName,
-                        'text-gray-500': !customerName
-                    }"></p>
+                    <button @click="openPaymentModal = true" 
+                            :disabled="Object.keys(cart).length === 0" 
+                            class="bg-orange-600 hover:bg-orange-500 disabled:opacity-30 disabled:hover:bg-orange-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-600/30 transition-all active:scale-95">
+                        <i class="fas fa-chevron-right text-xl"></i>
+                    </button>
                 </div>
-                </div>
-            <div class="mt-auto pt-4 border-t flex justify-end space-x-4">
-                <button @click="openPaymentModal = false" class="btn-outline py-2 px-6">Cancel</button>
-                <button @click="submitOrder()" class="btn-brand py-2 px-6" :disabled="processing"><span x-show="!processing">Confirm</span><span x-show="processing"><i class="fas fa-spinner fa-spin"></i></span></button>
             </div>
         </div>
     </div>
     
-    <div x-show="showReceiptModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg w-full max-w-sm flex flex-col">
-            <div class="voucher-print-area bg-gradient-to-br from-orange-50 to-amber-100 p-6 rounded-t-lg">
-                <div class="text-center mb-6"><h2 class="text-2xl font-bold text-orange-900">POS Receipt</h2><p class="text-sm text-orange-800">Order #<span x-text="receiptDetails.orderId"></span></p></div>
-                <div class="border-t border-b border-dashed border-orange-300 py-2 space-y-1 text-orange-900">
-                    <template x-for="item in receiptDetails.cart"><div class="flex justify-between text-sm"><span x-text="`${item.quantity}x ${item.name}`"></span><span x-text="formatCurrency(item.price * item.quantity)"></span></div></template>
-                </div>
-                <div class="border-t-2 border-orange-300 pt-3 mt-3 space-y-1 text-orange-900">
-                    <div class="flex justify-between font-semibold"><p>Subtotal</p><p x-text="formatCurrency(receiptDetails.totals.subtotal)"></p></div>
-                    <template x-if="receiptDetails.couponDiscount > 0"><div class="flex justify-between font-semibold text-red-500"><p>Discount (<span x-text="receiptDetails.couponCode"></span>)</p><p x-text="'-' + formatCurrency(receiptDetails.couponDiscount)"></p></div></template>
-                    <div class="flex justify-between font-semibold"><p>Tax</p><p x-text="formatCurrency(receiptDetails.totals.tax)"></p></div>
-                    <div class="flex justify-between text-xl font-bold mt-2"><p>Total</p><p x-text="formatCurrency(receiptDetails.totals.final)"></p></div>
-                </div>
-                <p class="text-center text-xs text-orange-800 opacity-75 mt-4">Thank you for your purchase!</p>
+    <!-- PAYMENT MODAL -->
+    <div x-show="openPaymentModal" x-cloak class="fixed inset-0 z-[100] no-print">
+        <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" @click="openPaymentModal = false"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#0f172a] shadow-2xl border-l border-white/5 flex flex-col">
+            
+            <div class="p-8 border-b border-white/5 flex items-center justify-between">
+                <h2 class="text-2xl font-black text-white tracking-tight uppercase">Checkout Terminal</h2>
+                <button @click="openPaymentModal = false" class="text-slate-500 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="p-4 bg-gray-100 flex justify-between rounded-b-lg no-print">
-                <button @click="printReceipt()" class="btn-outline py-2 px-4 text-sm">Print Receipt</button>
-                <button @click="startNewOrder()" class="btn-brand py-2 px-4 text-sm">New Order</button>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+                <!-- Total Display -->
+                <div class="text-center p-8 bg-white/[0.02] rounded-[2.5rem] border border-white/5">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Total Amount Due</p>
+                    <h3 class="text-6xl font-black text-white tracking-tighter" x-text="formatCurrency(totals.final)"></h3>
+                </div>
+
+                <!-- Input Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left: Customer & Voucher -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Customer Phone</label>
+                            <div class="relative">
+                                <input type="tel" x-model="customerPhone" placeholder="09..." 
+                                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all">
+                                <button @click="findCustomer()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Verify</button>
+                            </div>
+                            <p x-text="customerMessage" class="text-[10px] mt-2 font-bold px-2" :class="customerName ? 'text-emerald-500' : 'text-slate-500'"></p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Voucher Code</label>
+                            <div class="relative">
+                                <input type="text" x-model="couponCode" placeholder="Enter code..." 
+                                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all uppercase">
+                                <button @click="applyCoupon()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Apply</button>
+                            </div>
+                            <p x-text="couponMessage" class="text-[10px] mt-2 font-bold px-2" :class="couponDiscount > 0 ? 'text-emerald-500' : 'text-red-500'"></p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Payment Method -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Payment Channel</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button @click="paymentMethod = 'Cash'" 
+                                        :class="paymentMethod === 'Cash' ? 'border-orange-600 bg-orange-600/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'"
+                                        class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all">
+                                    <i class="fas fa-money-bill-wave mb-2"></i>
+                                    <span class="text-[10px] font-black uppercase">Cash</span>
+                                </button>
+                                <button @click="paymentMethod = 'Online'" 
+                                        :class="paymentMethod === 'Online' ? 'border-orange-600 bg-orange-600/10 text-white' : 'border-white/10 bg-white/5 text-slate-400'"
+                                        class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all">
+                                    <i class="fas fa-wallet mb-2"></i>
+                                    <span class="text-[10px] font-black uppercase">Digital</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div x-show="paymentMethod === 'Cash'" x-transition>
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Cash Received</label>
+                            <input type="number" x-model.number="amountTendered" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-2xl font-black mb-4 focus:outline-none">
+                            <div class="grid grid-cols-4 gap-2">
+                                <template x-for="val in [5000, 10000, 20000]">
+                                    <button @click="amountTendered = val" class="py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black hover:bg-white/10 transition-all" x-text="val.toLocaleString()"></button>
+                                </template>
+                                <button @click="amountTendered = totals.final" class="py-2 rounded-xl bg-orange-600/20 border border-orange-600/30 text-orange-500 text-[10px] font-black">EXACT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change Due -->
+                <div x-show="paymentMethod === 'Cash' && amountTendered >= totals.final" class="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl text-center">
+                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Balance Return</p>
+                    <h4 class="text-3xl font-black text-white" x-text="formatCurrency(amountTendered - totals.final)"></h4>
+                </div>
+            </div>
+
+            <div class="p-8 border-t border-white/5">
+                <button @click="submitOrder()" 
+                        :disabled="processing || (paymentMethod === 'Cash' && (amountTendered === null || amountTendered < totals.final))"
+                        class="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-30 text-white py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-orange-600/20 transition-all flex items-center justify-center space-x-3">
+                    <span x-show="!processing">Authorize Transaction</span>
+                    <i x-show="processing" class="fas fa-circle-notch fa-spin"></i>
+                </button>
             </div>
         </div>
     </div>
+    
+    <!-- RECEIPT MODAL -->
+    <div x-show="showReceiptModal" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative flex flex-col">
+            <div class="voucher-print-area p-8 text-slate-900 bg-gradient-to-b from-slate-50 to-white">
+                <div class="text-center mb-8 border-b-2 border-dashed border-slate-200 pb-8">
+                    <div class="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-coffee text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tighter">PAICAFE ONLINE</h2>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Transaction Receipt</p>
+                    <p class="text-[10px] font-mono text-slate-500 mt-4">Order #<span x-text="receiptDetails.orderId" class="text-slate-900 font-bold"></span></p>
+                </div>
+                
+                <div class="space-y-3 mb-8">
+                    <template x-for="item in receiptDetails.cart">
+                        <div class="flex justify-between items-start text-sm">
+                            <div class="flex-grow pr-4">
+                                <p class="font-bold leading-tight" x-text="item.name"></p>
+                                <p class="text-[10px] text-slate-400" x-text="`${item.quantity} x ${formatCurrency(item.price)}`"></p>
+                            </div>
+                            <span class="font-black" x-text="formatCurrency(item.price * item.quantity)"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="space-y-2 border-t-2 border-dashed border-slate-200 pt-6">
+                    <div class="flex justify-between text-xs font-bold text-slate-500">
+                        <span class="uppercase tracking-widest">Subtotal</span>
+                        <span x-text="formatCurrency(receiptDetails.totals.subtotal)"></span>
+                    </div>
+                    <template x-if="receiptDetails.couponDiscount > 0">
+                        <div class="flex justify-between text-xs font-bold text-emerald-600">
+                            <span class="uppercase tracking-widest underline decoration-wavy underline-offset-4">Voucher Apply</span>
+                            <span x-text="'-' + formatCurrency(receiptDetails.couponDiscount)"></span>
+                        </div>
+                    </template>
+                    <div class="flex justify-between text-xs font-bold text-slate-500">
+                        <span class="uppercase tracking-widest">Tax Inclusion</span>
+                        <span x-text="formatCurrency(receiptDetails.totals.tax)"></span>
+                    </div>
+                    <div class="flex justify-between text-2xl font-black mt-4 pt-4 border-t border-slate-100">
+                        <span>TOTAL</span>
+                        <span x-text="formatCurrency(receiptDetails.totals.final)"></span>
+                    </div>
+                </div>
+
+                <p class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-10">Sync Time: <?= date('Y-m-d H:i') ?></p>
+            </div>
+            
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-4 no-print">
+                <button @click="printReceipt()" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all">Print</button>
+                <button @click="startNewOrder()" class="flex-1 bg-white border border-slate-200 text-slate-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Next Order</button>
+            </div>
+        </div>
+    </div>
+
 <script>
     function posSystem(categories, taxRate) {
         return {
             loading: true, products: [], categories: categories, selectedCategory: 'All', searchTerm: '', cart: {}, 
-            taxRate: taxRate, // Use the tax rate from PHP
+            taxRate: taxRate,
             openPaymentModal: false, paymentMethod: 'Cash', customerPhone: '', processing: false, amountTendered: null,
-            
-            // NEW: Added state for customer lookup
             customerName: '', customerPoints: 0, customerMessage: '',
-            
-            showReceiptModal: false, receiptDetails: { 
-                orderId: null, 
-                cart: [], 
-                totals: { subtotal: 0, tax: 0, final: 0 } 
-            }, 
+            showReceiptModal: false, receiptDetails: { orderId: null, cart: [], totals: { subtotal: 0, tax: 0, final: 0 } }, 
             couponCode: '', couponDiscount: 0, couponMessage: '',
             
             init() { this.fetchProducts(); },
             
             fetchProducts() { 
-                fetch('api/get_products.php') // This now points to /admin/api/get_products.php
+                fetch('api/get_products.php')
                     .then(res => {
-                        if (!res.ok) { throw new Error('Network response was not ok'); }
+                        if (!res.ok) throw new Error('Network fault');
                         return res.json();
                     })
                     .then(data => {
-                        if (data.status === 'success') {
-                            this.products = data.products;
-                        } else {
-                            alert('Error loading products: ' + (data.message || 'Unknown error'));
-                        }
+                        if (data.status === 'success') { this.products = data.products; }
+                        else { this.showToast('Inventory Link Failed', '#ef4444'); }
                         this.loading = false; 
                     })
                     .catch(err => {
                         console.error('Fetch Error:', err);
-                        alert('Failed to fetch products. Check API path and logs.');
+                        this.showToast('Telemetry Link Severed', '#ef4444');
                         this.loading = false;
                     });
             },
@@ -213,8 +459,10 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             
             addToCart(p) { 
                 const finalPrice = p.price - (p.price * (p.discount_percentage || 0) / 100);
-                if(this.cart[p.id]){this.cart[p.id].quantity++;}else{this.cart[p.id]={name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
+                if(this.cart[p.id]){this.cart[p.id].quantity++;}
+                else{this.cart[p.id]={name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
             },
+
             updateQuantity(id, amt) { if(this.cart[id]){this.cart[id].quantity+=amt; if(this.cart[id].quantity<=0){delete this.cart[id];}}},
             manualUpdateQuantity(id, val) { const q = parseInt(val); if(!isNaN(q) && q > 0){this.cart[id].quantity=q;}else{delete this.cart[id];}},
             removeFromCart(id) { delete this.cart[id]; },
@@ -228,10 +476,13 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 return { subtotal, tax, final };
             },
             
-            formatCurrency(amt) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'MMK', minimumFractionDigits: 0}).format(amt || 0);},
+            formatCurrency(amt) { 
+                return new Intl.NumberFormat('en-US',{style:'currency',currency:'MMK', minimumFractionDigits: 0}).format(amt || 0).replace('MMK', 'Ks');
+            },
 
             applyCoupon() {
-                this.couponMessage = 'Applying...';
+                if(!this.couponCode) return;
+                this.couponMessage = 'Verifying...';
                 fetch('api/apply_coupon.php', { 
                     method: 'POST', headers: {'Content-Type':'application/json'}, 
                     body: JSON.stringify({ code: this.couponCode, subtotal: this.totals.subtotal })
@@ -239,37 +490,28 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 .then(res => res.json())
                 .then(data => {
                     this.couponMessage = data.message;
-                    if (data.status === 'success') { this.couponDiscount = data.discount; } 
-                    else { this.couponDiscount = 0; }
+                    if (data.status === 'success') { 
+                        this.couponDiscount = data.discount; 
+                        this.showToast('Voucher Authenticated', '#10b981');
+                    } else { this.couponDiscount = 0; }
                 });
             },
 
-            // NEW: Function to find customer by phone
             findCustomer() {
-                if (!this.customerPhone.trim()) {
-                    this.customerMessage = 'Please enter a phone number.';
-                    return;
-                }
-                this.customerMessage = 'Checking...';
-                this.customerName = '';
-                this.customerPoints = 0;
-
+                if (!this.customerPhone.trim()) return;
+                this.customerMessage = 'Locating...';
                 fetch(`api/get_user_by_phone.php?phone=${encodeURIComponent(this.customerPhone)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'success') {
                             this.customerName = data.user.username;
                             this.customerPoints = data.user.loyalty_points;
-                            this.customerMessage = `Customer: ${this.customerName} (${this.customerPoints} pts)`;
-                        } else if (data.status === 'not_found') {
-                            this.customerMessage = 'New customer.';
+                            this.customerMessage = `ID: ${this.customerName.toUpperCase()} / ${this.customerPoints} PTS`;
+                            this.showToast('Customer Identified', '#3b82f6');
                         } else {
-                            this.customerMessage = data.message || 'Error checking customer.';
+                            this.customerName = '';
+                            this.customerMessage = 'New Biological Entity Detected';
                         }
-                    })
-                    .catch(err => {
-                        console.error('Find Customer Error:', err);
-                        this.customerMessage = 'Failed to connect to server.';
                     });
             },
 
@@ -290,11 +532,11 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                     if (data.status === 'success') {
                         this.receiptDetails = { 
                             orderId: data.order_id, cart: Object.values(this.cart), 
-                            totals: this.totals, couponCode: this.couponCode,
-                            couponDiscount: this.couponDiscount
+                            totals: JSON.parse(JSON.stringify(this.totals)), 
+                            couponCode: this.couponCode, couponDiscount: this.couponDiscount
                         };
                         this.showReceiptModal = true;
-                        this.resetOrder();
+                        this.showToast('Transaction Authorized', '#10b981');
                     } else { alert('Error: ' + data.message); }
                 })
                 .finally(() => { this.processing = false; this.openPaymentModal = false; });
@@ -303,7 +545,6 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             resetOrder() { 
                 this.cart={}; this.paymentMethod='Cash'; this.customerPhone=''; this.amountTendered=null; 
                 this.couponCode=''; this.couponDiscount=0; this.couponMessage=''; 
-                // NEW: Reset customer data
                 this.customerName=''; this.customerPoints=0; this.customerMessage=''; 
             },
 
@@ -314,7 +555,21 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 }
             },
             
-            startNewOrder() { this.showReceiptModal = false; this.receiptDetails = {}; }
+            startNewOrder() { 
+                this.showReceiptModal = false; 
+                this.receiptDetails = { orderId: null, cart: [], totals: { subtotal: 0, tax: 0, final: 0 } };
+                this.resetOrder();
+            },
+
+            showToast(msg, color) {
+                Toastify({
+                    text: msg,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    style: { background: color, borderRadius: "12px", fontBold: "true", fontSize: "10px", tracking: "0.1em" }
+                }).showToast();
+            }
         }
     }
 </script>
