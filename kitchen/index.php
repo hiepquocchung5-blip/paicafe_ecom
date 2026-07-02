@@ -3,13 +3,6 @@
 // Path corrected to reach root includes from /kitchen/ subdirectory
 require_once  'includes/functions.php';
 
-// --- SECURITY CHECK ---
-function require_kitchen_login() {
-    if (!isset($_SESSION['admin_id']) || !isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'kitchen') {
-        header('Location: /login.php');
-        exit();
-    }
-}
 require_kitchen_login();
 ?>
 <!DOCTYPE html>

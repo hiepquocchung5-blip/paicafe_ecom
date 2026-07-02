@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
-include __DIR__ . '/partials/header.php';
+require_admin_login();
 
 // --- Permission Check ---
 // We check for manage_products permission since reviews are directly tied to products
@@ -31,9 +31,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // --- Filtering & Search ---
-$rating_filter = isset($_GET['rating']) ? $_GET['rating'] : '';
+$rating_filter = isset($_GET['rating']) && in_array((string)$_GET['rating'], ['1', '2', '3', '4', '5'], true) ? (string)$_GET['rating'] : '';
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max(1, isset($_GET['page']) ? (int)$_GET['page'] : 1);
 $limit = 10;
 $offset = ($page - 1) * $limit;
 
@@ -78,6 +78,8 @@ foreach ($params as $key => $val) {
 $stmt_count->execute();
 $filtered_count = $stmt_count->fetchColumn();
 $total_pages = max(1, ceil($filtered_count / $limit));
+$page = min($page, $total_pages);
+$offset = ($page - 1) * $limit;
 
 // Fetch page reviews
 $sql_reviews = "
@@ -98,6 +100,8 @@ $stmt_reviews->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt_reviews->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt_reviews->execute();
 $reviews = $stmt_reviews->fetchAll();
+
+include __DIR__ . '/partials/header.php';
 ?>
 
 <div class="max-w-7xl mx-auto px-6 py-4">
@@ -250,6 +254,11 @@ $reviews = $stmt_reviews->fetchAll();
                             </td>
                             <td class="p-6">
                                 <div class="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="prompt_generator.php?review_id=<?= e($review['id']) ?>" 
+                                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+                                       title="Generate Response Prompt">
+                                        <i class="fas fa-reply text-[10px]"></i>
+                                    </a>
                                     <a href="reviews.php?action=delete&id=<?= e($review['id']) ?>" 
                                        onclick="return confirm('Moderation Alert: Confirm removal of this review from public display?');"
                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"

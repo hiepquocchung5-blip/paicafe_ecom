@@ -4,15 +4,18 @@ require_once 'includes/functions.php';
 include 'includes/header.php';
 
 // --- Fetch Today's Special Products ---
-$specials_stmt = $pdo->prepare("SELECT * FROM products WHERE is_special_today = 1 AND is_available = 1 LIMIT 3");
-$specials_stmt->execute();
-$specials = $specials_stmt->fetchAll();
-$specials = $pdo->query("SELECT * FROM products WHERE is_special_today = 1 AND is_available = 1 LIMIT 3")->fetchAll();
-$rewards = $pdo->query("SELECT * FROM loyalty_rewards WHERE is_active = 1 ORDER BY points_cost ASC LIMIT 4")->fetchAll();
+$specials = $pdo->query("
+    SELECT p.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count
+    FROM products p
+    LEFT JOIN reviews r ON p.id = r.product_id
+    WHERE p.is_special_today = 1 AND p.is_available = 1
+    GROUP BY p.id
+    LIMIT 3
+")->fetchAll();
 
-// --- NEW: Fetch Top-Rated Products ---
-$favorites_stmt = $pdo->query("
-    SELECT p.*, AVG(r.rating) as avg_rating
+// --- Fetch Top-Rated Products (Favorites) ---
+$favorites = $pdo->query("
+    SELECT p.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count
     FROM products p
     JOIN reviews r ON p.id = r.product_id
     WHERE p.is_available = 1
@@ -20,12 +23,20 @@ $favorites_stmt = $pdo->query("
     HAVING avg_rating >= 3.5
     ORDER BY avg_rating DESC, COUNT(r.id) DESC
     LIMIT 3
-");
-$favorites = $favorites_stmt->fetchAll();
-// --- Fetch a few Active Loyalty Rewards ---
-$rewards_stmt = $pdo->prepare("SELECT * FROM loyalty_rewards WHERE is_active = 1 ORDER BY points_cost ASC LIMIT 4");
-$rewards_stmt->execute();
-$rewards = $rewards_stmt->fetchAll();
+")->fetchAll();
+
+// --- Fetch Active Loyalty Rewards ---
+$rewards = $pdo->query("SELECT * FROM loyalty_rewards WHERE is_active = 1 ORDER BY points_cost ASC LIMIT 4")->fetchAll();
+
+// --- Fetch Recent Reviews for Testimonial Section ---
+$recent_reviews = $pdo->query("
+    SELECT r.*, p.name_en as product_name, p.image as product_image, u.username
+    FROM reviews r
+    JOIN products p ON r.product_id = p.id
+    JOIN users u ON r.user_id = u.id
+    ORDER BY r.created_at DESC
+    LIMIT 3
+")->fetchAll();
 ?>
 
 <!-- Section 1: Hero Section -->
@@ -55,6 +66,16 @@ $rewards = $rewards_stmt->fetchAll();
             </a>
             <div class="p-6 flex-grow flex flex-col">
                 <h2 class="text-2xl font-bold mb-2 flex-grow"><?= e($product['name_en']) ?></h2>
+                <div class="flex items-center text-xs text-gray-500 mb-4">
+                    <?php if ($product['avg_rating'] > 0): ?>
+                        <span class="text-yellow-400 mr-1">
+                            <?= str_repeat('★', round($product['avg_rating'])) ?><span class="text-gray-300"><?= str_repeat('★', 5 - round($product['avg_rating'])) ?></span>
+                        </span>
+                        <span class="font-bold text-gray-600">(<?= number_format($product['avg_rating'], 1) ?>)</span>
+                    <?php else: ?>
+                        <span class="text-gray-400 italic">No reviews yet</span>
+                    <?php endif; ?>
+                </div>
                 <div class="flex justify-between items-center mt-auto">
                     <span class="text-2xl font-bold text-orange-600"><?= e($product['price']) ?> Ks</span>
                     <button @click="addToCart(<?= $product['id'] ?>, $data)" :disabled="busy" class="btn-brand">
@@ -82,10 +103,46 @@ $rewards = $rewards_stmt->fetchAll();
                         <h3 class="text-xl font-bold"><?= e($product['name_en']) ?></h3>
                         <div class="flex items-center text-yellow-400 font-bold">
                             <span><?= number_format($product['avg_rating'], 1) ?></span>
-                            <i class="fas fa-star ml-1"></i>
+                            <span class="ml-1 text-sm">
+                                <?= str_repeat('★', round($product['avg_rating'])) ?><span class="text-gray-300"><?= str_repeat('★', 5 - round($product['avg_rating'])) ?></span>
+                            </span>
                         </div>
                     </div>
                     <p class="text-sm text-gray-600 mt-2 line-clamp-2"><?= e($product['description_en']) ?></p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Testimonial Section: Customer Reviews -->
+<?php if (!empty($recent_reviews)): ?>
+<div class="bg-white py-20 border-t border-b border-gray-100">
+    <div class="container mx-auto">
+        <div class="text-center mb-12 animate-on-scroll">
+            <h2 class="text-4xl font-bold text-gray-800">What Our Customers Say</h2>
+            <p class="text-lg text-gray-600">Real feedback from recent visitors at PAICAFE</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <?php foreach($recent_reviews as $index => $rev): ?>
+            <div class="animate-on-scroll bg-gray-50 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 flex flex-col justify-between" style="transition-delay: <?= $index * 150 ?>ms;">
+                <div>
+                    <div class="flex items-center space-x-1 text-yellow-400 mb-3">
+                        <?php for ($i = 0; $i < $rev['rating']; $i++) echo '★'; ?>
+                        <?php for ($i = $rev['rating']; $i < 5; $i++) echo '<span class="text-gray-300">★</span>'; ?>
+                    </div>
+                    <p class="text-gray-600 italic text-sm sm:text-base mb-6 leading-relaxed">"<?= e($rev['comment'] ?: 'Great food and amazing hospitality!') ?>"</p>
+                </div>
+                <div class="flex items-center space-x-3 pt-4 border-t border-gray-200/60">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-600 text-sm">
+                        <?= e(strtoupper(substr($rev['username'], 0, 1))) ?>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 text-sm"><?= e($rev['username']) ?></h4>
+                        <p class="text-[10px] text-gray-400">Reviewed: <span class="font-semibold text-orange-600"><?= e($rev['product_name']) ?></span></p>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>

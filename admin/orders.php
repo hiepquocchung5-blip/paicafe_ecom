@@ -205,15 +205,29 @@ $orders = $stmt->fetchAll();
                         </td>
                         <td class="p-6">
                             <?php if ($order['order_type'] === 'web'): ?>
+                                <div class="mb-1">
+                                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 text-[9px] font-black uppercase tracking-wider">
+                                        <i class="fas fa-truck text-[9px]"></i> <span>Delivery</span>
+                                    </span>
+                                </div>
                                 <p class="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase leading-tight">
                                     <?= e($order['delivery_street']) ?><br>
                                     <span class="text-slate-400"><?= e($order['delivery_city']) ?></span>
                                 </p>
-                            <?php else: ?>
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-couch text-[10px] text-slate-400"></i>
-                                    <p class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase"><?= e($order['table_number'] ?? 'Takeaway') ?></p>
+                            <?php elseif ($order['order_type'] === 'takeaway'): ?>
+                                <div class="mb-1">
+                                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-black uppercase tracking-wider">
+                                        <i class="fas fa-bag-shopping text-[9px]"></i> <span>Takeaway</span>
+                                    </span>
                                 </div>
+                                <p class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase">Self Pickup</p>
+                            <?php else: ?>
+                                <div class="mb-1">
+                                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[9px] font-black uppercase tracking-wider">
+                                        <i class="fas fa-chair text-[9px]"></i> <span>Dine In</span>
+                                    </span>
+                                </div>
+                                <p class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase">Table <?= e($order['table_number'] ?? 'Takeaway') ?></p>
                             <?php endif; ?>
                         </td>
                         <td class="p-6">
@@ -225,7 +239,7 @@ $orders = $stmt->fetchAll();
                             </span>
                         </td>
                         <td class="p-6">
-                            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="flex items-center space-x-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                 <?php if ($order['status'] === 'pending_approval'): ?>
                                     <form method="POST" onsubmit="return confirm('Authorize protocol?');">
                                         <input type="hidden" name="order_id" value="<?= $order['id'] ?>">

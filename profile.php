@@ -60,6 +60,17 @@ $favorites_stmt = $pdo->prepare("SELECT p.* FROM products p JOIN user_favorites 
 $favorites_stmt->execute([$user_id]);
 $favorites = $favorites_stmt->fetchAll();
 
+// --- Fetch User's Reviews ---
+$my_reviews_stmt = $pdo->prepare("
+    SELECT r.*, p.name_en as product_name, p.image as product_image 
+    FROM reviews r 
+    JOIN products p ON r.product_id = p.id 
+    WHERE r.user_id = ? 
+    ORDER BY r.created_at DESC
+");
+$my_reviews_stmt->execute([$user_id]);
+$my_reviews = $my_reviews_stmt->fetchAll();
+
 include 'includes/header.php';
 ?>
 
@@ -87,6 +98,7 @@ include 'includes/header.php';
                     <button @click="activeTab = 'orders'" :class="{ 'border-orange-500 text-orange-600': activeTab === 'orders', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'orders' }" class="py-4 px-1 border-b-2 font-medium text-sm">Order History</button>
                     <button @click="activeTab = 'redemptions'" :class="{ 'border-orange-500 text-orange-600': activeTab === 'redemptions', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'redemptions' }" class="py-4 px-1 border-b-2 font-medium text-sm">Redemptions</button>
                     <button @click="activeTab = 'favorites'" :class="{ 'border-orange-500 text-orange-600': activeTab === 'favorites', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'favorites' }" class="py-4 px-1 border-b-2 font-medium text-sm">Favorites</button>
+                    <button @click="activeTab = 'reviews'" :class="{ 'border-orange-500 text-orange-600': activeTab === 'reviews', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'reviews' }" class="py-4 px-1 border-b-2 font-medium text-sm">My Reviews</button>
                 </nav>
             </div>
 
@@ -113,6 +125,123 @@ include 'includes/header.php';
             <div x-show="activeTab === 'orders'" class="bg-white p-6 rounded-lg shadow-md" style="display: none;"><h2 class="text-2xl font-bold mb-4">Your Order History</h2><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-gray-100"><th class="p-3">ID</th><th class="p-3">Date</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr></thead><tbody><?php foreach($orders as $order): ?><tr class="border-b"><td class="p-3 font-semibold">#<?= e($order['id']) ?></td><td class="p-3 text-sm"><?= date('d M Y', strtotime($order['created_at'])) ?></td><td class="p-3"><?= number_format($order['final_amount'], 2) ?> Ks</td><td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full <?= $order['status'] == 'completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800' ?>"><?= e(ucwords(str_replace('_', ' ', $order['status']))) ?></span></td><td class="p-3 flex items-center space-x-3"><a href="order_status.php?order_id=<?= $order['id']?>" class="text-blue-500 hover:underline text-sm">View</a><?php if ($order['status'] === 'completed'): ?><button onclick="reorder(<?= $order['id'] ?>)" class="btn-outline text-xs py-1 px-3">Order Again</button><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div></div>
             <div x-show="activeTab === 'redemptions'" class="bg-white p-6 rounded-lg shadow-md" style="display: none;"><h2 class="text-2xl font-bold mb-4">Your Redemption History</h2><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="bg-gray-100"><th class="p-3">Date</th><th class="p-3">Reward</th><th class="p-3">Points Used</th><th class="p-3">Status</th></tr></thead><tbody><?php foreach($redemptions as $r): ?><tr class="border-b"><td class="p-3 text-sm"><?= date('d M Y', strtotime($r['redeemed_at'])) ?></td><td class="p-3 font-medium"><?= e($r['reward_title']) ?></td><td class="p-3 text-red-500 font-semibold">-<?= e($r['points_spent']) ?></td><td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full <?= $r['status'] == 'fulfilled' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800' ?>"><?= e(ucwords($r['status'])) ?></span></td></tr><?php endforeach; ?></tbody></table></div></div>
             <div x-show="activeTab === 'favorites'" class="bg-white p-6 rounded-lg shadow-md" style="display: none;"><h2 class="text-2xl font-bold mb-4">Your Favorite Items</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><?php foreach ($favorites as $fav): ?><a href="product_details.php?id=<?= $fav['id'] ?>" class="flex items-center p-3 border rounded-lg hover:bg-gray-50"><img src="<?= e($fav['image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-16 h-16 object-cover rounded mr-4"><div><p class="font-semibold"><?= e($fav['name_en']) ?></p><p class="text-sm text-gray-600"><?= e($fav['price']) ?> Ks</p></div></a><?php endforeach; ?></div></div>
+
+            <div x-show="activeTab === 'reviews'" class="bg-white p-6 rounded-lg shadow-md" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">Your Reviews</h2>
+                <?php if (empty($my_reviews)): ?>
+                    <p class="text-gray-500 py-4">You have not submitted any reviews yet.</p>
+                <?php else: ?>
+                    <div class="space-y-4">
+                        <?php foreach ($my_reviews as $r): ?>
+                            <div class="border rounded-xl p-4 flex flex-col sm:flex-row sm:items-start justify-between hover:shadow-md transition-all"
+                                 x-data="{ 
+                                     editing: false, 
+                                     rating: <?= $r['rating'] ?>, 
+                                     comment: '<?= e(addslashes($r['comment'])) ?>',
+                                     submitting: false,
+                                     deleteReview() {
+                                         if (!confirm('Confirm deletion of this review?')) return;
+                                         fetch('/api/manage_user_review.php', {
+                                             method: 'POST',
+                                             headers: { 'Content-Type': 'application/json' },
+                                             body: JSON.stringify({ action: 'delete', review_id: <?= $r['id'] ?> })
+                                         })
+                                         .then(res => res.json())
+                                         .then(data => {
+                                             if (data.status === 'success') {
+                                                 window.location.reload();
+                                             } else {
+                                                 alert(data.message);
+                                             }
+                                         });
+                                     },
+                                     saveReview() {
+                                         this.submitting = true;
+                                         fetch('/api/manage_user_review.php', {
+                                             method: 'POST',
+                                             headers: { 'Content-Type': 'application/json' },
+                                             body: JSON.stringify({ 
+                                                 action: 'edit', 
+                                                 review_id: <?= $r['id'] ?>,
+                                                 rating: this.rating,
+                                                 comment: this.comment
+                                             })
+                                         })
+                                         .then(res => res.json())
+                                         .then(data => {
+                                             if (data.status === 'success') {
+                                                 window.location.reload();
+                                             } else {
+                                                 alert(data.message);
+                                                 this.submitting = false;
+                                             }
+                                         })
+                                         .catch(() => this.submitting = false);
+                                     }
+                                 }">
+                                
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <img src="<?= e($r['product_image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-16 h-16 object-cover rounded-xl border flex-shrink-0">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-gray-800"><?= e($r['product_name']) ?></h3>
+                                        
+                                        <!-- Star Rating display/input -->
+                                        <div class="flex items-center space-x-1 my-1">
+                                            <template x-if="!editing">
+                                                <div class="flex text-yellow-400 text-sm">
+                                                    <?php for ($i = 0; $i < 5; $i++): ?>
+                                                        <span class="<?= $i < $r['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>">★</span>
+                                                    <?php endfor; ?>
+                                                </div>
+                                            </template>
+                                            
+                                            <template x-if="editing">
+                                                <div class="flex space-x-1">
+                                                    <template x-for="star in 5">
+                                                        <button @click="rating = star" 
+                                                                :class="rating >= star ? 'text-yellow-400' : 'text-gray-300'"
+                                                                class="text-xl focus:outline-none transition-transform hover:scale-110">★</button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Comment display/input -->
+                                        <div class="mt-2 text-sm text-gray-600">
+                                            <template x-if="!editing">
+                                                <p class="italic text-gray-700">"<?= e($r['comment']) ?>"</p>
+                                            </template>
+                                            <template x-if="editing">
+                                                <textarea x-model="comment" class="form-input w-full p-2 border rounded-lg text-xs" rows="2"></textarea>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="text-[10px] text-gray-400 mt-2">
+                                            Submitted on <?= date('d M Y, h:i A', strtotime($r['created_at'])) ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-4 sm:mt-0 flex sm:flex-col items-end space-x-2 sm:space-x-0 sm:space-y-2">
+                                    <template x-if="!editing">
+                                        <div class="flex sm:flex-col gap-2">
+                                            <button @click="editing = true" class="px-3 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-all">Edit</button>
+                                            <button @click="deleteReview()" class="px-3 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-all">Delete</button>
+                                        </div>
+                                    </template>
+                                    <template x-if="editing">
+                                        <div class="flex sm:flex-col gap-2">
+                                            <button @click="saveReview()" :disabled="submitting" class="px-3 py-1 text-xs bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold transition-all">Save</button>
+                                            <button @click="editing = false; rating = <?= $r['rating'] ?>; comment = '<?= e(addslashes($r['comment'])) ?>'" class="px-3 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-all">Cancel</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         </div>
     </div>

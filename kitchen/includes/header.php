@@ -1,6 +1,4 @@
 <?php 
-// FIX 1: Start the session at the very top of the file.
-session_start(); 
 require_once 'functions.php'; 
 ?>
 <!DOCTYPE html>

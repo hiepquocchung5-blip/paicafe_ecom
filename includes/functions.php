@@ -5,10 +5,109 @@
  */
 
 // 1. SESSION MANAGEMENT
-// Ensures the session is always started.
-if (session_status() == PHP_SESSION_NONE) {
+function paicafe_is_https() {
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+        || (($_SERVER['SERVER_PORT'] ?? '') === '443');
+}
+
+function paicafe_session_cookie_options($lifetime = 0, $path = '/') {
+    return [
+        'lifetime' => $lifetime,
+        'path' => $path,
+        'domain' => '',
+        'secure' => paicafe_is_https(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ];
+}
+
+function paicafe_start_session() {
+    if (session_status() !== PHP_SESSION_NONE) {
+        return;
+    }
+
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    if (paicafe_is_https()) {
+        ini_set('session.cookie_secure', '1');
+    }
+
+    session_name('PAICAFESESSID');
+    session_set_cookie_params(paicafe_session_cookie_options());
     session_start();
 }
+
+function paicafe_regenerate_session() {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
+}
+
+function paicafe_set_cookie($name, $value, $expires, $path = '/') {
+    setcookie($name, $value, [
+        'expires' => $expires,
+        'path' => $path,
+        'domain' => '',
+        'secure' => paicafe_is_https(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function paicafe_clear_cookie($name, $path = '/') {
+    paicafe_set_cookie($name, '', time() - 3600, $path);
+}
+
+function paicafe_clear_admin_session() {
+    unset(
+        $_SESSION['admin_id'],
+        $_SESSION['admin_username'],
+        $_SESSION['user_type'],
+        $_SESSION['permissions']
+    );
+}
+
+function paicafe_destroy_session() {
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'] ?? '/',
+            'domain' => $params['domain'] ?? '',
+            'secure' => (bool)($params['secure'] ?? paicafe_is_https()),
+            'httponly' => true,
+            'samesite' => $params['samesite'] ?? 'Lax',
+        ]);
+    }
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
+}
+
+function paicafe_login_admin(array $admin, array $permissions = []) {
+    paicafe_regenerate_session();
+    $_SESSION['admin_id'] = $admin['id'];
+    $_SESSION['admin_username'] = $admin['username'];
+    $_SESSION['user_type'] = $admin['user_type'];
+    $_SESSION['permissions'] = $permissions;
+    $_SESSION['admin_last_seen'] = time();
+}
+
+function paicafe_login_user(array $user) {
+    paicafe_regenerate_session();
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['user_last_seen'] = time();
+}
+
+// Ensures the session is always started with consistent cookie settings.
+paicafe_start_session();
 
 // 2. LANGUAGE SWITCHING
 if (isset($_GET['lang'])) {
@@ -90,7 +189,7 @@ function is_admin_logged_in() {
  */
 function require_admin_login() {
     if (!is_admin_logged_in()) {
-        header('Location: /login.php'); // Redirect to admin login
+        header('Location: /admin/login.php');
         exit();
     }
 }

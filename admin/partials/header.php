@@ -11,20 +11,32 @@ require_admin_login();
 <html lang="en" class="h-full" 
       x-data="{ 
         sidebarOpen: false, 
-        darkMode: localStorage.getItem('darkMode') === 'true' 
+        darkMode: window.PaicafeTheme ? window.PaicafeTheme.isDark() : document.documentElement.classList.contains('dark')
       }" 
-      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      x-init="$watch('darkMode', val => window.PaicafeTheme ? window.PaicafeTheme.set(val) : document.documentElement.classList.toggle('dark', val))"
       :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAICAFE Control Center</title>
+    <script>
+        (function () {
+            const storedTheme = localStorage.getItem('paicafe-theme') || localStorage.getItem('darkMode');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const useDark = storedTheme ? (storedTheme === 'dark' || storedTheme === 'true') : prefersDark;
+            document.documentElement.classList.toggle('dark', useDark);
+        })();
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = { darkMode: 'class' };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/assets/css/style.css">
+    <script src="/assets/js/main.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -88,7 +100,7 @@ require_admin_login();
             
             <div class="flex items-center space-x-6">
                 <!-- Theme Toggle -->
-                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-all shadow-sm border border-slate-200 dark:border-slate-700" aria-label="Toggle color theme" title="Toggle theme">
                     <i class="fas" :class="darkMode ? 'fa-sun text-yellow-500' : 'fa-moon text-blue-500'"></i>
                 </button>
 

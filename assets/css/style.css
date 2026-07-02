@@ -28,6 +28,13 @@ Paicafe Custom Stylesheet
     --text-dark: #333333;
     --border-light: #E5E7EB; /* gray-200 */
     --font-sans: 'Poppins', sans-serif;
+    color-scheme: light;
+}
+
+.dark {
+    color-scheme: dark;
+    --text-dark: #E2E8F0;
+    --border-light: #334155;
 }
 html, body {
     height: 100%;
@@ -61,6 +68,10 @@ h1, h2, h3 {
     align-items: center;
     justify-content: center;
     transition: opacity 0.5s ease-out;
+}
+
+.dark #page-loader {
+    background-color: #020617;
 }
 
 /* The spinning element */
@@ -136,6 +147,84 @@ h1, h2, h3 {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/*
+--------------------------------
+4. Dark Mode Compatibility Layer
+--------------------------------
+*/
+
+.dark .form-input,
+.dark input,
+.dark select,
+.dark textarea {
+    background-color: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #64748b;
+}
+
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+    background-color: #0f172a !important;
+}
+
+.dark .bg-gray-200 {
+    background-color: #1e293b !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+    color: #e2e8f0 !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400 {
+    color: #94a3b8 !important;
+}
+
+.dark .border,
+.dark .border-t,
+.dark .border-b,
+.dark .border-l,
+.dark .border-r,
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+    border-color: #334155 !important;
+}
+
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+}
+
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-200:hover {
+    background-color: #1e293b !important;
+}
+
+.dark .mobile-floating-bar .active {
+    color: var(--brand-secondary) !important;
+}
+
+.dark iframe {
+    filter: grayscale(0.25) invert(0.9) contrast(0.9);
+}
+
+.theme-toggle {
+    flex-shrink: 0;
 }
 
 @media print {

@@ -352,7 +352,7 @@ $products = $stmt->fetchAll();
                             <?php endif; ?>
                         </td>
                         <td class="p-6">
-                            <div class="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="flex items-center space-x-3 opacity-60 group-hover:opacity-100 transition-opacity">
                                 <a href="products.php?action=edit&id=<?= e($product['id']) ?>" 
                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
                                     <i class="fas fa-pen-nib text-xs"></i>

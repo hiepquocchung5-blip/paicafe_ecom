@@ -23,26 +23,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin = $stmt->fetch();
 
     if ($admin && password_verify($password, $admin['password'])) {
-        // Set session variables
-        $_SESSION['admin_id'] = $admin['id'];
-        $_SESSION['admin_username'] = $admin['username'];
-        $_SESSION['user_type'] = $admin['user_type'];
-        
         $permissions_stmt = $pdo->prepare("SELECT p.name FROM permissions p JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.user_type = ?");
         $permissions_stmt->execute([$admin['user_type']]);
-        $_SESSION['permissions'] = $permissions_stmt->fetchAll(PDO::FETCH_COLUMN);
+        $permissions = $permissions_stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        paicafe_login_admin($admin, $permissions);
 
         $log_stmt = $pdo->prepare("INSERT INTO activity_logs (admin_id, action) VALUES (?, ?)");
         $log_stmt->execute([$admin['id'], "Admin user logged in: " . htmlspecialchars($username)]);
         
         // Handle "Remember Me" cookie
         if ($remember_me) {
-            setcookie('admin_remember_me', $admin['id'], time() + (86400 * 30), "/admin");
-            setcookie('admin_username', $admin['username'], time() + (86400 * 30), "/admin");
+            paicafe_set_cookie('admin_remember_me', '1', time() + (86400 * 30), '/admin');
+            paicafe_set_cookie('admin_username', $admin['username'], time() + (86400 * 30), '/admin');
         } else {
             if (isset($_COOKIE['admin_remember_me'])) {
-                setcookie('admin_remember_me', '', time() - 3600, "/admin");
-                setcookie('admin_username', '', time() - 3600, "/admin");
+                paicafe_clear_cookie('admin_remember_me', '/admin');
+                paicafe_clear_cookie('admin_username', '/admin');
             }
         }
         
@@ -86,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password</label>
                 <div class="relative">
                     <input class="form-input pr-10" id="password" name="password" :type="show ? 'text' : 'password'" placeholder="******************" required autocomplete="current-password">
-                    <button typeB="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
                         <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                     </button>
                 </div>

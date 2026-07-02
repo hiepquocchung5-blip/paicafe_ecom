@@ -1,8 +1,11 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/functions.php';
+
 // Unset only admin session variables to not interfere with user sessions
-unset($_SESSION['admin_id']);
-unset($_SESSION['admin_username']);
-header('Location: /login.php');
+paicafe_clear_admin_session();
+paicafe_clear_cookie('admin_remember_me', '/admin');
+paicafe_clear_cookie('admin_username', '/admin');
+
+header('Location: /admin/login.php');
 exit();
 ?>

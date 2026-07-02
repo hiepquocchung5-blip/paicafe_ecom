@@ -1,7 +1,4 @@
 <?php
-// We must start the session to be able to save login status
-session_start();
-
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
 
@@ -25,10 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
 
     if ($user && password_verify($password, $user['password'])) {
-        // Login successful, save details to the session
-        $_SESSION['admin_id'] = $user['id'];
-        $_SESSION['admin_username'] = $user['username'];
-        $_SESSION['user_type'] = $user['user_type'];
+        // Login successful, rotate the session ID and save details to the session.
+        paicafe_login_admin($user, []);
         
         $log_stmt = $pdo->prepare("INSERT INTO activity_logs (admin_id, action) VALUES (?, ?)");
         $log_stmt->execute([$user['id'], "Kitchen user logged in: " . htmlspecialchars($username)]);

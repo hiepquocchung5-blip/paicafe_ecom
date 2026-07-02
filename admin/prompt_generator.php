@@ -27,6 +27,21 @@ $sql = "
     ORDER BY p.id DESC
 ";
 $products = $pdo->query($sql)->fetchAll();
+
+// Fetch selected review if review_id is provided in GET for response prompt generation
+$selected_review = null;
+if (isset($_GET['review_id'])) {
+    $review_id = (int)$_GET['review_id'];
+    $stmt_rev = $pdo->prepare("
+        SELECT r.*, p.name_en AS product_name, u.username AS user_name
+        FROM reviews r
+        LEFT JOIN products p ON r.product_id = p.id
+        LEFT JOIN users u ON r.user_id = u.id
+        WHERE r.id = ?
+    ");
+    $stmt_rev->execute([$review_id]);
+    $selected_review = $stmt_rev->fetch();
+}
 ?>
 
 <div class="max-w-7xl mx-auto px-6 py-4" x-data="promptGeneratorState()">
@@ -61,6 +76,13 @@ $products = $pdo->query($sql)->fetchAll();
             <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Product Catalog</h3>
                 
+                <!-- Real-time Catalog Search -->
+                <div class="mb-4 relative">
+                    <input type="text" x-model="searchQuery" placeholder="Search catalog items by name, description..." 
+                           class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-2xl pl-12 pr-6 py-4 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/50 text-slate-800 dark:text-white transition-all">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+
                 <!-- Category Filter for Easy Selection -->
                 <div class="flex flex-wrap gap-2 mb-6">
                     <button @click="activeCategory = 'ALL'" 
@@ -136,6 +158,15 @@ $products = $pdo->query($sql)->fetchAll();
             <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Prompt Controls</h3>
                 
+                <!-- Review Response Active Context Info -->
+                <div x-show="reviewData" class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold mb-6 flex items-start space-x-3" style="display: none;">
+                    <i class="fas fa-info-circle mt-0.5 text-base"></i>
+                    <div>
+                        <p class="font-black uppercase tracking-widest text-[9px]">Active Context Loaded</p>
+                        <p class="mt-1 font-semibold normal-case text-[11px]" x-text="`Replying to ${reviewData ? reviewData.user_name : ''}'s ${reviewData ? reviewData.rating : 0}★ review on '${reviewData ? reviewData.product_name : ''}'`"></p>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
                     <!-- Prompt Objective -->
                     <div class="space-y-1">
@@ -146,6 +177,7 @@ $products = $pdo->query($sql)->fetchAll();
                             <option value="SEO Product Content & Keywords">SEO Search Description</option>
                             <option value="Marketing Launch Copy">New Asset Launch Release</option>
                             <option value="Local LLM Classification Prompt">LLM Catalog Classification</option>
+                            <option value="Reply to Customer Review" x-show="reviewData">Reply to Customer Review</option>
                         </select>
                     </div>
 
@@ -213,6 +245,7 @@ $products = $pdo->query($sql)->fetchAll();
 <script>
 function promptGeneratorState() {
     const rawProducts = <?= json_encode($products, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const selectedReview = <?= json_encode($selected_review, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     
     // Extract unique categories for filtering
     const categoriesSet = new Set();
@@ -223,14 +256,16 @@ function promptGeneratorState() {
     return {
         products: rawProducts,
         categories: Array.from(categoriesSet),
-        selectedProducts: [],
+        selectedProducts: selectedReview ? [parseInt(selectedReview.product_id)] : [],
         activeCategory: 'ALL',
+        searchQuery: '',
         
         // Form Controls
-        promptType: 'Social Media Advertisement',
+        promptType: selectedReview ? 'Reply to Customer Review' : 'Social Media Advertisement',
         tone: 'Luxurious and Premium',
         language: 'Bilingual (English with Burmese translation)',
         customInstructions: '',
+        reviewData: selectedReview,
         
         // Copy UI Feedback state
         copying: false,
@@ -245,10 +280,19 @@ function promptGeneratorState() {
         },
         
         filteredProducts() {
-            if (this.activeCategory === 'ALL') {
-                return this.products;
+            let items = this.products;
+            if (this.activeCategory !== 'ALL') {
+                items = items.filter(p => p.category_name === this.activeCategory);
             }
-            return this.products.filter(p => p.category_name === this.activeCategory);
+            if (this.searchQuery.trim() !== '') {
+                const query = this.searchQuery.toLowerCase();
+                items = items.filter(p => 
+                    p.name_en.toLowerCase().includes(query) || 
+                    (p.name_mm && p.name_mm.toLowerCase().includes(query)) ||
+                    (p.description_en && p.description_en.toLowerCase().includes(query))
+                );
+            }
+            return items;
         },
         
         selectAll() {
@@ -260,6 +304,37 @@ function promptGeneratorState() {
         },
         
         get computedPrompt() {
+            // Check if replying to customer review
+            if (this.promptType === 'Reply to Customer Review' && this.reviewData) {
+                let p = this.products.find(prod => prod.id == this.reviewData.product_id);
+                let prompt = `System Instructions:\nYou are a customer relation officer for ${this.appName}.
+Write a warm, polite, and professional reply to a customer review left on our product "${this.reviewData.product_name}".
+The response tone should be "${this.tone}" and written in "${this.language}".
+
+--- CUSTOMER REVIEW DETAILS ---
+Customer: ${this.reviewData.user_name || 'Guest User'}
+Rating: ${this.reviewData.rating} out of 5 stars
+Customer Comment: "${this.reviewData.comment || 'No text comment left.'}"
+Submitted on: ${this.reviewData.created_at}
+
+--- PRODUCT REFERENCE DATA ---
+Product Name: ${this.reviewData.product_name}
+Price: ${this.formatCurrency(p ? p.price : 0)} KS
+Description: ${p ? p.description_en : 'No description'}
+Image: ${p ? p.image : 'No image'}
+Video: ${p ? (p.video_url || 'No video') : 'No video'}
+`;
+                if (this.customInstructions.trim()) {
+                    prompt += `\nSpecial Directives:\n- ${this.customInstructions.trim()}\n`;
+                }
+                prompt += `\n--- OUTPUT REQUIREMENTS ---\n`;
+                prompt += `1. Express sincere gratitude for the customer's feedback.\n`;
+                prompt += `2. Address specific points raised in their comment.\n`;
+                prompt += `3. Maintain a positive brand image and invite them back to PAICAFE.\n`;
+                prompt += `4. Keep the output offline-optimization friendly (no external API calls needed).`;
+                return prompt;
+            }
+
             if (this.selectedProducts.length === 0) {
                 return `[LLM PROMPT ENGINE SYSTEM INITIALIZATION]
 Status: Ready

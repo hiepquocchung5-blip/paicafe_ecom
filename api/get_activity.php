@@ -7,10 +7,6 @@ require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // --- SECURITY CHECK ---
-// We must start the session to check admin login status
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
 if (!is_admin_logged_in()) {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
@@ -18,7 +14,7 @@ if (!is_admin_logged_in()) {
 }
 
 // --- Pagination Logic ---
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max(1, isset($_GET['page']) ? (int)$_GET['page'] : 1);
 $logs_per_page = 15; // Show 15 logs at a time in the feed
 $offset = ($page - 1) * $logs_per_page;
 
