@@ -9,6 +9,17 @@ if (!has_permission('manage_products')) {
     die('Access Denied. You do not have permission to manage products.');
 }
 
+// --- Self-Migration for video_url column ---
+try {
+    $pdo->query("SELECT video_url FROM products LIMIT 1");
+} catch (PDOException $e) {
+    try {
+        $pdo->exec("ALTER TABLE products ADD video_url VARCHAR(255) DEFAULT NULL");
+    } catch (Exception $ex) {
+        // Silent fallback
+    }
+}
+
 $errors = [];
 $flash_message = $_SESSION['flash_message'] ?? null;
 $flash_message_type = $_SESSION['flash_message_type'] ?? 'success';
@@ -35,19 +46,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['discount_percentage'] ?? 0,
             !empty($_POST['category_id']) ? $_POST['category_id'] : null,
             trim($_POST['image_url'] ?? ''),
+            trim($_POST['video_url'] ?? ''),
             isset($_POST['is_available']) ? 1 : 0,
             isset($_POST['is_special_today']) ? 1 : 0
         ];
 
         try {
             if ($action === 'create') {
-                $sql = "INSERT INTO products (name_en, name_mm, description_en, description_mm, price, discount_percentage, category_id, image, is_available, is_special_today) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO products (name_en, name_mm, description_en, description_mm, price, discount_percentage, category_id, image, video_url, is_available, is_special_today) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $_SESSION['flash_message'] = 'Product created successfully.';
                 log_activity($pdo, "Created product: " . $name_en);
             } elseif ($action === 'update') {
-                $sql = "UPDATE products SET name_en=?, name_mm=?, description_en=?, description_mm=?, price=?, discount_percentage=?, category_id=?, image=?, is_available=?, is_special_today=? WHERE id=?";
+                $sql = "UPDATE products SET name_en=?, name_mm=?, description_en=?, description_mm=?, price=?, discount_percentage=?, category_id=?, image=?, video_url=?, is_available=?, is_special_today=? WHERE id=?";
                 $params[] = $id;
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -224,6 +236,19 @@ $products = $stmt->fetchAll();
                     </div>
                 </div>
 
+                <div class="md:col-span-2 space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Video Source (URL)</label>
+                    <div class="flex items-center space-x-4">
+                        <input type="text" name="video_url" placeholder="https://... (e.g. mp4 link)" value="<?= e($product_to_edit['video_url'] ?? '') ?>"
+                               class="flex-1 bg-slate-100 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <?php if (!empty($product_to_edit['video_url'])): ?>
+                            <div class="h-14 w-14 rounded-xl border-2 border-white dark:border-slate-800 shadow-lg overflow-hidden flex items-center justify-center bg-black">
+                                <video src="<?= e($product_to_edit['video_url']) ?>" class="w-full h-full object-cover"></video>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="md:col-span-2 flex items-center space-x-8 px-2">
                     <label class="flex items-center cursor-pointer group">
                         <div class="relative">
@@ -278,8 +303,15 @@ $products = $stmt->fetchAll();
                     ?>
                     <tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all duration-200">
                         <td class="p-6">
-                            <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-full h-full object-cover">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 shadow-sm transition-transform duration-300 relative group-hover:scale-105" title="Image">
+                                    <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" class="w-full h-full object-cover">
+                                </div>
+                                <?php if (!empty($product['video_url'])): ?>
+                                    <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-900 border-2 border-white dark:border-slate-800 shadow-sm transition-transform duration-300 relative group-hover:scale-105 flex items-center justify-center" title="Has Video">
+                                        <i class="fas fa-video text-white text-[10px]"></i>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td class="p-6">

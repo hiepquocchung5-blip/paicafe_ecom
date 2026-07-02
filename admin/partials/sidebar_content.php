@@ -56,6 +56,12 @@
             <a href="categories.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'categories.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
                 <i class="fas fa-tags fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Categories
             </a>
+            <a href="reviews.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'reviews.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
+                <i class="fas fa-star fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Customer Reviews
+            </a>
+            <a href="prompt_generator.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'prompt_generator.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
+                <i class="fas fa-robot fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Prompt Engine
+            </a>
         <?php endif; ?>
         <?php if (has_permission('manage_recipes')): ?>
             <a href="recipes.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'recipes.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
