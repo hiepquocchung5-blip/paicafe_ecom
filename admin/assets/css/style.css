@@ -87,20 +87,89 @@ Dark Mode Compatibility Layer
     background-color: #0f172a !important;
 }
 
-.dark .bg-gray-200 {
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/90,
+.dark .bg-white\/95 {
+    background-color: rgba(15, 23, 42, 0.82) !important;
+}
+
+.dark .bg-gray-200,
+.dark .bg-slate-100,
+.dark .bg-slate-200 {
     background-color: #1e293b !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/30,
+.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+.dark .bg-blue-100 {
+    background-color: rgba(30, 64, 175, 0.28) !important;
+}
+
+.dark .bg-green-50,
+.dark .bg-green-100 {
+    background-color: rgba(6, 78, 59, 0.28) !important;
+}
+
+.dark .bg-red-50,
+.dark .bg-red-100 {
+    background-color: rgba(127, 29, 29, 0.28) !important;
+}
+
+.dark .bg-yellow-100 {
+    background-color: rgba(113, 63, 18, 0.32) !important;
 }
 
 .dark .text-gray-900,
 .dark .text-gray-800,
-.dark .text-gray-700 {
+.dark .text-gray-700,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark h1:not([class*="text-"]),
+.dark h2:not([class*="text-"]),
+.dark h3:not([class*="text-"]),
+.dark h4:not([class*="text-"]),
+.dark h5:not([class*="text-"]),
+.dark h6:not([class*="text-"]) {
     color: #e2e8f0 !important;
 }
 
 .dark .text-gray-600,
 .dark .text-gray-500,
-.dark .text-gray-400 {
+.dark .text-gray-400,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark p:not([class*="text-"]),
+.dark label:not([class*="text-"]),
+.dark td:not([class*="text-"]),
+.dark th:not([class*="text-"]) {
     color: #94a3b8 !important;
+}
+
+.dark .text-blue-500,
+.dark .text-blue-600,
+.dark .hover\:text-blue-600:hover {
+    color: #60a5fa !important;
+}
+
+.dark .text-green-700,
+.dark .text-green-800 {
+    color: #86efac !important;
+}
+
+.dark .text-red-700,
+.dark .text-red-800 {
+    color: #fca5a5 !important;
+}
+
+.dark .text-yellow-800 {
+    color: #fde68a !important;
 }
 
 .dark .border,
@@ -110,7 +179,11 @@ Dark Mode Compatibility Layer
 .dark .border-r,
 .dark .border-gray-100,
 .dark .border-gray-200,
-.dark .border-gray-300 {
+.dark .border-gray-300,
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark hr {
     border-color: #334155 !important;
 }
 
@@ -125,6 +198,34 @@ Dark Mode Compatibility Layer
 .dark .hover\:bg-gray-100:hover,
 .dark .hover\:bg-gray-200:hover {
     background-color: #1e293b !important;
+}
+
+.dark table,
+.dark thead,
+.dark tbody,
+.dark tr {
+    border-color: #334155 !important;
+}
+
+.dark tr.hover\:bg-gray-50:hover,
+.dark tr.hover\:bg-slate-50:hover {
+    background-color: rgba(30, 41, 59, 0.72) !important;
+}
+
+.dark .prose,
+.dark .prose p,
+.dark .prose li,
+.dark .prose strong {
+    color: #cbd5e1 !important;
+}
+
+.dark .line-through {
+    color: #64748b !important;
+}
+
+.dark [class*="divide-gray-"] > :not([hidden]) ~ :not([hidden]),
+.dark [class*="divide-slate-"] > :not([hidden]) ~ :not([hidden]) {
+    border-color: #334155 !important;
 }
 
 .theme-toggle {

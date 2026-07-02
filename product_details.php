@@ -66,21 +66,44 @@ include 'includes/header.php';
     <!-- Product Details Card: Stacked on mobile, side-by-side on larger screens -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
         <div class="grid grid-cols-1 lg:grid-cols-2">
-            <!-- Image: Full-width with zoom on mobile -->
-            <div class="relative overflow-hidden aspect-square lg:aspect-auto">
-                <img 
-                    src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" 
-                    alt="<?= e($product['name_en']) ?>" 
-                    class="w-full h-full object-cover transition-transform duration-300 hover:scale-105 lg:hover:scale-100 cursor-pointer"
-                    x-data="{ zoomed: false }"
-                    @click="zoomed = !zoomed"
-                    :class="{ 'scale-110': zoomed }"
-                    loading="lazy"
-                >
-                <!-- Mobile Zoom Overlay -->
-                <div x-show="zoomed" @click.away="zoomed = false" class="absolute inset-0 bg-black/50 flex items-center justify-center z-20 lg:hidden">
-                    <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" alt="<?= e($product['name_en']) ?>" class="max-w-full max-h-full object-contain">
+            <!-- Image & Video Tabbed Container: Stacked or toggleable if video exists -->
+            <div class="relative overflow-hidden aspect-square lg:aspect-auto" x-data="{ activeMedia: 'image', zoomed: false }">
+                <div class="w-full h-full">
+                    <template x-if="activeMedia === 'image'">
+                        <img 
+                            src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" 
+                            alt="<?= e($product['name_en']) ?>" 
+                            class="w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
+                            @click="zoomed = !zoomed"
+                            :class="{ 'scale-110': zoomed }"
+                            loading="lazy"
+                        >
+                    </template>
+                    <?php if (!empty($product['video_url'])): ?>
+                        <template x-if="activeMedia === 'video'">
+                            <div class="w-full h-full bg-black flex items-center justify-center">
+                                <video src="<?= e($product['video_url']) ?>" class="w-full h-full object-contain" controls autoplay muted loop></video>
+                            </div>
+                        </template>
+                    <?php endif; ?>
                 </div>
+
+                <!-- Mobile Zoom Overlay for Image -->
+                <div x-show="zoomed" @click="zoomed = false" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" x-cloak>
+                    <img src="<?= e($product['image'] ?: '/assets/uploads/placeholder.png') ?>" alt="<?= e($product['name_en']) ?>" class="max-w-full max-h-full object-contain rounded-2xl">
+                </div>
+
+                <?php if (!empty($product['video_url'])): ?>
+                    <!-- Media switcher tabs -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/10 z-10 shadow-lg">
+                        <button @click="activeMedia = 'image'" :class="activeMedia === 'image' ? 'bg-orange-600 text-white' : 'text-gray-300 hover:text-white'" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all flex items-center space-x-1.5">
+                            <i class="fas fa-image"></i> <span>Photo</span>
+                        </button>
+                        <button @click="activeMedia = 'video'" :class="activeMedia === 'video' ? 'bg-orange-600 text-white' : 'text-gray-300 hover:text-white'" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all flex items-center space-x-1.5">
+                            <i class="fas fa-video"></i> <span>Video</span>
+                        </button>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- Content: Flex for dynamic growth, responsive text sizing -->
@@ -141,7 +164,19 @@ include 'includes/header.php';
 
 <!-- Reviews Section: Accordion on mobile for space-saving -->
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Customer Reviews (<?= $review_count ?>)</h2>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold">Customer Reviews (<?= $review_count ?>)</h2>
+        <?php if ($review_count > 0): ?>
+            <div class="flex items-center space-x-2 mt-2 sm:mt-0 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 w-fit">
+                <span class="text-sm font-black text-slate-800 dark:text-white"><?= number_format($avg_rating, 1) ?></span>
+                <div class="flex text-yellow-400 text-sm">
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <i class="<?= $i < round($avg_rating) ? 'fas' : 'far' ?> fa-star mr-0.5"></i>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
     
     <?php if (is_user_logged_in()): ?>
     <!-- Review Form: Collapsible on mobile -->

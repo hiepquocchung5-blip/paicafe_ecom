@@ -135,10 +135,19 @@ include 'includes/header.php';
             </div>
 
             <div class="flex items-center mt-3 sm:mt-0">
-              <form method="POST" class="flex items-center">
-                <input type="hidden" name="product_id" value="<?= $item['id'] ?>">
-                <input type="number" name="quantity" value="<?= e($item['quantity']) ?>" min="1" class="w-16 text-center border rounded-md mx-4 py-1" onchange="this.form.submit()" aria-label="Quantity for <?= e($item['name']) ?>">
-              </form>
+              <div class="flex items-center space-x-1 border border-gray-200 rounded-xl p-1 bg-gray-50" x-data="{ qty: <?= (int)$item['quantity'] ?> }">
+                <button type="button" @click="if (qty > 1) { qty--; $nextTick(() => $refs.qtyForm.submit()); }" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-orange-600 rounded-lg hover:bg-white transition-all">
+                    <i class="fas fa-minus text-xs"></i>
+                </button>
+                <form method="POST" x-ref="qtyForm" class="inline">
+                    <input type="hidden" name="product_id" value="<?= $item['id'] ?>">
+                    <input type="hidden" name="update_quantity" value="1">
+                    <input type="text" readonly name="quantity" x-bind:value="qty" class="w-8 text-center bg-transparent border-none text-xs font-black focus:ring-0 p-0 text-gray-700">
+                </form>
+                <button type="button" @click="qty++; $nextTick(() => $refs.qtyForm.submit());" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-orange-600 rounded-lg hover:bg-white transition-all">
+                    <i class="fas fa-plus text-xs"></i>
+                </button>
+              </div>
             </div>
 
             <div class="text-lg font-semibold w-full sm:w-24 text-right mt-2 sm:mt-0"><?= number_format($item['price'] * $item['quantity'], 2) ?> Ks</div>

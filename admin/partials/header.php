@@ -6,6 +6,7 @@ require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 // This function is now loaded from the master functions.php file
 require_admin_login();
+$admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '/admin' : '';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full" 
@@ -35,8 +36,8 @@ require_admin_login();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/assets/css/style.css">
-    <script src="/assets/js/main.js"></script>
+    <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/style.css">
+    <script src="<?= $admin_asset_base ?>/assets/js/theme.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }

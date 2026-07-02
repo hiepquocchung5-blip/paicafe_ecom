@@ -75,7 +75,40 @@ if (!empty($_SESSION['cart'])) {
 </head>
 <body class="bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300 <?= ($_SESSION['lang'] ?? 'en') === 'mm' ? 'lang-mm' : '' ?>">
     <div id="page-loader">
-        <div class="spinner"></div>
+        <div class="coffee-loader" role="status" aria-label="Loading Paicafe">
+            <svg class="coffee-loader__svg" viewBox="0 0 220 180" aria-hidden="true">
+                <defs>
+                    <linearGradient id="coffeeGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#b45309" />
+                        <stop offset="100%" stop-color="#7c2d12" />
+                    </linearGradient>
+                    <clipPath id="cupFillClip">
+                        <path d="M71 76h82l-9 74H80z" />
+                    </clipPath>
+                </defs>
+                <g class="coffee-loader__pot">
+                    <path d="M132 28h48l10 24v34h-42c-13 0-24-11-24-24V36c0-4 3-8 8-8z" fill="#f8fafc" stroke="#ea580c" stroke-width="6" />
+                    <path d="M178 52c18 3 29 13 29 28 0 18-15 31-36 31h-13" fill="none" stroke="#ea580c" stroke-width="8" stroke-linecap="round" />
+                    <path d="M124 53H99c-10 0-17 7-17 17" fill="none" stroke="#ea580c" stroke-width="8" stroke-linecap="round" />
+                    <path d="M143 28l-4-14h36l-4 14" fill="#fed7aa" stroke="#ea580c" stroke-width="5" stroke-linejoin="round" />
+                </g>
+                <path class="coffee-loader__pour" d="M91 72C86 86 86 98 91 112" fill="none" stroke="url(#coffeeGradient)" stroke-width="9" stroke-linecap="round" />
+                <g class="coffee-loader__cup">
+                    <path d="M62 70h100l-11 88a12 12 0 0 1-12 10H85a12 12 0 0 1-12-10z" fill="#fff7ed" stroke="#ea580c" stroke-width="7" stroke-linejoin="round" />
+                    <path d="M157 91h14c13 0 23 10 23 23s-10 23-23 23h-18" fill="none" stroke="#ea580c" stroke-width="7" stroke-linecap="round" />
+                    <g clip-path="url(#cupFillClip)">
+                        <rect class="coffee-loader__fill" x="70" y="148" width="85" height="76" fill="url(#coffeeGradient)" />
+                    </g>
+                    <path d="M72 88c18 8 32-8 50 0 12 5 22 3 34-3" fill="none" stroke="#fdba74" stroke-width="4" stroke-linecap="round" opacity=".8" />
+                </g>
+                <g class="coffee-loader__steam" fill="none" stroke="#fb923c" stroke-width="5" stroke-linecap="round">
+                    <path d="M84 48c-8-10 8-15 0-26" />
+                    <path d="M111 45c-8-10 8-15 0-26" />
+                    <path d="M138 48c-8-10 8-15 0-26" />
+                </g>
+            </svg>
+            <div class="coffee-loader__brand">PAICAFE</div>
+        </div>
     </div>
     
     <nav class="bg-white dark:bg-slate-900 shadow-md hidden md:block border-b border-transparent dark:border-slate-800 transition-colors duration-300"> 
