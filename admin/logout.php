@@ -6,6 +6,6 @@ paicafe_clear_admin_session();
 paicafe_clear_cookie('admin_remember_me', '/admin');
 paicafe_clear_cookie('admin_username', '/admin');
 
-header('Location: /admin/login.php');
+header('Location: /login.php');
 exit();
 ?>

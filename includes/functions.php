@@ -189,7 +189,7 @@ function is_admin_logged_in() {
  */
 function require_admin_login() {
     if (!is_admin_logged_in()) {
-        header('Location: /admin/login.php');
+        header('Location: /login.php');
         exit();
     }
 }
