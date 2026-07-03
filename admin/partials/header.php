@@ -51,7 +51,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
     
     <!-- Sidebar -->
     <div class="hidden lg:flex lg:flex-shrink-0">
-        <div class="flex flex-col w-72 bg-[#0f172a] text-white">
+        <div class="admin-sidebar flex flex-col w-72 text-white">
             <?php include 'sidebar_content.php'; ?>
         </div>
     </div>
@@ -74,7 +74,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
              x-transition:leave="transition ease-in-out duration-300 transform"
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="-translate-x-full"
-             class="relative flex-1 flex flex-col max-w-xs w-full bg-[#0f172a] text-white shadow-2xl">
+             class="admin-sidebar relative flex-1 flex flex-col max-w-xs w-full text-white shadow-2xl">
             <div class="absolute top-0 right-0 -mr-12 pt-4">
                 <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                     <i class="fas fa-times text-white"></i>
@@ -86,7 +86,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden relative">
-        <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-between items-center z-10 transition-colors duration-300">
+        <header class="admin-shell-header bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-between items-center z-10 transition-colors duration-300">
             <div class="flex items-center space-x-4">
                 <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-bars-staggered text-xl"></i>
@@ -116,7 +116,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
             </div>
         </header>
         
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-950 custom-scrollbar relative transition-colors duration-300">
-            <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-50 pointer-events-none"></div>
+        <main class="admin-shell-main flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-950 custom-scrollbar relative transition-colors duration-300">
+            <div class="absolute inset-0 bg-[radial-gradient(rgba(15,118,110,0.16)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(94,234,212,0.12)_1px,transparent_1px)] [background-size:24px_24px] opacity-60 pointer-events-none"></div>
             <div class="relative z-0 p-8">
 

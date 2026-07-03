@@ -23,18 +23,40 @@ Paicafe Custom Stylesheet
 */
 
 :root {
-    --brand-primary: #EA580C; /* orange-600 */
-    --brand-secondary: #F97316; /* orange-500 */
-    --text-dark: #333333;
-    --border-light: #E5E7EB; /* gray-200 */
+    --brand-primary: #C2410C;
+    --brand-secondary: #0F766E;
+    --brand-accent: #D97706;
+    --page-bg: #F5F7F2;
+    --page-bg-soft: #EEF4EB;
+    --surface-card: #FFFDF8;
+    --surface-card-muted: #F6F0E6;
+    --surface-control: #EEF6F3;
+    --surface-control-hover: #E2EFEA;
+    --nav-bg: rgba(255, 253, 248, 0.9);
+    --text-dark: #1F2933;
+    --text-muted: #64716D;
+    --border-light: #D9E4DD;
+    --shadow-soft: 0 18px 48px rgba(23, 53, 47, 0.1);
     --font-sans: 'Poppins', sans-serif;
     color-scheme: light;
 }
 
 .dark {
     color-scheme: dark;
-    --text-dark: #E2E8F0;
-    --border-light: #334155;
+    --brand-primary: #FB923C;
+    --brand-secondary: #5EEAD4;
+    --brand-accent: #FBBF24;
+    --page-bg: #071316;
+    --page-bg-soft: #0B1D21;
+    --surface-card: #122126;
+    --surface-card-muted: #172B31;
+    --surface-control: #1D333A;
+    --surface-control-hover: #28454D;
+    --nav-bg: rgba(18, 33, 38, 0.9);
+    --text-dark: #E7F0ED;
+    --text-muted: #9FB5AF;
+    --border-light: #28454D;
+    --shadow-soft: 0 22px 56px rgba(0, 0, 0, 0.34);
 }
 html, body {
     height: 100%;
@@ -44,6 +66,10 @@ html, body {
 body {
     font-family: var(--font-sans);
     color: var(--text-dark);
+    background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 34%),
+        linear-gradient(315deg, rgba(217, 119, 6, 0.08), transparent 38%),
+        var(--page-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -180,9 +206,13 @@ h1, h2, h3 {
 /* FIX: A single, clean style for all form inputs */
 .form-input {
     @apply w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-md transition;
+    background-color: var(--surface-control);
+    border-color: var(--border-light);
+    color: var(--text-dark);
 }
 .form-input:focus {
     @apply outline-none border-transparent ring-2 ring-orange-500;
+    background-color: var(--surface-card);
 }
 
 
@@ -217,39 +247,131 @@ h1, h2, h3 {
 .dark input,
 .dark select,
 .dark textarea {
-    background-color: #0f172a;
-    border-color: #334155;
-    color: #e2e8f0;
+    background-color: var(--surface-control);
+    border-color: var(--border-light);
+    color: var(--text-dark);
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-    color: #64748b;
+    color: #6f8983;
+}
+
+.bg-white,
+.bg-white\/70,
+.bg-white\/80,
+.bg-white\/90,
+.bg-white\/95 {
+    background-color: color-mix(in srgb, var(--surface-card) 88%, transparent) !important;
+}
+
+.bg-gray-50,
+.bg-slate-50,
+.bg-slate-50\/30,
+.bg-slate-50\/50 {
+    background-color: color-mix(in srgb, var(--surface-card-muted) 78%, transparent) !important;
+}
+
+.bg-gray-100,
+.bg-gray-200,
+.bg-slate-100,
+.bg-slate-200,
+.bg-slate-800,
+.bg-slate-900,
+.bg-slate-950 {
+    background-color: var(--surface-control) !important;
+}
+
+.dark .dark\:bg-white,
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-900\/50,
+.dark .dark\:bg-slate-900\/70,
+.dark .dark\:bg-slate-900\/80 {
+    background-color: color-mix(in srgb, var(--surface-card) 84%, transparent) !important;
+}
+
+.dark .dark\:bg-slate-950,
+.dark .dark\:bg-slate-950\/20,
+.dark .dark\:bg-slate-950\/30,
+.dark .dark\:bg-slate-950\/50 {
+    background-color: color-mix(in srgb, var(--page-bg-soft) 78%, transparent) !important;
+}
+
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-700 {
+    background-color: var(--surface-control) !important;
+}
+
+.dark .dark\:border-slate-700,
+.dark .dark\:border-slate-800,
+.dark .dark\:border-white\/5 {
+    border-color: var(--border-light) !important;
+}
+
+.border-gray-100,
+.border-gray-200,
+.border-gray-300,
+.border-slate-100,
+.border-slate-200,
+.border-slate-300,
+.border-slate-700,
+.border-slate-800,
+hr {
+    border-color: var(--border-light) !important;
+}
+
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-100:hover,
+.hover\:bg-gray-200:hover,
+.hover\:bg-slate-50:hover,
+.hover\:bg-slate-100:hover,
+.hover\:bg-slate-200:hover,
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-200:hover,
+.dark .hover\:bg-slate-700:hover,
+.dark .hover\:bg-slate-800:hover {
+    background-color: var(--surface-control-hover) !important;
+}
+
+nav.bg-white,
+.mobile-floating-bar,
+footer.bg-white {
+    background-color: var(--nav-bg) !important;
+    backdrop-filter: blur(16px);
+    border-color: var(--border-light) !important;
 }
 
 .dark .bg-white,
 .dark .bg-gray-50,
 .dark .bg-gray-100 {
-    background-color: #0f172a !important;
+    background-color: var(--surface-card) !important;
 }
 
 .dark .bg-white\/70,
 .dark .bg-white\/80,
 .dark .bg-white\/90,
 .dark .bg-white\/95 {
-    background-color: rgba(15, 23, 42, 0.82) !important;
+    background-color: color-mix(in srgb, var(--surface-card) 82%, transparent) !important;
 }
 
 .dark .bg-gray-200,
 .dark .bg-slate-100,
 .dark .bg-slate-200 {
-    background-color: #1e293b !important;
+    background-color: var(--surface-control) !important;
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-50\/30,
 .dark .bg-slate-50\/50 {
-    background-color: rgba(15, 23, 42, 0.55) !important;
+    background-color: color-mix(in srgb, var(--surface-card-muted) 68%, transparent) !important;
 }
 
 .dark .bg-blue-100 {
@@ -318,11 +440,6 @@ h1, h2, h3 {
     color: #fde68a !important;
 }
 
-.dark .border,
-.dark .border-t,
-.dark .border-b,
-.dark .border-l,
-.dark .border-r,
 .dark .border-gray-100,
 .dark .border-gray-200,
 .dark .border-gray-300,
@@ -330,7 +447,7 @@ h1, h2, h3 {
 .dark .border-slate-200,
 .dark .border-slate-300,
 .dark hr {
-    border-color: #334155 !important;
+    border-color: var(--border-light) !important;
 }
 
 .dark .shadow-md,
@@ -343,19 +460,19 @@ h1, h2, h3 {
 .dark .hover\:bg-gray-50:hover,
 .dark .hover\:bg-gray-100:hover,
 .dark .hover\:bg-gray-200:hover {
-    background-color: #1e293b !important;
+    background-color: var(--surface-control-hover) !important;
 }
 
 .dark table,
 .dark thead,
 .dark tbody,
 .dark tr {
-    border-color: #334155 !important;
+    border-color: var(--border-light) !important;
 }
 
 .dark tr.hover\:bg-gray-50:hover,
 .dark tr.hover\:bg-slate-50:hover {
-    background-color: rgba(30, 41, 59, 0.72) !important;
+    background-color: color-mix(in srgb, var(--surface-control-hover) 78%, transparent) !important;
 }
 
 .dark .prose,
