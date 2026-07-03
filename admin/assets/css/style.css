@@ -74,15 +74,14 @@ body {
     align-items: center;
     justify-content: center;
     background:
-        radial-gradient(circle at 22% 16%, rgba(94, 234, 212, 0.26), transparent 30%),
-        radial-gradient(circle at 82% 10%, rgba(167, 139, 250, 0.2), transparent 28%),
-        radial-gradient(circle at 70% 88%, rgba(251, 191, 36, 0.16), transparent 30%),
-        color-mix(in srgb, var(--page-bg) 92%, rgba(255, 255, 255, 0.34));
-    backdrop-filter: blur(26px) saturate(1.35);
-    -webkit-backdrop-filter: blur(26px) saturate(1.35);
+        radial-gradient(circle at 22% 16%, rgba(94, 234, 212, 0.16), transparent 28%),
+        radial-gradient(circle at 82% 10%, rgba(167, 139, 250, 0.12), transparent 26%),
+        color-mix(in srgb, var(--page-bg) 86%, rgba(255, 255, 255, 0.28));
+    backdrop-filter: blur(14px) saturate(1.18);
+    -webkit-backdrop-filter: blur(14px) saturate(1.18);
     opacity: 1;
     visibility: visible;
-    transition: opacity 480ms ease, visibility 480ms ease;
+    transition: opacity 260ms ease, visibility 260ms ease;
 }
 
 .admin-page-loader--hidden {
@@ -91,20 +90,20 @@ body {
 }
 
 .admin-coffee-loader {
-    width: min(360px, calc(100vw - 40px));
-    min-height: 340px;
+    width: min(250px, calc(100vw - 32px));
+    min-height: 238px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    padding: 34px;
-    border-radius: 30px;
+    gap: 12px;
+    padding: 22px;
+    border-radius: 22px;
     color: var(--brand-primary);
     background:
-        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 74%, transparent), color-mix(in srgb, var(--liquid-glass) 92%, transparent));
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 58%, transparent), color-mix(in srgb, var(--liquid-glass) 82%, transparent));
     border: 1px solid var(--liquid-stroke);
-    box-shadow: var(--liquid-shadow);
+    box-shadow: 0 18px 42px rgba(15, 49, 58, 0.14), inset 0 1px 0 var(--liquid-inner-stroke);
     position: relative;
     overflow: hidden;
 }
@@ -122,10 +121,10 @@ body {
 }
 
 .admin-coffee-loader__svg {
-    width: min(250px, 70vw);
+    width: min(170px, 58vw);
     height: auto;
     color: color-mix(in srgb, var(--brand-primary) 72%, var(--brand-secondary));
-    filter: drop-shadow(0 24px 36px color-mix(in srgb, var(--brand-primary) 18%, transparent));
+    filter: drop-shadow(0 14px 22px color-mix(in srgb, var(--brand-primary) 14%, transparent));
     position: relative;
     z-index: 1;
 }
@@ -139,39 +138,39 @@ body {
 .admin-coffee-loader__copy span {
     display: block;
     color: var(--text-muted);
-    font-size: 0.68rem;
+    font-size: 0.58rem;
     font-weight: 900;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.24em;
 }
 
 .admin-coffee-loader__copy strong {
     display: block;
-    margin-top: 6px;
+    margin-top: 4px;
     color: var(--text-dark);
-    font-size: 1.05rem;
+    font-size: 0.86rem;
     font-weight: 900;
     letter-spacing: 0.02em;
 }
 
 .admin-coffee-loader__pot {
     transform-origin: 108px 80px;
-    animation: adminCoffeePotTilt 1.8s ease-in-out infinite;
+    animation: adminCoffeePotTilt 1.35s ease-in-out infinite;
 }
 
 .admin-coffee-loader__pour {
     stroke-dasharray: 92;
     stroke-dashoffset: 92;
-    animation: adminCoffeePour 1.8s ease-in-out infinite;
+    animation: adminCoffeePour 1.35s ease-in-out infinite;
 }
 
 .admin-coffee-loader__fill {
     transform-origin: center bottom;
-    animation: adminCoffeeFill 1.8s ease-in-out infinite;
+    animation: adminCoffeeFill 1.35s ease-in-out infinite;
 }
 
 .admin-coffee-loader__steam path {
     opacity: 0;
-    animation: adminCoffeeSteam 2s ease-in-out infinite;
+    animation: adminCoffeeSteam 1.55s ease-in-out infinite;
 }
 
 .admin-coffee-loader__steam path:nth-child(2) {
@@ -510,8 +509,14 @@ th {
     }
 
     .admin-coffee-loader {
-        min-height: 300px;
-        padding: 24px;
+        width: min(220px, calc(100vw - 28px));
+        min-height: 212px;
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .admin-coffee-loader__svg {
+        width: min(148px, 54vw);
     }
 }
 

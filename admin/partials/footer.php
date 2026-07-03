@@ -10,8 +10,8 @@
             loader.classList.add('admin-page-loader--hidden');
             window.setTimeout(function () {
                 loader.remove();
-            }, 520);
-        }, 260);
+            }, 300);
+        }, 120);
     });
 </script>
 </body>
