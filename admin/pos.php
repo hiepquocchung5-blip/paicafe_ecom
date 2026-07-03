@@ -23,6 +23,15 @@ $tailwind_css = load_tailwind_css([
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PAICAFE POS | Terminal</title>
+    <script>
+        (function () {
+            const storedTheme = localStorage.getItem('paicafe-theme') || localStorage.getItem('darkMode');
+            const useDark = storedTheme === 'dark' || storedTheme === 'true' || (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', useDark);
+            document.documentElement.classList.toggle('light', !useDark);
+            document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
+        })();
+    </script>
     <style><?= $tailwind_css ?></style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -31,14 +40,44 @@ $tailwind_css = load_tailwind_css([
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            color-scheme: light;
+            --pos-bg: #edf7f4;
+            --pos-text: #14323a;
+            --pos-muted: #64748b;
+            --pos-faint: #8aa0a8;
+            --pos-border: rgba(21, 94, 117, 0.16);
+            --pos-panel: linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(232, 247, 243, 0.7));
+            --pos-card: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(242, 251, 248, 0.72));
+            --pos-soft: rgba(255, 255, 255, 0.62);
+            --pos-rail: rgba(230, 248, 244, 0.76);
+            --pos-field: rgba(255, 255, 255, 0.78);
+            --pos-shadow: 0 24px 70px rgba(15, 76, 91, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .dark {
+            color-scheme: dark;
+            --pos-bg: #061113;
+            --pos-text: #f8fafc;
+            --pos-muted: #94a3b8;
+            --pos-faint: #64748b;
+            --pos-border: rgba(184, 222, 226, 0.18);
+            --pos-panel: linear-gradient(145deg, rgba(20, 48, 58, 0.72), rgba(13, 31, 38, 0.58));
+            --pos-card: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03));
+            --pos-soft: rgba(255, 255, 255, 0.055);
+            --pos-rail: rgba(10, 26, 32, 0.8);
+            --pos-field: rgba(255, 255, 255, 0.055);
+            --pos-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             background:
                 radial-gradient(circle at 18% 10%, rgba(94, 234, 212, 0.18), transparent 26%),
                 radial-gradient(circle at 82% 16%, rgba(167, 139, 250, 0.16), transparent 28%),
                 radial-gradient(circle at 78% 92%, rgba(251, 191, 36, 0.12), transparent 28%),
-                #061113;
-            color: #f8fafc;
+                var(--pos-bg);
+            color: var(--pos-text);
             overflow: hidden;
         }
 
@@ -46,17 +85,16 @@ $tailwind_css = load_tailwind_css([
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
 
         .glass-panel {
-            background:
-                linear-gradient(145deg, rgba(20, 48, 58, 0.72), rgba(13, 31, 38, 0.58));
+            background: var(--pos-panel);
             backdrop-filter: blur(24px) saturate(1.42);
             -webkit-backdrop-filter: blur(24px) saturate(1.42);
-            border: 1px solid rgba(184, 222, 226, 0.18);
-            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--pos-border);
+            box-shadow: var(--pos-shadow);
         }
 
         .product-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03));
-            border: 1px solid rgba(184, 222, 226, 0.14);
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -67,11 +105,18 @@ $tailwind_css = load_tailwind_css([
         }
 
         .soft-panel {
-            background: rgba(255, 255, 255, 0.055);
-            border: 1px solid rgba(184, 222, 226, 0.12);
+            background: var(--pos-soft);
+            border: 1px solid var(--pos-border);
             backdrop-filter: blur(18px) saturate(1.24);
             -webkit-backdrop-filter: blur(18px) saturate(1.24);
         }
+
+        .pos-rail { background: var(--pos-rail); }
+        .pos-field { background: var(--pos-field) !important; border-color: var(--pos-border) !important; }
+        .pos-muted { color: var(--pos-muted) !important; }
+        .pos-faint { color: var(--pos-faint) !important; }
+        .pos-shell { min-height: 100svh; height: 100svh; }
+        .pos-checkout { width: min(420px, 100%); }
 
         .touch-button {
             min-height: 44px;
@@ -100,8 +145,52 @@ $tailwind_css = load_tailwind_css([
             justify-content: center; 
         }
 
-        @media (max-width: 1024px) and (orientation: portrait) {
-            #rotate-overlay { display: flex; }
+        .orientation-hint { display: none; }
+
+        .light .pos-page .text-white { color: var(--pos-text) !important; }
+        .light .pos-page .text-slate-200,
+        .light .pos-page .text-slate-300,
+        .light .pos-page .text-slate-400 { color: var(--pos-muted) !important; }
+        .light .pos-page .bg-slate-800 { background-color: rgba(15, 76, 91, 0.1) !important; }
+        .light .pos-page .bg-black\/20 { background-color: rgba(15, 76, 91, 0.08) !important; }
+        .light .pos-page .active-category,
+        .light .pos-page .bg-orange-600,
+        .light .pos-page .bg-red-600,
+        .light .pos-page .hover\:bg-red-500:hover,
+        .light .pos-page .hover\:bg-teal-500:hover,
+        .light .pos-page .group:hover .group-hover\:text-white,
+        .light .pos-page .voucher-print-area .text-white { color: #ffffff !important; }
+        .light .pos-page .voucher-print-area,
+        .light .pos-page .voucher-print-area .text-slate-900 { color: #0f172a !important; }
+
+        @media (max-width: 1279px) {
+            body { overflow: auto; }
+            .pos-shell { height: auto; min-height: 100svh; overflow: visible; }
+            .pos-layout { flex-direction: column; overflow: visible; }
+            .pos-products { border-right: 0; min-height: 62svh; }
+            .pos-checkout { width: 100%; min-height: 520px; }
+            .pos-product-scroll { min-height: 420px; }
+        }
+
+        @media (max-width: 768px) {
+            .orientation-hint { display: flex; }
+            .pos-shell { padding: 0.625rem; }
+            .pos-header { gap: 0.75rem; align-items: stretch; }
+            .pos-header-actions { width: 100%; flex-wrap: wrap; gap: 0.5rem; }
+            .pos-search { flex: 1 1 100%; width: 100%; }
+            .pos-search input { width: 100%; }
+            .pos-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+            .pos-section-pad { padding-left: 1rem; padding-right: 1rem; }
+            .pos-checkout { border-radius: 1.35rem; }
+            .pos-payment-panel { left: 0; max-width: none; }
+            .pos-payment-panel .p-8 { padding: 1rem; }
+            .pos-payment-panel .text-6xl { font-size: 2.35rem; line-height: 1; }
+            .pos-payment-panel .rounded-\[2\.5rem\] { border-radius: 1.25rem; }
+        }
+
+        @media (max-width: 420px) {
+            .pos-product-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .pos-total { font-size: 1.85rem; }
         }
 
         @media print {
@@ -113,7 +202,7 @@ $tailwind_css = load_tailwind_css([
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="h-full" x-data="posSystem(<?= htmlspecialchars(json_encode($categories)) ?>, <?= $tax_rate ?>)">
+<body class="h-full pos-page" x-data="posSystem(<?= htmlspecialchars(json_encode($categories)) ?>, <?= $tax_rate ?>)">
     
     <!-- ROTATE NOTIFICATION -->
     <div id="rotate-overlay" class="text-center p-10">
@@ -125,12 +214,13 @@ $tailwind_css = load_tailwind_css([
     </div>
 
     <!-- MAIN POS INTERFACE -->
-    <div class="flex h-full overflow-hidden">
+    <div class="pos-shell flex h-full overflow-hidden p-3 sm:p-4 lg:p-6">
+    <div class="pos-layout flex h-full overflow-hidden w-full gap-4">
         
         <!-- LEFT: PRODUCT GRID -->
-        <div class="flex-1 flex flex-col min-w-0 border-r border-white/5">
+        <div class="pos-products flex-1 flex flex-col min-w-0 border-r border-white/5 glass-panel overflow-hidden">
             <!-- Header -->
-            <header class="glass-panel px-6 py-4 flex items-center justify-between no-print">
+            <header class="pos-header px-4 sm:px-6 py-4 flex items-center justify-between flex-wrap no-print border-b border-white/5">
                 <div class="flex items-center space-x-4">
                     <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/20">
                         <i class="fas fa-terminal text-white"></i>
@@ -141,25 +231,32 @@ $tailwind_css = load_tailwind_css([
                     </div>
                 </div>
                 
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
+                <div class="pos-header-actions flex items-center gap-2 sm:gap-4">
+                    <div class="orientation-hint items-center gap-2 rounded-xl bg-orange-500/10 border border-orange-500/20 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-orange-500">
+                        <i class="fas fa-mobile-screen"></i>
+                        <span>Mobile fit</span>
+                    </div>
+                    <div class="pos-search relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                         <input type="text" x-model.debounce.300ms="searchTerm" placeholder="Search product..." 
-                               class="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50 w-64 transition-all">
+                               class="pos-field border rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50 w-64 transition-all">
                     </div>
-                    <button @click="showHeldOrders = true" class="relative h-10 px-4 flex items-center gap-2 rounded-xl bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest">
+                    <button @click="showHeldOrders = true" class="relative h-10 px-4 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest">
                         <i class="fas fa-inbox"></i>
                         <span>Held</span>
                         <span x-show="heldOrders.length" x-text="heldOrders.length" class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center"></span>
                     </button>
-                    <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                    <button @click="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl soft-panel text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Toggle color theme" title="Toggle theme">
+                        <i class="fas" :class="darkMode ? 'fa-sun text-yellow-400' : 'fa-moon text-blue-500'"></i>
+                    </button>
+                    <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl soft-panel text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Back office" title="Back office">
                         <i class="fas fa-house-user"></i>
                     </a>
                 </div>
             </header>
 
             <!-- Categories -->
-            <div class="bg-slate-900/50 border-b border-white/5 px-6 py-3 no-print">
+            <div class="pos-rail border-b border-white/5 px-4 sm:px-6 py-3 no-print">
                 <div class="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-1">
                     <button @click="selectedCategory = 'All'" 
                             :class="selectedCategory === 'All' ? 'active-category' : 'bg-white/5 text-slate-400 hover:bg-white/10'"
@@ -177,7 +274,7 @@ $tailwind_css = load_tailwind_css([
             </div>
 
             <!-- Favorites / Quick Picks -->
-            <div x-show="favoriteProducts.length" class="bg-[#0a1a20]/80 border-b border-white/5 px-6 py-3 no-print">
+            <div x-show="favoriteProducts.length" class="pos-rail border-b border-white/5 px-4 sm:px-6 py-3 no-print">
                 <div class="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
                     <span class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-300 flex-shrink-0">Quick Picks</span>
                     <template x-for="product in favoriteProducts" :key="'fav-' + product.id">
@@ -191,7 +288,7 @@ $tailwind_css = load_tailwind_css([
             </div>
 
             <!-- Products Grid -->
-            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#061113]/35">
+            <main class="pos-product-scroll flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
                 <div x-show="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
                     <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-orange-600"></i>
                     <p class="font-mono text-xs uppercase tracking-widest">Loading menu items...</p>
@@ -202,7 +299,7 @@ $tailwind_css = load_tailwind_css([
                     <p class="font-mono text-xs uppercase tracking-widest">No matching products found.</p>
                 </div>
 
-                <div x-show="!loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div x-show="!loading" class="pos-product-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
                     <template x-for="product in filteredProducts" :key="product.id">
                         <div @click="addToCart(product)" 
                              class="product-card group rounded-2xl p-3 cursor-pointer flex flex-col relative overflow-hidden">
@@ -239,9 +336,9 @@ $tailwind_css = load_tailwind_css([
         </div>
 
         <!-- RIGHT: CHECKOUT SIDEBAR -->
-        <div class="w-[420px] flex flex-col glass-panel shadow-2xl z-20">
+        <div class="pos-checkout flex flex-col glass-panel shadow-2xl z-20 overflow-hidden">
             <!-- Header -->
-            <div class="p-6 border-b border-white/5 bg-white/[0.02]">
+            <div class="p-4 sm:p-6 border-b border-white/5 bg-white/[0.02]">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-black text-white tracking-tight uppercase">Current Order</h2>
@@ -260,7 +357,7 @@ $tailwind_css = load_tailwind_css([
                 </div>
             </div>
 
-            <div class="px-6 pt-5 no-print">
+            <div class="px-4 sm:px-6 pt-5 no-print">
                 <div class="grid grid-cols-2 gap-3">
                     <button @click="orderMode = 'takeaway'" :class="orderMode === 'takeaway' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
                         <i class="fas fa-bag-shopping mr-2"></i>Takeaway
@@ -272,7 +369,7 @@ $tailwind_css = load_tailwind_css([
             </div>
 
             <!-- Cart Items -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
                 <template x-if="Object.keys(cart).length === 0">
                     <div class="h-full flex flex-col items-center justify-center text-slate-600 text-center opacity-40">
                         <i class="fas fa-shopping-basket text-5xl mb-4"></i>
@@ -307,11 +404,11 @@ $tailwind_css = load_tailwind_css([
             </div>
 
             <!-- Footer / Totals -->
-            <div class="p-6 bg-[#0a1a20]/90 border-t border-white/5 space-y-4 no-print">
+            <div class="p-4 sm:p-6 pos-rail border-t border-white/5 space-y-4 no-print">
                 <div>
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Order Label</label>
                     <input type="text" x-model="orderLabel" placeholder="Name, table, or short note" 
-                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-orange-500/50 focus:outline-none transition-all">
+                           class="w-full pos-field border rounded-2xl px-4 py-3 text-sm text-white focus:border-orange-500/50 focus:outline-none transition-all">
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-xs font-bold">
@@ -333,7 +430,7 @@ $tailwind_css = load_tailwind_css([
                 <div class="pt-4 border-t border-white/5 flex justify-between items-end">
                     <div>
                         <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-1">Payable Total</p>
-                        <h3 class="text-4xl font-black text-white tracking-tighter leading-none" x-text="formatCurrency(totals.final)"></h3>
+                        <h3 class="pos-total text-4xl font-black text-white tracking-tighter leading-none" x-text="formatCurrency(totals.final)"></h3>
                     </div>
                     <button @click="openPaymentModal = true" 
                             :disabled="Object.keys(cart).length === 0" 
@@ -344,11 +441,12 @@ $tailwind_css = load_tailwind_css([
             </div>
         </div>
     </div>
+    </div>
     
     <!-- PAYMENT MODAL -->
     <div x-show="openPaymentModal" x-cloak class="fixed inset-0 z-[100] no-print">
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" @click="openPaymentModal = false"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#061113] shadow-2xl border-l border-white/5 flex flex-col">
+        <div class="pos-payment-panel absolute right-0 top-0 bottom-0 w-full max-w-xl glass-panel shadow-2xl border-l border-white/5 flex flex-col">
             
             <div class="p-8 border-b border-white/5 flex items-center justify-between">
                 <h2 class="text-2xl font-black text-white tracking-tight uppercase">Checkout</h2>
@@ -372,7 +470,7 @@ $tailwind_css = load_tailwind_css([
                             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Customer Phone</label>
                             <div class="relative">
                                 <input type="tel" x-model="customerPhone" placeholder="09..." 
-                                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all">
+                                       class="w-full pos-field border rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all">
                                 <button @click="findCustomer()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Verify</button>
                             </div>
                             <p x-text="customerMessage" class="text-[10px] mt-2 font-bold px-2" :class="customerName ? 'text-emerald-500' : 'text-slate-500'"></p>
@@ -382,7 +480,7 @@ $tailwind_css = load_tailwind_css([
                             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Voucher Code</label>
                             <div class="relative">
                                 <input type="text" x-model="couponCode" placeholder="Enter code..." 
-                                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all uppercase">
+                                       class="w-full pos-field border rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all uppercase">
                                 <button @click="applyCoupon()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Apply</button>
                             </div>
                             <p x-text="couponMessage" class="text-[10px] mt-2 font-bold px-2" :class="couponDiscount > 0 ? 'text-emerald-500' : 'text-red-500'"></p>
@@ -411,10 +509,10 @@ $tailwind_css = load_tailwind_css([
 
                         <div x-show="paymentMethod === 'Cash'" x-transition>
                             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Cash Received</label>
-                            <input type="number" x-model.number="amountTendered" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-2xl font-black mb-4 focus:outline-none">
+                            <input type="number" x-model.number="amountTendered" class="w-full pos-field border rounded-2xl px-5 py-4 text-white text-2xl font-black mb-4 focus:outline-none">
                             <div class="grid grid-cols-4 gap-2">
                                 <template x-for="val in [5000, 10000, 20000]">
-                                    <button @click="amountTendered = val" class="py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black hover:bg-white/10 transition-all" x-text="val.toLocaleString()"></button>
+                                    <button @click="amountTendered = val" class="py-2 rounded-xl soft-panel text-[10px] font-black hover:bg-white/10 transition-all" x-text="val.toLocaleString()"></button>
                                 </template>
                                 <button @click="amountTendered = totals.final" class="py-2 rounded-xl bg-orange-600/20 border border-orange-600/30 text-orange-500 text-[10px] font-black">EXACT</button>
                             </div>
@@ -551,11 +649,16 @@ $tailwind_css = load_tailwind_css([
             couponCode: '', couponDiscount: 0, couponMessage: '',
             orderLabel: '', orderMode: 'takeaway', showHeldOrders: false, heldOrders: [],
             favoriteProductIds: [],
+            darkMode: document.documentElement.classList.contains('dark'),
             
             init() {
+                this.darkMode = document.documentElement.classList.contains('dark');
                 this.loadHeldOrders();
                 this.loadFavorites();
                 this.fetchProducts();
+                window.addEventListener('paicafe-theme-change', (event) => {
+                    this.darkMode = Boolean(event.detail && event.detail.dark);
+                });
                 window.addEventListener('keydown', (event) => {
                     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
                         event.preventDefault();
@@ -570,6 +673,20 @@ $tailwind_css = load_tailwind_css([
                         this.openPaymentModal = true;
                     }
                 });
+            },
+
+            applyTheme(useDark) {
+                document.documentElement.classList.toggle('dark', useDark);
+                document.documentElement.classList.toggle('light', !useDark);
+                document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
+                localStorage.setItem('paicafe-theme', useDark ? 'dark' : 'light');
+                localStorage.setItem('darkMode', useDark ? 'true' : 'false');
+                this.darkMode = useDark;
+                window.dispatchEvent(new CustomEvent('paicafe-theme-change', { detail: { dark: useDark } }));
+            },
+
+            toggleTheme() {
+                this.applyTheme(!this.darkMode);
             },
             
             fetchProducts() { 
