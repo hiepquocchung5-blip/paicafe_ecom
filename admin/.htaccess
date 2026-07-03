@@ -8,6 +8,10 @@
     # Set the base directory for all admin rewrites
     RewriteBase /admin/
 
+    # Support admin subdomain deployments where /admin/assets/* is requested
+    # even though this directory is already the admin document root.
+    RewriteRule ^admin/assets/(.*)$ assets/$1 [L]
+
     # Prevent direct access to partial files like header.php, footer.php, etc.
     RewriteRule ^partials/ - [F,L]
     RewriteRule ^_order_table_content\.php$ - [F,L]

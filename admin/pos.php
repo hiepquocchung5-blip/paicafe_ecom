@@ -12,6 +12,17 @@ $categories_stmt = $pdo->query("SELECT name_en FROM categories ORDER BY name_en 
 $categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
 // Fetch tax rate
 $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
+$tailwind_css_candidates = [
+    __DIR__ . '/assets/css/tailwind.css',
+    dirname(__DIR__) . '/assets/css/tailwind.css',
+];
+$tailwind_css = '';
+foreach ($tailwind_css_candidates as $tailwind_css_path) {
+    if (is_readable($tailwind_css_path)) {
+        $tailwind_css = file_get_contents($tailwind_css_path);
+        break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full">
@@ -19,7 +30,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PAICAFE POS | Terminal</title>
-    <link rel="stylesheet" href="/admin/assets/css/tailwind.css">
+    <style><?= $tailwind_css ?></style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -173,7 +184,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             </div>
 
             <!-- Favorites / Quick Picks -->
-            <div x-show="favoriteProducts.length" class="bg-[#1b1411]/80 border-b border-white/5 px-6 py-3 no-print">
+            <div x-show="favoriteProducts.length" class="bg-[#0a1a20]/80 border-b border-white/5 px-6 py-3 no-print">
                 <div class="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
                     <span class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-300 flex-shrink-0">Quick Picks</span>
                     <template x-for="product in favoriteProducts" :key="'fav-' + product.id">
@@ -187,7 +198,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             </div>
 
             <!-- Products Grid -->
-            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#140e0c]/35">
+            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#061113]/35">
                 <div x-show="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
                     <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-orange-600"></i>
                     <p class="font-mono text-xs uppercase tracking-widest">Loading menu items...</p>
@@ -303,7 +314,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             </div>
 
             <!-- Footer / Totals -->
-            <div class="p-6 bg-[#1b1411]/90 border-t border-white/5 space-y-4 no-print">
+            <div class="p-6 bg-[#0a1a20]/90 border-t border-white/5 space-y-4 no-print">
                 <div>
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Order Label</label>
                     <input type="text" x-model="orderLabel" placeholder="Name, table, or short note" 
@@ -344,7 +355,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
     <!-- PAYMENT MODAL -->
     <div x-show="openPaymentModal" x-cloak class="fixed inset-0 z-[100] no-print">
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" @click="openPaymentModal = false"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#140e0c] shadow-2xl border-l border-white/5 flex flex-col">
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#061113] shadow-2xl border-l border-white/5 flex flex-col">
             
             <div class="p-8 border-b border-white/5 flex items-center justify-between">
                 <h2 class="text-2xl font-black text-white tracking-tight uppercase">Checkout</h2>
