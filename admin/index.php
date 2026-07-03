@@ -149,16 +149,19 @@ if ($hour < 12) {
     }
 
     .premium-glass {
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(16px) saturate(120%);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.05);
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 76%, transparent), color-mix(in srgb, var(--liquid-glass) 92%, transparent));
+        backdrop-filter: blur(24px) saturate(142%);
+        -webkit-backdrop-filter: blur(24px) saturate(142%);
+        border: 1px solid var(--liquid-stroke);
+        box-shadow: var(--liquid-shadow);
     }
 
     .dark .premium-glass {
-        background: rgba(15, 23, 42, 0.45);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 76%, transparent), color-mix(in srgb, var(--liquid-glass) 92%, transparent));
+        border: 1px solid var(--liquid-stroke);
+        box-shadow: var(--liquid-shadow);
     }
 
     .glass-card-hover {
@@ -167,15 +170,17 @@ if ($hour < 12) {
 
     .glass-card-hover:hover {
         transform: translateY(-4px);
-        background: rgba(255, 255, 255, 0.7);
-        border-color: rgba(234, 88, 12, 0.35);
-        box-shadow: 0 20px 40px -10px rgba(234, 88, 12, 0.12);
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 88%, transparent), color-mix(in srgb, var(--liquid-glass) 96%, transparent));
+        border-color: color-mix(in srgb, var(--brand-primary) 42%, var(--liquid-stroke));
+        box-shadow: 0 30px 90px rgba(15, 118, 110, 0.18), var(--liquid-shadow);
     }
 
     .dark .glass-card-hover:hover {
-        background: rgba(30, 41, 59, 0.6);
-        border-color: rgba(234, 88, 12, 0.4);
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 88%, transparent), color-mix(in srgb, var(--liquid-glass) 96%, transparent));
+        border-color: color-mix(in srgb, var(--brand-secondary) 44%, var(--liquid-stroke));
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.38), var(--liquid-shadow);
     }
 
     /* Glows for specific cards */
@@ -892,4 +897,3 @@ function dashboardNotifications() {
 <?php endif; ?>
 
 <?php include 'partials/footer.php'; ?>
-

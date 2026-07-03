@@ -3,6 +3,10 @@ require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_admin_login();
 
+if (!has_permission('use_pos')) {
+    die('Access Denied. You do not have permission to use the POS terminal.');
+}
+
 // Fetch categories for the filter buttons
 $categories_stmt = $pdo->query("SELECT name_en FROM categories ORDER BY name_en ASC");
 $categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -25,43 +29,67 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0f172a;
+            background:
+                radial-gradient(circle at 18% 10%, rgba(94, 234, 212, 0.18), transparent 26%),
+                radial-gradient(circle at 82% 16%, rgba(167, 139, 250, 0.16), transparent 28%),
+                radial-gradient(circle at 78% 92%, rgba(251, 191, 36, 0.12), transparent 28%),
+                #061113;
             color: #f8fafc;
             overflow: hidden;
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
 
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background:
+                linear-gradient(145deg, rgba(20, 48, 58, 0.72), rgba(13, 31, 38, 0.58));
+            backdrop-filter: blur(24px) saturate(1.42);
+            -webkit-backdrop-filter: blur(24px) saturate(1.42);
+            border: 1px solid rgba(184, 222, 226, 0.18);
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         .product-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(184, 222, 226, 0.14);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .product-card:hover {
-            background: rgba(234, 88, 12, 0.1);
-            border-color: rgba(234, 88, 12, 0.4);
+            background: rgba(94, 234, 212, 0.1);
+            border-color: rgba(94, 234, 212, 0.4);
             transform: translateY(-2px);
         }
 
+        .soft-panel {
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(184, 222, 226, 0.12);
+            backdrop-filter: blur(18px) saturate(1.24);
+            -webkit-backdrop-filter: blur(18px) saturate(1.24);
+        }
+
+        .touch-button {
+            min-height: 44px;
+        }
+
         .active-category {
-            background: #ea580c !important;
+            background: linear-gradient(135deg, #0f766e, #7c3aed) !important;
             color: white !important;
-            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+            box-shadow: 0 4px 16px rgba(20, 184, 166, 0.28);
+        }
+
+        .active-mode {
+            background: rgba(94, 234, 212, 0.16) !important;
+            color: #99f6e4 !important;
+            border-color: rgba(94, 234, 212, 0.36) !important;
         }
 
         #rotate-overlay { 
             display: none; 
             position: fixed; 
             inset: 0; 
-            background: #0f172a; 
+            background: #061113; 
             z-index: 1000; 
             flex-direction: column; 
             align-items: center; 
@@ -104,8 +132,8 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                         <i class="fas fa-terminal text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-black tracking-tighter text-white">POS TERMINAL</h1>
-                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Node_01 Active</p>
+                        <h1 class="text-lg font-black tracking-tighter text-white">Counter POS</h1>
+                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Ready for orders</p>
                     </div>
                 </div>
                 
@@ -115,6 +143,11 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                         <input type="text" x-model.debounce.300ms="searchTerm" placeholder="Search product..." 
                                class="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50 w-64 transition-all">
                     </div>
+                    <button @click="showHeldOrders = true" class="relative h-10 px-4 flex items-center gap-2 rounded-xl bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest">
+                        <i class="fas fa-inbox"></i>
+                        <span>Held</span>
+                        <span x-show="heldOrders.length" x-text="heldOrders.length" class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center"></span>
+                    </button>
                     <a href="index.php" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
                         <i class="fas fa-house-user"></i>
                     </a>
@@ -139,16 +172,30 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 </div>
             </div>
 
+            <!-- Favorites / Quick Picks -->
+            <div x-show="favoriteProducts.length" class="bg-[#1b1411]/80 border-b border-white/5 px-6 py-3 no-print">
+                <div class="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-300 flex-shrink-0">Quick Picks</span>
+                    <template x-for="product in favoriteProducts" :key="'fav-' + product.id">
+                        <button @click="addToCart(product)"
+                                class="touch-button flex items-center gap-3 rounded-2xl soft-panel px-3 py-2 hover:border-orange-500/40 hover:bg-orange-500/10 transition-all flex-shrink-0">
+                            <img :src="product.image || '/assets/uploads/placeholder.png'" class="w-9 h-9 rounded-xl object-cover" alt="">
+                            <span class="text-xs font-bold text-slate-100 max-w-32 truncate" x-text="product.name_en"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
             <!-- Products Grid -->
-            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#0f172a]/50">
+            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#140e0c]/35">
                 <div x-show="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
                     <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-orange-600"></i>
-                    <p class="font-mono text-xs uppercase tracking-widest">Initializing Inventory...</p>
+                    <p class="font-mono text-xs uppercase tracking-widest">Loading menu items...</p>
                 </div>
 
                 <div x-show="!loading && filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full text-slate-600">
                     <i class="fas fa-box-open text-5xl mb-4 opacity-20"></i>
-                    <p class="font-mono text-xs uppercase tracking-widest">No matching assets found.</p>
+                    <p class="font-mono text-xs uppercase tracking-widest">No matching products found.</p>
                 </div>
 
                 <div x-show="!loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -188,13 +235,34 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
         </div>
 
         <!-- RIGHT: CHECKOUT SIDEBAR -->
-        <div class="w-[400px] flex flex-col glass-panel shadow-2xl z-20">
+        <div class="w-[420px] flex flex-col glass-panel shadow-2xl z-20">
             <!-- Header -->
             <div class="p-6 border-b border-white/5 bg-white/[0.02]">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-black text-white tracking-tight uppercase">Current Tray</h2>
-                    <button @click="resetOrder()" class="text-[10px] font-black text-slate-500 hover:text-red-500 uppercase tracking-widest transition-colors">
-                        Clear Tray
+                    <div>
+                        <h2 class="text-xl font-black text-white tracking-tight uppercase">Current Order</h2>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                            <span x-text="cartItemCount"></span> items selected
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button @click="holdCurrentOrder()" :disabled="Object.keys(cart).length === 0" class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-300 hover:bg-teal-500 hover:text-white disabled:opacity-30 transition-all" title="Hold order">
+                            <i class="fas fa-pause text-xs"></i>
+                        </button>
+                        <button @click="resetOrder()" class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all" title="Clear order">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 pt-5 no-print">
+                <div class="grid grid-cols-2 gap-3">
+                    <button @click="orderMode = 'takeaway'" :class="orderMode === 'takeaway' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                        <i class="fas fa-bag-shopping mr-2"></i>Takeaway
+                    </button>
+                    <button @click="orderMode = 'dine_in'" :class="orderMode === 'dine_in' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                        <i class="fas fa-mug-hot mr-2"></i>Dine In
                     </button>
                 </div>
             </div>
@@ -204,7 +272,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 <template x-if="Object.keys(cart).length === 0">
                     <div class="h-full flex flex-col items-center justify-center text-slate-600 text-center opacity-40">
                         <i class="fas fa-shopping-basket text-5xl mb-4"></i>
-                        <p class="text-xs font-mono uppercase tracking-widest leading-loose">Waiting for input...<br>Scan or select product.</p>
+                        <p class="text-xs font-mono uppercase tracking-widest leading-loose">No items yet.<br>Select a product to start.</p>
                     </div>
                 </template>
 
@@ -235,7 +303,12 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             </div>
 
             <!-- Footer / Totals -->
-            <div class="p-6 bg-slate-900/80 border-t border-white/5 space-y-4 no-print">
+            <div class="p-6 bg-[#1b1411]/90 border-t border-white/5 space-y-4 no-print">
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Order Label</label>
+                    <input type="text" x-model="orderLabel" placeholder="Name, table, or short note" 
+                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-orange-500/50 focus:outline-none transition-all">
+                </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-xs font-bold">
                         <span class="text-slate-500 uppercase tracking-widest">Subtotal</span>
@@ -271,10 +344,10 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
     <!-- PAYMENT MODAL -->
     <div x-show="openPaymentModal" x-cloak class="fixed inset-0 z-[100] no-print">
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" @click="openPaymentModal = false"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#0f172a] shadow-2xl border-l border-white/5 flex flex-col">
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-[#140e0c] shadow-2xl border-l border-white/5 flex flex-col">
             
             <div class="p-8 border-b border-white/5 flex items-center justify-between">
-                <h2 class="text-2xl font-black text-white tracking-tight uppercase">Checkout Terminal</h2>
+                <h2 class="text-2xl font-black text-white tracking-tight uppercase">Checkout</h2>
                 <button @click="openPaymentModal = false" class="text-slate-500 hover:text-white transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -283,7 +356,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             <div class="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
                 <!-- Total Display -->
                 <div class="text-center p-8 bg-white/[0.02] rounded-[2.5rem] border border-white/5">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Total Amount Due</p>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Customer Pays</p>
                     <h3 class="text-6xl font-black text-white tracking-tighter" x-text="formatCurrency(totals.final)"></h3>
                 </div>
 
@@ -356,9 +429,49 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 <button @click="submitOrder()" 
                         :disabled="processing || (paymentMethod === 'Cash' && (amountTendered === null || amountTendered < totals.final))"
                         class="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-30 text-white py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-orange-600/20 transition-all flex items-center justify-center space-x-3">
-                    <span x-show="!processing">Authorize Transaction</span>
+                    <span x-show="!processing">Complete Sale</span>
                     <i x-show="processing" class="fas fa-circle-notch fa-spin"></i>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELD ORDERS MODAL -->
+    <div x-show="showHeldOrders" x-cloak class="fixed inset-0 z-[150] no-print">
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-xl" @click="showHeldOrders = false"></div>
+        <div class="absolute left-1/2 top-1/2 w-[min(680px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] glass-panel overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-black uppercase tracking-tight text-white">Held Orders</h2>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Pause a sale, serve another customer, then recall it.</p>
+                </div>
+                <button @click="showHeldOrders = false" class="w-10 h-10 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="max-h-[60vh] overflow-y-auto custom-scrollbar p-4 space-y-3">
+                <template x-if="heldOrders.length === 0">
+                    <div class="p-12 text-center text-slate-500">
+                        <i class="fas fa-inbox text-4xl opacity-30 mb-4"></i>
+                        <p class="text-xs font-black uppercase tracking-widest">No held orders</p>
+                    </div>
+                </template>
+                <template x-for="order in heldOrders" :key="order.id">
+                    <div class="soft-panel rounded-2xl p-4 flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <p class="text-sm font-black text-white truncate" x-text="order.label || 'Counter order'"></p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                                <span x-text="order.itemCount"></span> items · <span x-text="formatCurrency(order.total)"></span> · <span x-text="order.time"></span>
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button @click="recallHeldOrder(order.id)" class="px-4 py-3 rounded-xl bg-teal-500/15 text-teal-300 hover:bg-teal-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all">Recall</button>
+                            <button @click="deleteHeldOrder(order.id)" class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -375,6 +488,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                     <h2 class="text-2xl font-black tracking-tighter">PAICAFE ONLINE</h2>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Transaction Receipt</p>
                     <p class="text-[10px] font-mono text-slate-500 mt-4">Order #<span x-text="receiptDetails.orderId" class="text-slate-900 font-bold"></span></p>
+                    <p x-show="receiptDetails.label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1" x-text="receiptDetails.label"></p>
                 </div>
                 
                 <div class="space-y-3 mb-8">
@@ -429,8 +543,28 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             customerName: '', customerPoints: 0, customerMessage: '',
             showReceiptModal: false, receiptDetails: { orderId: null, cart: [], totals: { subtotal: 0, tax: 0, final: 0 } }, 
             couponCode: '', couponDiscount: 0, couponMessage: '',
+            orderLabel: '', orderMode: 'takeaway', showHeldOrders: false, heldOrders: [],
+            favoriteProductIds: [],
             
-            init() { this.fetchProducts(); },
+            init() {
+                this.loadHeldOrders();
+                this.loadFavorites();
+                this.fetchProducts();
+                window.addEventListener('keydown', (event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+                        event.preventDefault();
+                        document.querySelector('input[placeholder="Search product..."]')?.focus();
+                    }
+                    if (event.key === 'F2') {
+                        event.preventDefault();
+                        this.holdCurrentOrder();
+                    }
+                    if (event.key === 'F4' && Object.keys(this.cart).length > 0) {
+                        event.preventDefault();
+                        this.openPaymentModal = true;
+                    }
+                });
+            },
             
             fetchProducts() { 
                 fetch('api/get_products.php')
@@ -440,12 +574,12 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                     })
                     .then(data => {
                         if (data.status === 'success') { this.products = data.products; }
-                        else { this.showToast('Inventory Link Failed', '#ef4444'); }
+                        else { this.showToast('Failed to load products', '#ef4444'); }
                         this.loading = false; 
                     })
                     .catch(err => {
                         console.error('Fetch Error:', err);
-                        this.showToast('Telemetry Link Severed', '#ef4444');
+                        this.showToast('Connection lost. Please check your internet.', '#ef4444');
                         this.loading = false;
                     });
             },
@@ -456,16 +590,107 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                 if (this.searchTerm.trim() !== '') { f = f.filter(p => p.name_en.toLowerCase().includes(this.searchTerm.toLowerCase())); }
                 return f;
             },
+
+            get favoriteProducts() {
+                const ids = this.favoriteProductIds.length
+                    ? this.favoriteProductIds
+                    : Object.values(this.cart).map(item => item.id);
+                return ids
+                    .map(id => this.products.find(product => String(product.id) === String(id)))
+                    .filter(Boolean)
+                    .slice(0, 8);
+            },
+
+            get cartItemCount() {
+                return Object.values(this.cart).reduce((sum, item) => sum + item.quantity, 0);
+            },
             
             addToCart(p) { 
                 const finalPrice = p.price - (p.price * (p.discount_percentage || 0) / 100);
                 if(this.cart[p.id]){this.cart[p.id].quantity++;}
-                else{this.cart[p.id]={name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
+                else{this.cart[p.id]={id:p.id,name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
+                this.rememberFavorite(p.id);
             },
 
             updateQuantity(id, amt) { if(this.cart[id]){this.cart[id].quantity+=amt; if(this.cart[id].quantity<=0){delete this.cart[id];}}},
             manualUpdateQuantity(id, val) { const q = parseInt(val); if(!isNaN(q) && q > 0){this.cart[id].quantity=q;}else{delete this.cart[id];}},
             removeFromCart(id) { delete this.cart[id]; },
+
+            rememberFavorite(id) {
+                const normalized = String(id);
+                this.favoriteProductIds = [normalized, ...this.favoriteProductIds.filter(itemId => String(itemId) !== normalized)].slice(0, 8);
+                localStorage.setItem('paicafe-pos-favorites', JSON.stringify(this.favoriteProductIds));
+            },
+
+            loadFavorites() {
+                try {
+                    const stored = JSON.parse(localStorage.getItem('paicafe-pos-favorites') || '[]');
+                    this.favoriteProductIds = Array.isArray(stored) ? stored : [];
+                } catch (error) {
+                    this.favoriteProductIds = [];
+                }
+            },
+
+            loadHeldOrders() {
+                try {
+                    const stored = JSON.parse(localStorage.getItem('paicafe-pos-held-orders') || '[]');
+                    this.heldOrders = Array.isArray(stored) ? stored : [];
+                } catch (error) {
+                    this.heldOrders = [];
+                }
+            },
+
+            saveHeldOrders() {
+                localStorage.setItem('paicafe-pos-held-orders', JSON.stringify(this.heldOrders.slice(0, 12)));
+            },
+
+            holdCurrentOrder() {
+                if (Object.keys(this.cart).length === 0) {
+                    this.showToast('Add items before holding an order', '#64748b');
+                    return;
+                }
+                const heldOrder = {
+                    id: Date.now().toString(),
+                    label: this.orderLabel.trim() || this.customerName || this.customerPhone || 'Counter order',
+                    cart: JSON.parse(JSON.stringify(this.cart)),
+                    customerPhone: this.customerPhone,
+                    customerName: this.customerName,
+                    orderMode: this.orderMode,
+                    couponCode: this.couponCode,
+                    couponDiscount: this.couponDiscount,
+                    total: this.totals.final,
+                    itemCount: this.cartItemCount,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                this.heldOrders = [heldOrder, ...this.heldOrders].slice(0, 12);
+                this.saveHeldOrders();
+                this.resetOrder();
+                this.showToast('Order held for later', '#14b8a6');
+            },
+
+            recallHeldOrder(id) {
+                const heldOrder = this.heldOrders.find(order => order.id === id);
+                if (!heldOrder) return;
+                if (Object.keys(this.cart).length > 0 && !confirm('Replace the current order with this held order?')) {
+                    return;
+                }
+                this.cart = heldOrder.cart || {};
+                this.customerPhone = heldOrder.customerPhone || '';
+                this.customerName = heldOrder.customerName || '';
+                this.orderMode = heldOrder.orderMode || 'takeaway';
+                this.orderLabel = heldOrder.label || '';
+                this.couponCode = heldOrder.couponCode || '';
+                this.couponDiscount = heldOrder.couponDiscount || 0;
+                this.heldOrders = this.heldOrders.filter(order => order.id !== id);
+                this.saveHeldOrders();
+                this.showHeldOrders = false;
+                this.showToast('Held order recalled', '#14b8a6');
+            },
+
+            deleteHeldOrder(id) {
+                this.heldOrders = this.heldOrders.filter(order => order.id !== id);
+                this.saveHeldOrders();
+            },
             
             get totals() {
                 let subtotal = 0;
@@ -510,7 +735,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                             this.showToast('Customer Identified', '#3b82f6');
                         } else {
                             this.customerName = '';
-                            this.customerMessage = 'New Biological Entity Detected';
+                            this.customerMessage = 'No saved customer found. This sale can continue.';
                         }
                     });
             },
@@ -524,7 +749,9 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                         payment_method: this.paymentMethod, 
                         customer_phone: this.customerPhone,
                         coupon_code: this.couponCode,
-                        discount_amount: this.couponDiscount
+                        discount_amount: this.couponDiscount,
+                        order_label: this.orderLabel,
+                        order_mode: this.orderMode
                     })
                 })
                 .then(res => res.json())
@@ -533,7 +760,8 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
                         this.receiptDetails = { 
                             orderId: data.order_id, cart: Object.values(this.cart), 
                             totals: JSON.parse(JSON.stringify(this.totals)), 
-                            couponCode: this.couponCode, couponDiscount: this.couponDiscount
+                            couponCode: this.couponCode, couponDiscount: this.couponDiscount,
+                            label: this.orderLabel
                         };
                         this.showReceiptModal = true;
                         this.showToast('Transaction Authorized', '#10b981');
@@ -545,7 +773,7 @@ $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
             resetOrder() { 
                 this.cart={}; this.paymentMethod='Cash'; this.customerPhone=''; this.amountTendered=null; 
                 this.couponCode=''; this.couponDiscount=0; this.couponMessage=''; 
-                this.customerName=''; this.customerPoints=0; this.customerMessage=''; 
+                this.customerName=''; this.customerPoints=0; this.customerMessage=''; this.orderLabel=''; this.orderMode='takeaway';
             },
 
             printReceipt() {

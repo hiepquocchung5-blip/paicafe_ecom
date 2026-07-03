@@ -102,17 +102,17 @@ if ($order_id > 0) {
                     <?php endif; ?>
 
                     <div class="flex justify-between text-xs font-bold">
-                        <span class="text-slate-400 uppercase tracking-widest">Protocol Tax (5%)</span>
+                        <span class="text-slate-400 uppercase tracking-widest">Tax (5%)</span>
                         <span class="text-slate-700 dark:text-slate-300"><?= number_format($order['tax_amount']) ?> KS</span>
                     </div>
 
                     <div class="flex justify-between items-end pt-6">
                         <div>
-                            <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-1">Final Valuation</p>
+                            <p class="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-1">Total Price</p>
                             <h3 class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none"><?= number_format($order['final_amount']) ?> <span class="text-lg opacity-30">KS</span></h3>
                         </div>
                         <div class="text-right">
-                            <span class="inline-flex px-3 py-1 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">Verified_Link</span>
+                            <span class="inline-flex px-3 py-1 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">Verified</span>
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@ if ($order_id > 0) {
 
         <div class="mt-8 text-center">
             <a href="orders.php" class="text-[10px] font-black text-slate-400 hover:text-orange-500 uppercase tracking-widest transition-colors">
-                <i class="fas fa-chevron-left mr-1"></i> Return to Terminal
+                <i class="fas fa-chevron-left mr-1"></i> Return to Orders
             </a>
         </div>
 
@@ -142,9 +142,9 @@ if ($order_id > 0) {
             <div class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fas fa-triangle-exclamation text-red-500 text-3xl"></i>
             </div>
-            <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">LINK SEVERED</h1>
-            <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">The requested transmission data does not exist in our network.</p>
-            <a href="orders.php" class="inline-block mt-8 px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest">Back to Hub</a>
+            <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">ORDER NOT FOUND</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">The requested order details could not be found.</p>
+            <a href="orders.php" class="inline-block mt-8 px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest">Back to Orders</a>
         </div>
     <?php endif; ?>
 </div>

@@ -5,7 +5,7 @@
         </div>
         <div>
             <h1 class="text-xl font-black tracking-tighter text-white">PAICAFE</h1>
-            <p class="text-[10px] text-orange-500 font-bold tracking-[0.2em] uppercase">Control Center</p>
+            <p class="text-[10px] text-orange-500 font-bold tracking-[0.2em] uppercase">Admin Hub</p>
         </div>
     </div>
 </div>
@@ -42,7 +42,7 @@
     
     <?php if (has_permission('manage_products') || has_permission('manage_recipes') || has_permission('manage_inventory')): ?>
     <div class="mt-8 pt-6 border-t border-gray-700/30">
-        <h2 class="px-8 mb-4 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">Inventory Engine</h2>
+        <h2 class="px-8 mb-4 text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">Inventory</h2>
         <?php if (has_permission('manage_products')): ?>
             <a href="combos.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'combos.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
                 <i class="fas fa-layer-group fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Combos
@@ -60,7 +60,7 @@
                 <i class="fas fa-star fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Customer Reviews
             </a>
             <a href="prompt_generator.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'prompt_generator.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
-                <i class="fas fa-robot fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Prompt Engine
+                <i class="fas fa-robot fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Prompt Assistant
             </a>
         <?php endif; ?>
         <?php if (has_permission('manage_recipes')): ?>
@@ -129,7 +129,7 @@
         <?php endif; ?>
         <?php if (has_permission('manage_permissions')): ?>
              <a href="permissions.php" class="group flex items-center px-8 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-orange-600/10 hover:text-orange-500 <?= strpos($_SERVER['PHP_SELF'], 'permissions.php') !== false ? 'text-orange-500' : 'text-gray-400' ?>">
-                <i class="fas fa-shield-halved fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Security Matrix
+                 <i class="fas fa-shield-halved fa-fw mr-3 group-hover:scale-110 transition-transform"></i> Access Control
             </a>
         <?php endif; ?>
     </div>
@@ -137,6 +137,6 @@
 </nav>
 <div class="px-8 py-6 border-t border-gray-700/30 bg-gray-900/50">
     <a href="logout.php" class="group flex items-center text-sm font-bold text-red-500 hover:text-red-400 transition-colors">
-        <i class="fas fa-power-off fa-fw mr-3 group-hover:rotate-90 transition-transform duration-300"></i> Disconnect
+        <i class="fas fa-power-off fa-fw mr-3 group-hover:rotate-90 transition-transform duration-300"></i> Log Out
     </a>
 </div>

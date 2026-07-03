@@ -1,43 +1,52 @@
-
 :root {
-    --brand-primary: #C2410C;
-    --brand-secondary: #0F766E;
+    --brand-primary: #0F766E;
+    --brand-secondary: #7C3AED;
     --brand-accent: #D97706;
-    --page-bg: #F4F7F4;
-    --page-bg-soft: #EEF4EF;
-    --surface-card: #FFFDF8;
-    --surface-card-muted: #F7F1E6;
-    --surface-control: #EEF6F3;
-    --surface-control-hover: #E2EFEA;
-    --sidebar-bg: #17352F;
-    --sidebar-panel: rgba(255, 255, 255, 0.07);
-    --sidebar-border: rgba(210, 231, 224, 0.16);
-    --text-dark: #1F2933;
-    --text-muted: #64716D;
-    --border-light: #D9E4DD;
-    --shadow-soft: 0 18px 48px rgba(23, 53, 47, 0.12);
-    --font-sans: 'Poppins', sans-serif;
+    --page-bg: #EEF6F4;
+    --page-bg-soft: #E7EFF7;
+    --surface-card: rgba(255, 255, 255, 0.62);
+    --surface-card-muted: rgba(240, 247, 246, 0.56);
+    --surface-control: rgba(255, 255, 255, 0.5);
+    --surface-control-hover: rgba(255, 255, 255, 0.72);
+    --sidebar-bg: #0B2428;
+    --sidebar-panel: rgba(255, 255, 255, 0.08);
+    --sidebar-border: rgba(153, 246, 228, 0.18);
+    --text-dark: #17313A;
+    --text-muted: #627278;
+    --border-light: rgba(255, 255, 255, 0.48);
+    --liquid-glass: rgba(255, 255, 255, 0.58);
+    --liquid-glass-strong: rgba(255, 255, 255, 0.72);
+    --liquid-stroke: rgba(255, 255, 255, 0.56);
+    --liquid-inner-stroke: rgba(255, 255, 255, 0.38);
+    --liquid-shadow: 0 24px 70px rgba(19, 49, 58, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.64);
+    --shadow-soft: var(--liquid-shadow);
+    --font-sans: 'Plus Jakarta Sans', 'Poppins', sans-serif;
     color-scheme: light;
 }
 
 .dark {
     color-scheme: dark;
-    --brand-primary: #FB923C;
-    --brand-secondary: #5EEAD4;
+    --brand-primary: #5EEAD4;
+    --brand-secondary: #A78BFA;
     --brand-accent: #FBBF24;
-    --page-bg: #071316;
-    --page-bg-soft: #0B1D21;
-    --surface-card: #122126;
-    --surface-card-muted: #172B31;
-    --surface-control: #1D333A;
-    --surface-control-hover: #28454D;
-    --sidebar-bg: #061A1E;
-    --sidebar-panel: rgba(94, 234, 212, 0.08);
-    --sidebar-border: rgba(94, 234, 212, 0.18);
-    --text-dark: #E7F0ED;
-    --text-muted: #9FB5AF;
-    --border-light: #28454D;
-    --shadow-soft: 0 22px 56px rgba(0, 0, 0, 0.36);
+    --page-bg: #061113;
+    --page-bg-soft: #0A1A20;
+    --surface-card: rgba(13, 31, 38, 0.58);
+    --surface-card-muted: rgba(16, 39, 47, 0.5);
+    --surface-control: rgba(21, 48, 58, 0.62);
+    --surface-control-hover: rgba(31, 70, 82, 0.74);
+    --sidebar-bg: #031416;
+    --sidebar-panel: rgba(94, 234, 212, 0.09);
+    --sidebar-border: rgba(167, 139, 250, 0.2);
+    --text-dark: #ECFEFF;
+    --text-muted: #A6C5C8;
+    --border-light: rgba(184, 222, 226, 0.16);
+    --liquid-glass: rgba(13, 31, 38, 0.58);
+    --liquid-glass-strong: rgba(20, 48, 58, 0.72);
+    --liquid-stroke: rgba(184, 222, 226, 0.18);
+    --liquid-inner-stroke: rgba(255, 255, 255, 0.08);
+    --liquid-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    --shadow-soft: var(--liquid-shadow);
 }
 
 /* ... (the rest of your stylesheet remains the same) ... */
@@ -45,8 +54,9 @@ body {
     font-family: var(--font-sans);
     color: var(--text-dark);
     background:
-        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 34%),
-        linear-gradient(315deg, rgba(217, 119, 6, 0.08), transparent 38%),
+        radial-gradient(circle at 10% 8%, rgba(20, 184, 166, 0.24), transparent 30%),
+        radial-gradient(circle at 84% 12%, rgba(124, 58, 237, 0.16), transparent 28%),
+        radial-gradient(circle at 74% 92%, rgba(217, 119, 6, 0.14), transparent 32%),
         var(--page-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -97,6 +107,155 @@ h1, h2, h3 {
 
 /*
 --------------------------------
+Liquid Glass UI v2
+--------------------------------
+*/
+
+.liquid-glass-v2 {
+    background:
+        radial-gradient(circle at 12% 10%, rgba(94, 234, 212, 0.12), transparent 28%),
+        radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.12), transparent 30%),
+        radial-gradient(circle at 76% 88%, rgba(251, 191, 36, 0.1), transparent 28%),
+        var(--page-bg);
+}
+
+.liquid-glass-v2::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.2), transparent 18%, transparent 72%, rgba(255, 255, 255, 0.12)),
+        radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.22), transparent 12%),
+        radial-gradient(circle at 80% 22%, rgba(94, 234, 212, 0.1), transparent 14%);
+    opacity: 0.62;
+    mix-blend-mode: soft-light;
+}
+
+.liquid-glass-v2.dark::before {
+    opacity: 0.34;
+}
+
+.liquid-surface,
+.premium-glass,
+.node-card,
+.stat-card,
+.bg-white\/50,
+.bg-white\/70,
+.bg-white\/80,
+.bg-white\/90,
+.bg-white\/95 {
+    position: relative;
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 76%, transparent), color-mix(in srgb, var(--liquid-glass) 92%, transparent)) !important;
+    border-color: var(--liquid-stroke) !important;
+    box-shadow: var(--liquid-shadow) !important;
+    backdrop-filter: blur(24px) saturate(1.42);
+    -webkit-backdrop-filter: blur(24px) saturate(1.42);
+}
+
+.liquid-surface::before,
+.premium-glass::before,
+.node-card::before,
+.stat-card::before,
+.bg-white\/70::before,
+.bg-white\/80::before,
+.bg-white\/90::before,
+.bg-white\/95::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    border: 1px solid var(--liquid-inner-stroke);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 32%),
+        radial-gradient(circle at 24% 0%, rgba(255, 255, 255, 0.24), transparent 26%);
+    opacity: 0.82;
+}
+
+.liquid-surface > *,
+.premium-glass > *,
+.node-card > *,
+.stat-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.liquid-card-hover,
+.glass-card-hover,
+.node-card,
+.stat-card {
+    transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+
+.liquid-card-hover:hover,
+.glass-card-hover:hover,
+.node-card:hover,
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--brand-primary) 42%, var(--liquid-stroke)) !important;
+    box-shadow: 0 30px 90px rgba(15, 118, 110, 0.18), var(--liquid-shadow) !important;
+}
+
+.liquid-control,
+.form-input,
+input,
+select,
+textarea {
+    background: var(--surface-control) !important;
+    border-color: var(--liquid-stroke) !important;
+    box-shadow: inset 0 1px 0 var(--liquid-inner-stroke), 0 10px 24px rgba(15, 49, 58, 0.05);
+    backdrop-filter: blur(18px) saturate(1.28);
+    -webkit-backdrop-filter: blur(18px) saturate(1.28);
+}
+
+.liquid-control:focus,
+.form-input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    background: var(--surface-control-hover) !important;
+    border-color: color-mix(in srgb, var(--brand-primary) 52%, var(--liquid-stroke)) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 22%, transparent), inset 0 1px 0 var(--liquid-inner-stroke) !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+.bg-slate-50\/30,
+.bg-slate-50\/50,
+.dark .dark\:bg-slate-950\/30,
+.dark .dark\:bg-slate-950\/50 {
+    background-color: transparent !important;
+}
+
+thead tr,
+.bg-slate-50\/30,
+.bg-slate-50\/50 {
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--liquid-glass-strong) 42%, transparent), color-mix(in srgb, var(--liquid-glass) 54%, transparent)) !important;
+    backdrop-filter: blur(18px) saturate(1.24);
+    -webkit-backdrop-filter: blur(18px) saturate(1.24);
+}
+
+tbody tr:hover {
+    background:
+        linear-gradient(90deg, color-mix(in srgb, var(--brand-primary) 9%, transparent), color-mix(in srgb, var(--brand-secondary) 7%, transparent)) !important;
+}
+
+.fixed .bg-white,
+.fixed .dark\:bg-slate-900,
+[role="dialog"],
+.voucher-print-area {
+    backdrop-filter: blur(24px) saturate(1.35);
+    -webkit-backdrop-filter: blur(24px) saturate(1.35);
+}
+
+/*
+--------------------------------
 Dark Mode Compatibility Layer
 --------------------------------
 */
@@ -120,14 +279,14 @@ Dark Mode Compatibility Layer
 .bg-white\/80,
 .bg-white\/90,
 .bg-white\/95 {
-    background-color: color-mix(in srgb, var(--surface-card) 88%, transparent) !important;
+    background-color: var(--surface-card) !important;
 }
 
 .bg-gray-50,
 .bg-slate-50,
 .bg-slate-50\/30,
 .bg-slate-50\/50 {
-    background-color: color-mix(in srgb, var(--surface-card-muted) 78%, transparent) !important;
+    background-color: var(--surface-card-muted) !important;
 }
 
 .bg-gray-100,
@@ -148,14 +307,14 @@ Dark Mode Compatibility Layer
 .dark .dark\:bg-slate-900\/50,
 .dark .dark\:bg-slate-900\/70,
 .dark .dark\:bg-slate-900\/80 {
-    background-color: color-mix(in srgb, var(--surface-card) 84%, transparent) !important;
+    background-color: var(--surface-card) !important;
 }
 
 .dark .dark\:bg-slate-950,
 .dark .dark\:bg-slate-950\/20,
 .dark .dark\:bg-slate-950\/30,
 .dark .dark\:bg-slate-950\/50 {
-    background-color: color-mix(in srgb, var(--page-bg-soft) 78%, transparent) !important;
+    background-color: var(--surface-card-muted) !important;
 }
 
 .dark .dark\:bg-slate-800,
@@ -205,11 +364,14 @@ hr {
 
 .admin-sidebar {
     background:
-        linear-gradient(180deg, rgba(217, 119, 6, 0.14), transparent 28%),
-        linear-gradient(135deg, rgba(15, 118, 110, 0.22), transparent 52%),
+        linear-gradient(180deg, rgba(94, 234, 212, 0.13), transparent 28%),
+        linear-gradient(135deg, rgba(167, 139, 250, 0.14), transparent 46%),
+        linear-gradient(315deg, rgba(217, 119, 6, 0.1), transparent 48%),
         var(--sidebar-bg) !important;
     color: #F7FEFB;
-    box-shadow: 18px 0 48px rgba(6, 26, 30, 0.18);
+    box-shadow: 18px 0 60px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(24px) saturate(1.28);
+    -webkit-backdrop-filter: blur(24px) saturate(1.28);
 }
 
 .admin-sidebar .bg-gray-900\/50 {
@@ -222,7 +384,7 @@ hr {
 }
 
 .admin-sidebar nav a:not(.bg-orange-600):not(.bg-green-600):not(.bg-yellow-500) {
-    color: rgba(232, 247, 242, 0.74);
+    color: rgba(245, 239, 235, 0.74);
 }
 
 .admin-sidebar nav a:not(.bg-orange-600):not(.bg-green-600):not(.bg-yellow-500):hover {
@@ -231,18 +393,23 @@ hr {
 }
 
 .admin-sidebar h2 {
-    color: rgba(167, 243, 208, 0.58) !important;
+    color: rgba(196, 181, 253, 0.68) !important;
 }
 
 .admin-shell-header {
-    background-color: color-mix(in srgb, var(--surface-card) 84%, transparent) !important;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--liquid-glass-strong) 74%, transparent), color-mix(in srgb, var(--liquid-glass) 86%, transparent)) !important;
     border-color: var(--border-light) !important;
+    box-shadow: 0 16px 42px rgba(15, 49, 58, 0.08), inset 0 1px 0 var(--liquid-inner-stroke);
+    backdrop-filter: blur(28px) saturate(1.45);
+    -webkit-backdrop-filter: blur(28px) saturate(1.45);
 }
 
 .admin-shell-main {
     background:
-        radial-gradient(circle at 18% 10%, rgba(15, 118, 110, 0.12), transparent 28%),
-        radial-gradient(circle at 86% 12%, rgba(217, 119, 6, 0.1), transparent 24%),
+        radial-gradient(circle at 18% 10%, rgba(20, 184, 166, 0.18), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(124, 58, 237, 0.14), transparent 26%),
+        radial-gradient(circle at 72% 88%, rgba(217, 119, 6, 0.12), transparent 26%),
         var(--page-bg) !important;
 }
 
@@ -256,7 +423,7 @@ hr {
 .dark .bg-white\/80,
 .dark .bg-white\/90,
 .dark .bg-white\/95 {
-    background-color: color-mix(in srgb, var(--surface-card) 82%, transparent) !important;
+    background-color: var(--surface-card) !important;
 }
 
 .dark .bg-gray-200,
@@ -268,7 +435,7 @@ hr {
 .dark .bg-slate-50,
 .dark .bg-slate-50\/30,
 .dark .bg-slate-50\/50 {
-    background-color: color-mix(in srgb, var(--surface-card-muted) 68%, transparent) !important;
+    background-color: var(--surface-card-muted) !important;
 }
 
 .dark .bg-blue-100 {

@@ -19,7 +19,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAICAFE Control Center</title>
+    <title>PAICAFE Admin Hub</title>
     <script>
         (function () {
             const storedTheme = localStorage.getItem('paicafe-theme') || localStorage.getItem('darkMode');
@@ -46,7 +46,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<body class="liquid-glass-v2 h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
 <div class="flex h-full overflow-hidden">
     
     <!-- Sidebar -->

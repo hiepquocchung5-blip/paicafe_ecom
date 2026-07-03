@@ -44,17 +44,17 @@ $redemptions = $stmt->fetchAll();
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Deploy User</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Asset Title</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Points Burned</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Timestamp</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Protocol State</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Directive</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Customer</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Reward</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Points Used</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Timestamp</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Status</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php if (empty($redemptions)): ?>
-                        <tr><td colspan="6" class="p-20 text-center text-slate-400 font-mono text-xs uppercase tracking-widest">Zero activations detected in the grid.</td></tr>
+                        <tr><td colspan="6" class="p-20 text-center text-slate-400 text-xs font-bold uppercase tracking-wider">No reward redemptions found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($redemptions as $r): ?>
                     <tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all duration-200">
@@ -79,9 +79,9 @@ $redemptions = $stmt->fetchAll();
                         <td class="p-6">
                             <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <?php if ($r['status'] === 'pending'): ?>
-                                    <form method="POST" onsubmit="return confirm('Execute fulfillment?');">
+                                    <form method="POST" onsubmit="return confirm('Fulfill reward redemption?');">
                                         <input type="hidden" name="redemption_id" value="<?= $r['id'] ?>">
-                                        <button type="submit" name="fulfill_redemption" class="bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all">Fulfil</button>
+                                        <button type="submit" name="fulfill_redemption" class="bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all">Fulfill</button>
                                     </form>
                                 <?php else: ?>
                                     <span class="text-[9px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest">Completed</span>

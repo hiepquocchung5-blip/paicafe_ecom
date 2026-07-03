@@ -117,8 +117,8 @@ $orders = $stmt->fetchAll();
                 <div class="w-1.5 h-6 bg-orange-600 rounded-full"></div>
                 <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Order Management</h2>
             </div>
-            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">Command Center</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Overseeing transmissions for <?= $selected_date->format('l, F j') ?>.</p>
+            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">Order Management</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Overseeing orders for <?= $selected_date->format('l, F j') ?>.</p>
         </div>
 
         <div class="flex items-center space-x-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -159,22 +159,23 @@ $orders = $stmt->fetchAll();
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Transmission</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Origin</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Destination</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Valuation</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Protocol</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Directive</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Order ID</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Customer</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Service Mode</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Total Price</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Status</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em] text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php if (empty($orders)): ?>
                         <tr>
                             <td colspan="6" class="p-20 text-center">
-                                <div class="opacity-20 mb-4 text-slate-400 dark:text-white">
-                                    <i class="fas fa-radar text-6xl"></i>
+                                <div class="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mx-auto mb-4 animate-pulse">
+                                    <i class="fas fa-mug-hot text-2xl"></i>
                                 </div>
-                                <p class="text-xs font-mono uppercase tracking-widest text-slate-400">Zero active signals detected for this sector.</p>
+                                <p class="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">No orders found</p>
+                                <p class="text-xs text-slate-400 mt-1">There are no orders registered for this date.</p>
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -200,8 +201,8 @@ $orders = $stmt->fetchAll();
                             </div>
                         </td>
                         <td class="p-6">
-                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase leading-none"><?= e($order['username'] ?? 'Guest Node') ?></p>
-                            <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono"><?= e($order['phone_number'] ?? $order['customer_phone_for_points'] ?: 'UNKNOWN_PH') ?></p>
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase leading-none"><?= e($order['username'] ?? 'Guest') ?></p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono"><?= e($order['phone_number'] ?? $order['customer_phone_for_points'] ?: 'No Phone') ?></p>
                         </td>
                         <td class="p-6">
                             <?php if ($order['order_type'] === 'web'): ?>
@@ -241,32 +242,32 @@ $orders = $stmt->fetchAll();
                         <td class="p-6">
                             <div class="flex items-center space-x-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                 <?php if ($order['status'] === 'pending_approval'): ?>
-                                    <form method="POST" onsubmit="return confirm('Authorize protocol?');">
+                                    <form method="POST" onsubmit="return confirm('Approve payment for this order?');">
                                         <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                        <button type="submit" name="approve_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all" title="Approve">
+                                        <button type="submit" name="approve_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all" title="Approve Payment">
                                             <i class="fas fa-check text-xs"></i>
                                         </button>
                                     </form>
                                 <?php endif; ?>
                                 
                                 <?php if ($order['status'] === 'ready_for_pickup' || $order['status'] === 'processing'): ?>
-                                    <form method="POST" onsubmit="return confirm('Execute completion?');">
+                                    <form method="POST" onsubmit="return confirm('Mark order as completed?');">
                                         <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                        <button type="submit" name="complete_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all" title="Complete">
-                                            <i class="fas fa-flag-checkered text-xs"></i>
+                                        <button type="submit" name="complete_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all" title="Complete Order">
+                                            <i class="fas fa-check-double text-xs"></i>
                                         </button>
                                     </form>
                                 <?php endif; ?>
 
-                                <a href="voucher_view.php?order_id=<?= e($order['id']) ?>" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all" title="View Audit">
+                                <a href="voucher_view.php?order_id=<?= e($order['id']) ?>" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all" title="View Detail">
                                     <i class="fas fa-file-invoice text-xs"></i>
                                 </a>
 
                                 <?php if (!in_array($order['status'], ['completed', 'cancelled'])): ?>
-                                    <form method="POST" onsubmit="return confirm('Abort transmission?');">
+                                    <form method="POST" onsubmit="return confirm('Cancel this order?');">
                                         <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                        <button type="submit" name="cancel_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Abort">
-                                            <i class="fas fa-ban text-xs"></i>
+                                        <button type="submit" name="cancel_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Cancel Order">
+                                            <i class="fas fa-trash-alt text-xs"></i>
                                         </button>
                                     </form>
                                 <?php endif; ?>

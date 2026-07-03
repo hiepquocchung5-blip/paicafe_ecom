@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/style.css">
     <script src="<?= $admin_asset_base ?>/assets/js/theme.js"></script>
 </head>
-<body class="bg-gray-200 dark:bg-slate-950 text-gray-800 dark:text-slate-100 flex items-center justify-center h-screen transition-colors duration-300">
+<body class="liquid-glass-v2 bg-gray-200 dark:bg-slate-950 text-gray-800 dark:text-slate-100 flex items-center justify-center h-screen transition-colors duration-300">
     <button type="button" class="theme-toggle fixed top-4 right-4 h-11 w-11 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors shadow-md" aria-label="Toggle color theme" title="Toggle theme">
         <i class="fas fa-moon theme-icon-moon"></i>
         <i class="fas fa-sun theme-icon-sun hidden"></i>

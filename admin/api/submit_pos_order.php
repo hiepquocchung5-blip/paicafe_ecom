@@ -14,6 +14,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 $cart = $data['cart'] ?? [];
 $payment_method = $data['payment_method'] ?? 'Cash';
 $customer_phone = $data['customer_phone'] ?? null;
+$coupon_code = strtoupper(trim($data['coupon_code'] ?? ''));
 
 if (empty($cart)) {
     http_response_code(400);
@@ -49,10 +50,39 @@ try {
         $final_prices[$product_id] = $final_price;
     }
 
+    $discount_amount = 0;
+    $applied_coupon_code = null;
+    if ($coupon_code !== '') {
+        $coupon_stmt = $pdo->prepare("
+            SELECT * FROM coupons 
+            WHERE code = ? 
+              AND is_active = 1
+              AND (expiry_date IS NULL OR expiry_date >= CURDATE())
+              AND (max_uses IS NULL OR uses_count < max_uses)
+            LIMIT 1
+        ");
+        $coupon_stmt->execute([$coupon_code]);
+        $coupon = $coupon_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$coupon) {
+            throw new Exception('The selected voucher is no longer valid.');
+        }
+
+        if ($coupon['discount_type'] === 'percentage') {
+            $discount_amount = ($subtotal * (float)$coupon['discount_value']) / 100;
+        } else {
+            $discount_amount = (float)$coupon['discount_value'];
+        }
+
+        $discount_amount = min($subtotal, max(0, $discount_amount));
+        $applied_coupon_code = $coupon_code;
+    }
+
     $tax_rate_stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'tax_percentage'");
-    $tax_rate = $tax_rate_stmt->fetchColumn();
-    $tax_amount = ($subtotal * $tax_rate) / 100;
-    $final_amount = $subtotal + $tax_amount;
+    $tax_rate = (float)$tax_rate_stmt->fetchColumn();
+    $taxable_amount = max(0, $subtotal - $discount_amount);
+    $tax_amount = ($taxable_amount * $tax_rate) / 100;
+    $final_amount = $taxable_amount + $tax_amount;
 
     // 2. Find the user ID if a phone number is provided
     $user_id = null;
@@ -64,10 +94,10 @@ try {
 
     // 3. Insert the order
     $order_stmt = $pdo->prepare("
-        INSERT INTO orders (user_id, customer_phone_for_points, total_amount, tax_amount, final_amount, order_type, status) 
-        VALUES (?, ?, ?, ?, ?, 'pos', 'processing')
+        INSERT INTO orders (user_id, customer_phone_for_points, total_amount, tax_amount, discount_amount, coupon_code, final_amount, order_type, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pos', 'processing')
     ");
-    $order_stmt->execute([$user_id, $customer_phone, $subtotal, $tax_amount, $final_amount]);
+    $order_stmt->execute([$user_id, $customer_phone, $subtotal, $tax_amount, $discount_amount, $applied_coupon_code, $final_amount]);
     $order_id = $pdo->lastInsertId();
 
     // 4. Insert order items
@@ -82,6 +112,11 @@ try {
         VALUES (?, ?, 'approved', ?, ?)
     ");
     $payment_stmt->execute([$order_id, $payment_method, $final_amount, $_SESSION['admin_id']]);
+
+    if ($applied_coupon_code) {
+        $coupon_use_stmt = $pdo->prepare("UPDATE coupons SET uses_count = uses_count + 1 WHERE code = ?");
+        $coupon_use_stmt->execute([$applied_coupon_code]);
+    }
 
     // 6. Award loyalty points if a user was found
     if ($user_id) {

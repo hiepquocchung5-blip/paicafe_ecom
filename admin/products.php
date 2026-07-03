@@ -143,22 +143,22 @@ $products = $stmt->fetchAll();
         <div>
             <div class="flex items-center space-x-3 mb-2">
                 <div class="w-1.5 h-6 bg-orange-600 rounded-full"></div>
-                <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Inventory Assets</h2>
+                <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Inventory Products</h2>
             </div>
-            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">Product Matrix</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Managing <?= number_format($total_products) ?> active SKUs across the network.</p>
+            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">Products</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Manage menu items, prices, and availability.</p>
         </div>
 
         <div class="flex items-center space-x-4">
             <form method="GET" class="relative group">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors"></i>
-                <input type="text" name="search" placeholder="Search sequence..." value="<?= e($search_term) ?>" 
+                <input type="text" name="search" placeholder="Search products..." value="<?= e($search_term) ?>" 
                        class="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-3 text-sm font-bold focus:outline-none focus:border-orange-500/50 w-72 transition-all">
             </form>
             <button @click="showForm = !showForm" 
                     class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 flex items-center space-x-3">
                 <i class="fas" :class="showForm ? 'fa-times' : 'fa-plus'"></i>
-                <span x-text="showForm ? 'Abort Entry' : 'Inject Asset'"></span>
+                <span x-text="showForm ? 'Cancel' : 'Add Product'"></span>
             </button>
         </div>
     </div>
@@ -175,7 +175,7 @@ $products = $stmt->fetchAll();
     <div x-show="showForm" x-transition x-cloak 
          class="mb-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-10 shadow-2xl">
         <h2 class="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-8">
-            <?= $product_to_edit ? 'Edit Existing Protocol' : 'New Asset Protocol' ?>
+            <?= $product_to_edit ? 'Edit Product Details' : 'Add New Product' ?>
         </h2>
         
         <form action="products.php" method="POST" class="space-y-8">
@@ -272,10 +272,10 @@ $products = $stmt->fetchAll();
 
             <div class="flex items-center space-x-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button type="submit" class="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-xl">
-                    <?= $product_to_edit ? 'Update Matrix' : 'Authorize Asset' ?>
+                    <?= $product_to_edit ? 'Update Product' : 'Save Product' ?>
                 </button>
                 <?php if ($product_to_edit): ?>
-                    <a href="products.php" class="text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cancel Protocol</a>
+                    <a href="products.php" class="text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cancel</a>
                 <?php endif; ?>
             </div>
         </form>
@@ -287,13 +287,13 @@ $products = $stmt->fetchAll();
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Visual</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Asset Specs</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Category</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Pricing Link</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Net Margin</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Operational</th>
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Actions</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Image</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Product Details</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Category</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Price Details</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Profit Margin</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Status</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -358,7 +358,7 @@ $products = $stmt->fetchAll();
                                     <i class="fas fa-pen-nib text-xs"></i>
                                 </a>
                                 <a href="products.php?action=delete&id=<?= e($product['id']) ?>" 
-                                   onclick="return confirm('Confirm asset termination?');"
+                                   onclick="return confirm('Are you sure you want to delete this product?');"
                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                     <i class="fas fa-trash-alt text-xs"></i>
                                 </a>
@@ -372,7 +372,7 @@ $products = $stmt->fetchAll();
         
         <!-- Pager -->
         <div class="p-8 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-950/30">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sector <?= $page ?> / <?= $total_pages ?></span>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page <?= $page ?> of <?= $total_pages ?></span>
             <div class="flex space-x-2">
                 <?php if ($page > 1): ?>
                     <a href="?page=<?= $page - 1 ?>&search=<?= e($search_term) ?>" 
