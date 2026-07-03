@@ -54,57 +54,86 @@ foreach ($settings_raw as $key => $value) {
 }
 ?>
 
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">General Settings</h1>
+<div class="max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row justify-between lg:items-end mb-10 gap-6">
+        <div>
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-1.5 h-6 bg-slate-500 rounded-full"></div>
+                <h2 class="text-xs font-black uppercase tracking-[0.35em] text-slate-500 dark:text-slate-400">System Control</h2>
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tight leading-none">General Settings</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Manage tax, loyalty earning, and online payment account details.</p>
+        </div>
+        <div class="liquid-surface rounded-2xl px-5 py-4 border">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Payment Methods</p>
+            <p class="text-3xl font-black text-slate-800 dark:text-white leading-none mt-1"><?= count($payment_methods) ?></p>
+        </div>
+    </div>
 
     <!-- Display Messages -->
     <?php if ($success_message): ?>
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert"><p><?= e($success_message) ?></p></div>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-2xl" role="alert"><p class="font-bold"><?= e($success_message) ?></p></div>
     <?php endif; ?>
     <?php if (!empty($errors)): ?>
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-2xl" role="alert">
             <?php foreach ($errors as $error): ?><p><?= e($error) ?></p><?php endforeach; ?>
         </div>
     <?php endif; ?>
 
     <form method="POST">
         <!-- General Settings -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4">Business Rules</h2>
+        <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 lg:p-8 shadow-2xl mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Business Rules</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">These values affect checkout totals and reward points.</p>
+                </div>
+                <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-500/10 text-slate-500">
+                    <i class="fas fa-sliders"></i>
+                </div>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="tax_percentage" class="block text-gray-700 font-semibold">Tax Rate (%)</label>
-                    <input type="number" name="tax_percentage" id="tax_percentage" value="<?= e($tax_percentage) ?>" class="w-full mt-1 p-2 border rounded" step="0.1">
+                    <label for="tax_percentage" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Tax Rate (%)</label>
+                    <input type="number" name="tax_percentage" id="tax_percentage" value="<?= e($tax_percentage) ?>" class="form-input" step="0.1">
                 </div>
                 <div>
-                    <label for="loyalty_points_per_100_kyats" class="block text-gray-700 font-semibold">Loyalty Points Awarded</label>
-                    <input type="number" name="loyalty_points_per_100_kyats" id="loyalty_points_per_100_kyats" value="<?= e($loyalty_points) ?>" class="w-full mt-1 p-2 border rounded">
-                    <p class="text-sm text-gray-500 mt-1">Points awarded for every 100 Kyats spent.</p>
+                    <label for="loyalty_points_per_100_kyats" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Loyalty Points Awarded</label>
+                    <input type="number" name="loyalty_points_per_100_kyats" id="loyalty_points_per_100_kyats" value="<?= e($loyalty_points) ?>" class="form-input">
+                    <p class="text-xs text-slate-500 mt-2">Points awarded for every 100 Kyats spent.</p>
                 </div>
             </div>
         </div>
 
         <!-- Payment Methods -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4">Online Payment Methods</h2>
+        <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 lg:p-8 shadow-2xl mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Online Payment Methods</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Enabled methods appear in customer checkout.</p>
+                </div>
+                <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                    <i class="fas fa-wallet"></i>
+                </div>
+            </div>
             <div class="space-y-6">
                 <?php foreach ($payment_methods as $key => $method): ?>
-                <div class="border p-4 rounded-lg">
+                <div class="liquid-surface border p-5 rounded-2xl">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold"><?= e($method['name']) ?></h3>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="payment_methods[<?= e($key) ?>][enabled]" value="1" <?= $method['enabled'] ? 'checked' : '' ?> class="mr-2 h-5 w-5"> Enable
+                        <h3 class="text-xl font-black text-slate-800 dark:text-white"><?= e($method['name']) ?></h3>
+                        <label class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-300">
+                            <input type="checkbox" name="payment_methods[<?= e($key) ?>][enabled]" value="1" <?= $method['enabled'] ? 'checked' : '' ?> class="mr-2 h-5 w-5 accent-teal-600"> Enable
                         </label>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <input type="hidden" name="payment_methods[<?= e($key) ?>][name]" value="<?= e($method['name']) ?>">
                         <div>
-                            <label class="block text-sm text-gray-600">Account Name</label>
-                            <input type="text" name="payment_methods[<?= e($key) ?>][account_name]" value="<?= e($method['account_name']) ?>" class="w-full mt-1 p-2 border rounded">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Account Name</label>
+                            <input type="text" name="payment_methods[<?= e($key) ?>][account_name]" value="<?= e($method['account_name']) ?>" class="form-input">
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-600">Phone Number / Account ID</label>
-                            <input type="text" name="payment_methods[<?= e($key) ?>][phone]" value="<?= e($method['phone']) ?>" class="w-full mt-1 p-2 border rounded">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Phone / Account ID</label>
+                            <input type="text" name="payment_methods[<?= e($key) ?>][phone]" value="<?= e($method['phone']) ?>" class="form-input">
                         </div>
                     </div>
                 </div>
@@ -112,8 +141,8 @@ foreach ($settings_raw as $key => $value) {
             </div>
         </div>
         
-        <div class="mt-6">
-            <button type="submit" class="bg-blue-500 text-white py-3 px-8 rounded-lg hover:bg-blue-700 font-bold">Save All Settings</button>
+        <div class="mt-6 flex justify-end">
+            <button type="submit" class="btn-brand">Save All Settings</button>
         </div>
     </form>
 </div>

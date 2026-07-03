@@ -1,20 +1,18 @@
 <?php
 header('Content-Type: application/json');
-// FIX: Added correct paths and admin login check
-require_once __DIR__ . '/../../includes/db_connect.php';
-require_once __DIR__ . '/../../includes/functions.php';
-require_admin_login(); // <-- This is essential
+require_once __DIR__ . '/../includes/db_connect.php';
+require_once __DIR__ . '/../includes/functions.php';
 
-$phone = $_GET['phone'] ?? '';
+$phone = trim($_GET['phone'] ?? '');
 
-if (empty($phone)) {
+if ($phone === '') {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Phone number is required.']);
     exit();
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT username, loyalty_points FROM users WHERE phone_number = ?");
+    $stmt = $pdo->prepare("SELECT username, loyalty_points FROM users WHERE phone_number = ? LIMIT 1");
     $stmt->execute([$phone]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -30,4 +28,3 @@ try {
     error_log($e->getMessage()); 
     echo json_encode(['status' => 'error', 'message' => 'Database error.']);
 }
-?>

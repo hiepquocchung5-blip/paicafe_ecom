@@ -11,6 +11,14 @@ if (!is_admin_logged_in()) {
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
+$data = is_array($data) ? $data : [];
+
+if (!verify_csrf_token($data['csrf_token'] ?? '')) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid security token. Please refresh and try again.']);
+    exit();
+}
+
 $cart = $data['cart'] ?? [];
 $payment_method = $data['payment_method'] ?? 'Cash';
 $customer_phone = $data['customer_phone'] ?? null;
@@ -53,28 +61,12 @@ try {
     $discount_amount = 0;
     $applied_coupon_code = null;
     if ($coupon_code !== '') {
-        $coupon_stmt = $pdo->prepare("
-            SELECT * FROM coupons 
-            WHERE code = ? 
-              AND is_active = 1
-              AND (expiry_date IS NULL OR expiry_date >= CURDATE())
-              AND (max_uses IS NULL OR uses_count < max_uses)
-            LIMIT 1
-        ");
-        $coupon_stmt->execute([$coupon_code]);
-        $coupon = $coupon_stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$coupon) {
+        $coupon_result = validate_coupon($pdo, $coupon_code, $subtotal);
+        if ($coupon_result['status'] !== 'success') {
             throw new Exception('The selected voucher is no longer valid.');
         }
 
-        if ($coupon['discount_type'] === 'percentage') {
-            $discount_amount = ($subtotal * (float)$coupon['discount_value']) / 100;
-        } else {
-            $discount_amount = (float)$coupon['discount_value'];
-        }
-
-        $discount_amount = min($subtotal, max(0, $discount_amount));
+        $discount_amount = $coupon_result['discount'];
         $applied_coupon_code = $coupon_code;
     }
 

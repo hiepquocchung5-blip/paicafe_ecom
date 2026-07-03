@@ -6,6 +6,10 @@
 require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
 $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '/admin' : '';
+$tailwind_css = load_tailwind_css([
+    __DIR__ . '/assets/css/tailwind.css',
+    dirname(__DIR__) . '/assets/css/tailwind.css',
+]);
 
 // If an admin is already logged in, redirect them to the admin dashboard
 if (is_admin_logged_in()) {
@@ -15,6 +19,8 @@ if (is_admin_logged_in()) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
+
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     $remember_me = isset($_POST['remember_me']);
@@ -68,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
         })();
     </script>
-    <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/tailwind.css">
+    <style><?= $tailwind_css ?></style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/style.css">
@@ -81,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </button>
     <div class="w-full max-w-md">
         <form method="POST" class="bg-white dark:bg-slate-900 shadow-lg rounded-xl px-8 pt-6 pb-8 mb-4 border border-transparent dark:border-slate-800 transition-colors duration-300">
+            <?= csrf_field() ?>
             <div class="text-center mb-8">
                 <i class="fas fa-shield-alt fa-3x text-orange-500"></i>
                 <h1 class="text-2xl mt-2 font-bold text-gray-700 dark:text-slate-100">Admin Panel Login</h1>

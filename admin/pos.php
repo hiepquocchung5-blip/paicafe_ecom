@@ -12,17 +12,10 @@ $categories_stmt = $pdo->query("SELECT name_en FROM categories ORDER BY name_en 
 $categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
 // Fetch tax rate
 $tax_rate = get_setting($pdo, 'tax_percentage', 5) / 100;
-$tailwind_css_candidates = [
+$tailwind_css = load_tailwind_css([
     __DIR__ . '/assets/css/tailwind.css',
     dirname(__DIR__) . '/assets/css/tailwind.css',
-];
-$tailwind_css = '';
-foreach ($tailwind_css_candidates as $tailwind_css_path) {
-    if (is_readable($tailwind_css_path)) {
-        $tailwind_css = file_get_contents($tailwind_css_path);
-        break;
-    }
-}
+]);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full">
@@ -546,6 +539,8 @@ foreach ($tailwind_css_candidates as $tailwind_css_path) {
     </div>
 
 <script>
+    const PAICAFE_CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+
     function posSystem(categories, taxRate) {
         return {
             loading: true, products: [], categories: categories, selectedCategory: 'All', searchTerm: '', cart: {}, 
@@ -760,6 +755,7 @@ foreach ($tailwind_css_candidates as $tailwind_css_path) {
                         payment_method: this.paymentMethod, 
                         customer_phone: this.customerPhone,
                         coupon_code: this.couponCode,
+                        csrf_token: PAICAFE_CSRF_TOKEN,
                         discount_amount: this.couponDiscount,
                         order_label: this.orderLabel,
                         order_mode: this.orderMode

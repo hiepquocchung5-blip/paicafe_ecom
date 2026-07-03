@@ -3,17 +3,10 @@ require_once __DIR__ . '/../includes/db_connect.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_admin_login();
 
-$tailwind_css_candidates = [
+$tailwind_css = load_tailwind_css([
     __DIR__ . '/assets/css/tailwind.css',
     dirname(__DIR__) . '/assets/css/tailwind.css',
-];
-$tailwind_css = '';
-foreach ($tailwind_css_candidates as $tailwind_css_path) {
-    if (is_readable($tailwind_css_path)) {
-        $tailwind_css = file_get_contents($tailwind_css_path);
-        break;
-    }
-}
+]);
 
 $table_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $table = null;

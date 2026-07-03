@@ -48,28 +48,41 @@ foreach ($role_permissions_raw as $rp) {
 }
 ?>
 
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">Manage Role Permissions</h1>
+<div class="max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row justify-between lg:items-end mb-10 gap-6">
+        <div>
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-1.5 h-6 bg-rose-500 rounded-full"></div>
+                <h2 class="text-xs font-black uppercase tracking-[0.35em] text-slate-500 dark:text-slate-400">Access Control</h2>
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tight leading-none">Role Permissions</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Developer-only permission matrix for admin roles.</p>
+        </div>
+        <div class="liquid-surface rounded-2xl px-5 py-4 border">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Permissions</p>
+            <p class="text-3xl font-black text-slate-800 dark:text-white leading-none mt-1"><?= count($permissions) ?></p>
+        </div>
+    </div>
     <form method="POST">
-        <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="p-3">Permission</th>
+                        <tr>
+                            <th class="p-4">Permission</th>
                             <?php foreach ($roles as $role): ?>
-                                <th class="p-3 text-center"><?= e(ucfirst($role)) ?></th>
+                                <th class="p-4 text-center"><?= e(ucfirst($role)) ?></th>
                             <?php endforeach; ?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($permissions as $permission): ?>
-                        <tr class="border-b">
-                            <td class="p-3 font-medium"><?= e(ucwords(str_replace('_', ' ', $permission['name']))) ?></td>
+                        <tr class="border-b border-slate-100 dark:border-slate-800">
+                            <td class="p-4 font-black text-slate-800 dark:text-white"><?= e(ucwords(str_replace('_', ' ', $permission['name']))) ?></td>
                             <?php foreach ($roles as $role): ?>
-                                <td class="p-3 text-center">
+                                <td class="p-4 text-center">
                                     <input type="checkbox" name="permissions[<?= e($role) ?>][<?= $permission['id'] ?>]"
-                                           class="h-5 w-5"
+                                           class="h-5 w-5 accent-teal-600"
                                            <?= isset($current_permissions[$role][$permission['id']]) ? 'checked' : '' ?>>
                                 </td>
                             <?php endforeach; ?>
@@ -78,7 +91,7 @@ foreach ($role_permissions_raw as $rp) {
                     </tbody>
                 </table>
             </div>
-            <div class="mt-6">
+            <div class="p-6 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                 <button type="submit" class="btn-brand">Save Permissions</button>
             </div>
         </div>

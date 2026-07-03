@@ -32,6 +32,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = $_POST['price'] ?? 0;
     $action = $_POST['action'] ?? '';
 
+    if ($action === 'delete') {
+        try {
+            $id = (int)($_POST['id'] ?? 0);
+            $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
+            $stmt->execute([$id]);
+            $_SESSION['flash_message'] = 'Product deleted successfully.';
+            log_activity($pdo, "Deleted product ID #$id");
+        } catch (Exception $e) {
+            $_SESSION['flash_message'] = 'Delete failed: This product might be linked to orders.';
+            $_SESSION['flash_message_type'] = 'error';
+        }
+        header('Location: products.php');
+        exit();
+    }
+
     if (empty($name_en) || empty($price)) {
         $errors[] = "Product Name and Price are required.";
     }
@@ -72,22 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         $_SESSION['flash_message'] = implode(' ', $errors);
-        $_SESSION['flash_message_type'] = 'error';
-    }
-    header('Location: products.php');
-    exit();
-}
-
-// --- Handle Delete Action ---
-if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    try {
-        $id = (int)$_GET['id'];
-        $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
-        $stmt->execute([$id]);
-        $_SESSION['flash_message'] = 'Product deleted successfully.';
-        log_activity($pdo, "Deleted product ID #$id");
-    } catch (Exception $e) {
-        $_SESSION['flash_message'] = 'Delete failed: This product might be linked to orders.';
         $_SESSION['flash_message_type'] = 'error';
     }
     header('Location: products.php');
@@ -357,11 +356,13 @@ $products = $stmt->fetchAll();
                                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
                                     <i class="fas fa-pen-nib text-xs"></i>
                                 </a>
-                                <a href="products.php?action=delete&id=<?= e($product['id']) ?>" 
-                                   onclick="return confirm('Are you sure you want to delete this product?');"
-                                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
-                                    <i class="fas fa-trash-alt text-xs"></i>
-                                </a>
+                                <form method="POST" action="products.php" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= e($product['id']) ?>">
+                                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                                        <i class="fas fa-trash-alt text-xs"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

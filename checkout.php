@@ -212,7 +212,7 @@ include 'includes/header.php';
                              }
                              this.lookupMessage = 'Searching...';
                              this.debounce = setTimeout(() => {
-                                 fetch(`/api/get_user_by_phone.php?phone=${this.customerPhone}`)
+                                 fetch(`/api/get_user_by_phone.php?phone=${encodeURIComponent(this.customerPhone)}`)
                                      .then(res => res.json())
                                      .then(data => {
                                          if (data.status === 'success') {

@@ -145,11 +145,121 @@ function e($string) {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+function csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field() {
+    return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
+}
+
+function verify_csrf_token($token) {
+    return is_string($token) && hash_equals($_SESSION['csrf_token'] ?? '', $token);
+}
+
+function require_csrf_token($token = null) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return;
+    }
+
+    $token = $token ?? ($_POST['csrf_token'] ?? '');
+
+    if (!verify_csrf_token($token)) {
+        http_response_code(403);
+        die('Invalid security token. Please refresh the page and try again.');
+    }
+}
+
+function start_admin_csrf_form_injection() {
+    static $started = false;
+
+    if ($started) {
+        return;
+    }
+
+    $started = true;
+    $field = csrf_field();
+
+    ob_start(static function ($html) use ($field) {
+        return preg_replace_callback('/<form\b[^>]*\bmethod=["\']?post["\']?[^>]*>/i', static function ($matches) use ($field) {
+            return $matches[0] . $field;
+        }, $html);
+    });
+}
+
 /**
  * Formats a number as currency.
  */
 function format_currency($amount, $currency = 'Ks') {
     return number_format($amount, 0) . ' ' . $currency;
+}
+
+function load_first_readable_file(array $paths) {
+    foreach ($paths as $path) {
+        if (is_readable($path)) {
+            return file_get_contents($path);
+        }
+    }
+
+    return '';
+}
+
+function load_tailwind_css(array $paths = []) {
+    $default_paths = [
+        __DIR__ . '/../admin/assets/css/tailwind.css',
+        __DIR__ . '/../assets/css/tailwind.css',
+    ];
+
+    return load_first_readable_file(array_merge($paths, $default_paths));
+}
+
+function validate_coupon($pdo, $code, $subtotal) {
+    $code = strtoupper(trim((string)$code));
+    $subtotal = max(0, (float)$subtotal);
+
+    if ($code === '') {
+        return [
+            'status' => 'error',
+            'message' => 'Please enter a coupon code.',
+        ];
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM coupons
+        WHERE code = ?
+          AND is_active = 1
+          AND (expiry_date IS NULL OR expiry_date >= CURDATE())
+          AND (max_uses IS NULL OR uses_count < max_uses)
+        LIMIT 1
+    ");
+    $stmt->execute([$code]);
+    $coupon = $stmt->fetch();
+
+    if (!$coupon) {
+        return [
+            'status' => 'error',
+            'message' => 'Invalid, expired, or fully used coupon code.',
+        ];
+    }
+
+    $discount = 0;
+    if ($coupon['discount_type'] === 'percentage') {
+        $discount = ($subtotal * (float)$coupon['discount_value']) / 100;
+    } else {
+        $discount = (float)$coupon['discount_value'];
+    }
+
+    return [
+        'status' => 'success',
+        'discount' => min($subtotal, max(0, $discount)),
+        'coupon' => $coupon,
+        'message' => 'Coupon applied successfully!',
+    ];
 }
 
 

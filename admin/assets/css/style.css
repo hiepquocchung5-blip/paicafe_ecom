@@ -66,6 +66,144 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.admin-page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 22% 16%, rgba(94, 234, 212, 0.26), transparent 30%),
+        radial-gradient(circle at 82% 10%, rgba(167, 139, 250, 0.2), transparent 28%),
+        radial-gradient(circle at 70% 88%, rgba(251, 191, 36, 0.16), transparent 30%),
+        color-mix(in srgb, var(--page-bg) 92%, rgba(255, 255, 255, 0.34));
+    backdrop-filter: blur(26px) saturate(1.35);
+    -webkit-backdrop-filter: blur(26px) saturate(1.35);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 480ms ease, visibility 480ms ease;
+}
+
+.admin-page-loader--hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.admin-coffee-loader {
+    width: min(360px, calc(100vw - 40px));
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 34px;
+    border-radius: 30px;
+    color: var(--brand-primary);
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 74%, transparent), color-mix(in srgb, var(--liquid-glass) 92%, transparent));
+    border: 1px solid var(--liquid-stroke);
+    box-shadow: var(--liquid-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-coffee-loader::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 36%),
+        radial-gradient(circle at 30% 4%, rgba(255, 255, 255, 0.32), transparent 22%);
+    border: 1px solid var(--liquid-inner-stroke);
+}
+
+.admin-coffee-loader__svg {
+    width: min(250px, 70vw);
+    height: auto;
+    color: color-mix(in srgb, var(--brand-primary) 72%, var(--brand-secondary));
+    filter: drop-shadow(0 24px 36px color-mix(in srgb, var(--brand-primary) 18%, transparent));
+    position: relative;
+    z-index: 1;
+}
+
+.admin-coffee-loader__copy {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.admin-coffee-loader__copy span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.32em;
+}
+
+.admin-coffee-loader__copy strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-dark);
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.admin-coffee-loader__pot {
+    transform-origin: 108px 80px;
+    animation: adminCoffeePotTilt 1.8s ease-in-out infinite;
+}
+
+.admin-coffee-loader__pour {
+    stroke-dasharray: 92;
+    stroke-dashoffset: 92;
+    animation: adminCoffeePour 1.8s ease-in-out infinite;
+}
+
+.admin-coffee-loader__fill {
+    transform-origin: center bottom;
+    animation: adminCoffeeFill 1.8s ease-in-out infinite;
+}
+
+.admin-coffee-loader__steam path {
+    opacity: 0;
+    animation: adminCoffeeSteam 2s ease-in-out infinite;
+}
+
+.admin-coffee-loader__steam path:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.admin-coffee-loader__steam path:nth-child(3) {
+    animation-delay: 0.36s;
+}
+
+@keyframes adminCoffeePotTilt {
+    0%, 100% { transform: rotate(0deg); }
+    34%, 72% { transform: rotate(-7deg); }
+}
+
+@keyframes adminCoffeePour {
+    0%, 16% { stroke-dashoffset: 92; opacity: 0; }
+    28%, 76% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: -92; opacity: 0; }
+}
+
+@keyframes adminCoffeeFill {
+    0%, 18% { transform: translateY(0); }
+    72%, 100% { transform: translateY(-88px); }
+}
+
+@keyframes adminCoffeeSteam {
+    0%, 22% { opacity: 0; transform: translateY(8px); }
+    46% { opacity: 0.72; }
+    100% { opacity: 0; transform: translateY(-14px); }
+}
+
 h1, h2, h3 {
     font-weight: 700;
 }
@@ -145,6 +283,13 @@ Liquid Glass UI v2
 .premium-glass,
 .node-card,
 .stat-card,
+.container > .bg-white,
+.container > .bg-white\/70,
+.container > .bg-white\/80,
+.max-w-7xl > .bg-white,
+.max-w-7xl > .bg-white\/70,
+.max-w-7xl > .bg-white\/80,
+.max-w-7xl > div[class*="shadow"],
 .bg-white\/50,
 .bg-white\/70,
 .bg-white\/80,
@@ -205,7 +350,7 @@ Liquid Glass UI v2
 
 .liquid-control,
 .form-input,
-input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 select,
 textarea {
     background: var(--surface-control) !important;
@@ -217,7 +362,7 @@ textarea {
 
 .liquid-control:focus,
 .form-input:focus,
-input:focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
 select:focus,
 textarea:focus {
     background: var(--surface-control-hover) !important;
@@ -258,6 +403,133 @@ tbody tr:hover {
     -webkit-backdrop-filter: blur(24px) saturate(1.35);
 }
 
+.container > .bg-white,
+.container > .bg-white\/70,
+.container > .bg-white\/80,
+.max-w-7xl > .bg-white,
+.max-w-7xl > .bg-white\/70,
+.max-w-7xl > .bg-white\/80,
+.max-w-7xl > div[class*="shadow"] {
+    border-radius: 22px !important;
+    overflow: hidden;
+}
+
+.btn-brand,
+a.btn-brand {
+    border: 1px solid color-mix(in srgb, var(--brand-primary) 42%, rgba(255, 255, 255, 0.26));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--brand-primary) 88%, white 12%), color-mix(in srgb, var(--brand-secondary) 82%, black 8%)) !important;
+    box-shadow: 0 14px 30px color-mix(in srgb, var(--brand-primary) 22%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.btn-brand:hover,
+a.btn-brand:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 38px color-mix(in srgb, var(--brand-primary) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    outline-offset: 3px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--brand-primary) 42%, transparent);
+    outline-offset: 3px;
+}
+
+button[type="submit"]:not(.btn-brand):not(.unstyled),
+button[name]:not(.btn-brand):not(.unstyled) {
+    min-height: 34px;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    color: color-mix(in srgb, var(--text-muted) 92%, var(--brand-primary)) !important;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+td,
+th {
+    border-color: var(--border-light) !important;
+}
+
+.bg-green-100,
+.bg-red-100,
+.bg-yellow-100,
+.bg-blue-100 {
+    border: 1px solid var(--liquid-stroke) !important;
+    backdrop-filter: blur(18px) saturate(1.24);
+    -webkit-backdrop-filter: blur(18px) saturate(1.24);
+    box-shadow: inset 0 1px 0 var(--liquid-inner-stroke), 0 16px 34px rgba(15, 49, 58, 0.08);
+}
+
+.admin-shell-main > .relative {
+    min-height: 100%;
+}
+
+@media (max-width: 767px) {
+    .admin-shell-header {
+        padding: 0.85rem 1rem !important;
+    }
+
+    .admin-shell-main > .relative {
+        padding: 1rem !important;
+    }
+
+    .container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .container > .bg-white,
+    .container > .bg-white\/70,
+    .container > .bg-white\/80,
+    .max-w-7xl > .bg-white,
+    .max-w-7xl > .bg-white\/70,
+    .max-w-7xl > .bg-white\/80,
+    .max-w-7xl > div[class*="shadow"] {
+        border-radius: 18px !important;
+    }
+
+    table {
+        min-width: 680px;
+    }
+
+    .admin-coffee-loader {
+        min-height: 300px;
+        padding: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+    }
+
+    .admin-page-loader {
+        display: none;
+    }
+}
+
 /*
 --------------------------------
 Dark Mode Compatibility Layer
@@ -265,7 +537,7 @@ Dark Mode Compatibility Layer
 */
 
 .dark .form-input,
-.dark input,
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .dark select,
 .dark textarea {
     background-color: var(--surface-control);
@@ -389,6 +661,23 @@ hr {
 
 .admin-sidebar nav a:not(.bg-orange-600):not(.bg-green-600):not(.bg-yellow-500) {
     color: rgba(245, 239, 235, 0.74);
+}
+
+.admin-sidebar nav a {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    border-radius: 14px;
+    min-height: 42px;
+}
+
+.admin-sidebar nav a.bg-orange-600,
+.admin-sidebar nav a.bg-green-600,
+.admin-sidebar nav a.bg-yellow-500,
+.admin-sidebar nav a.text-orange-500 {
+    background:
+        linear-gradient(135deg, rgba(94, 234, 212, 0.16), rgba(167, 139, 250, 0.12)) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 rgba(251, 191, 36, 0.85), 0 14px 34px rgba(0, 0, 0, 0.16);
 }
 
 .admin-sidebar nav a:not(.bg-orange-600):not(.bg-green-600):not(.bg-yellow-500):hover {

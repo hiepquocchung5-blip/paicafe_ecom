@@ -15,6 +15,8 @@ unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 
 // --- Handle Delete Action ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_review') {
+    require_csrf_token();
+
     try {
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {

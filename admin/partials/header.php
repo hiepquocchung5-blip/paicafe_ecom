@@ -6,7 +6,13 @@ require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 // This function is now loaded from the master functions.php file
 require_admin_login();
+require_csrf_token();
+start_admin_csrf_form_injection();
 $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '/admin' : '';
+$tailwind_css = load_tailwind_css([
+    dirname(__DIR__) . '/assets/css/tailwind.css',
+    dirname(__DIR__, 2) . '/assets/css/tailwind.css',
+]);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full" 
@@ -30,7 +36,7 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
             document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
         })();
     </script>
-    <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/tailwind.css">
+    <style><?= $tailwind_css ?></style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -47,6 +53,50 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
     </style>
 </head>
 <body class="liquid-glass-v2 h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div id="admin-page-loader" class="admin-page-loader" aria-hidden="true">
+    <div class="admin-coffee-loader">
+        <svg class="admin-coffee-loader__svg" viewBox="0 0 260 210" role="img" aria-label="Loading PAICAFE admin">
+            <defs>
+                <linearGradient id="adminLoaderGlass" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.78"/>
+                    <stop offset="100%" stop-color="#ccfbf1" stop-opacity="0.22"/>
+                </linearGradient>
+                <linearGradient id="adminLoaderCoffee" x1="0" x2="0" y1="1" y2="0">
+                    <stop offset="0%" stop-color="#7c2d12"/>
+                    <stop offset="48%" stop-color="#b45309"/>
+                    <stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+            </defs>
+            <g class="admin-coffee-loader__steam" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+                <path d="M95 52c-10-12 10-17 0-30"/>
+                <path d="M130 48c-10-12 10-17 0-30"/>
+                <path d="M165 52c-10-12 10-17 0-30"/>
+            </g>
+            <g class="admin-coffee-loader__pot">
+                <path d="M50 78h70c13 0 24 11 24 24v22c0 22-18 40-40 40H67c-22 0-40-18-40-40v-22c0-13 10-24 23-24Z" fill="rgba(15,118,110,0.18)" stroke="currentColor" stroke-width="7"/>
+                <path d="M144 102c28-2 37 34 8 44" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round"/>
+                <path d="M35 78l-16-20h45" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M58 100h52" stroke="rgba(255,255,255,0.55)" stroke-width="5" stroke-linecap="round"/>
+            </g>
+            <path class="admin-coffee-loader__pour" d="M146 94c24 24 31 48 30 73" fill="none" stroke="#d97706" stroke-width="8" stroke-linecap="round"/>
+            <g class="admin-coffee-loader__glass">
+                <path d="M165 92h62l-10 92c-1 11-11 19-22 19h-1c-11 0-21-8-22-19l-7-92Z" fill="url(#adminLoaderGlass)" stroke="rgba(255,255,255,0.75)" stroke-width="6"/>
+                <clipPath id="adminLoaderCupClip">
+                    <path d="M168 96h56l-9 86c-1 9-9 16-18 16h-3c-9 0-17-7-18-16l-8-86Z"/>
+                </clipPath>
+                <g clip-path="url(#adminLoaderCupClip)">
+                    <rect class="admin-coffee-loader__fill" x="162" y="198" width="70" height="100" fill="url(#adminLoaderCoffee)"/>
+                    <path d="M164 121c12 7 22-7 34 0s20-5 32 1v16h-66Z" fill="rgba(255,255,255,0.2)"/>
+                </g>
+                <path d="M178 114h34" stroke="rgba(255,255,255,0.52)" stroke-width="5" stroke-linecap="round"/>
+            </g>
+        </svg>
+        <div class="admin-coffee-loader__copy">
+            <span>PAICAFE ADMIN</span>
+            <strong>Preparing dashboard</strong>
+        </div>
+    </div>
+</div>
 <div class="flex h-full overflow-hidden">
     
     <!-- Sidebar -->
