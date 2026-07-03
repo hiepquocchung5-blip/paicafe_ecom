@@ -24,6 +24,10 @@
     color-scheme: light;
 }
 
+.light {
+    color-scheme: light;
+}
+
 .dark {
     color-scheme: dark;
     --brand-primary: #5EEAD4;
@@ -133,7 +137,7 @@ Liquid Glass UI v2
     mix-blend-mode: soft-light;
 }
 
-.liquid-glass-v2.dark::before {
+.dark .liquid-glass-v2::before {
     opacity: 0.34;
 }
 

@@ -14,8 +14,8 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
         sidebarOpen: false, 
         darkMode: window.PaicafeTheme ? window.PaicafeTheme.isDark() : document.documentElement.classList.contains('dark')
       }" 
-      x-init="$watch('darkMode', val => window.PaicafeTheme ? window.PaicafeTheme.set(val) : document.documentElement.classList.toggle('dark', val))"
-      :class="{ 'dark': darkMode }">
+      x-init="$watch('darkMode', val => window.PaicafeTheme ? window.PaicafeTheme.set(val) : (document.documentElement.classList.toggle('dark', val), document.documentElement.classList.toggle('light', !val), document.documentElement.dataset.theme = val ? 'dark' : 'light'))"
+      :class="{ 'dark': darkMode, 'light': !darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,11 +26,11 @@ $admin_asset_base = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') === 0) ? '
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const useDark = storedTheme ? (storedTheme === 'dark' || storedTheme === 'true') : prefersDark;
             document.documentElement.classList.toggle('dark', useDark);
+            document.documentElement.classList.toggle('light', !useDark);
+            document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
         })();
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/tailwind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">

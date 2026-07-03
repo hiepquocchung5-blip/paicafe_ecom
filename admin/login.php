@@ -64,11 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const useDark = storedTheme ? (storedTheme === 'dark' || storedTheme === 'true') : prefersDark;
             document.documentElement.classList.toggle('dark', useDark);
+            document.documentElement.classList.toggle('light', !useDark);
+            document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
         })();
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/tailwind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/style.css">

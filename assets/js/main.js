@@ -31,6 +31,8 @@ window.PaicafeTheme = (function () {
 
   function set(useDark) {
     document.documentElement.classList.toggle('dark', useDark);
+    document.documentElement.classList.toggle('light', !useDark);
+    document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
     localStorage.setItem(storageKey, useDark ? 'dark' : 'light');
     localStorage.setItem(legacyKey, useDark ? 'true' : 'false');
     syncToggleIcons();

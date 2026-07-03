@@ -36,11 +36,11 @@ if (!empty($_SESSION['cart'])) {
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const useDark = storedTheme ? (storedTheme === 'dark' || storedTheme === 'true') : prefersDark;
             document.documentElement.classList.toggle('dark', useDark);
+            document.documentElement.classList.toggle('light', !useDark);
+            document.documentElement.dataset.theme = useDark ? 'dark' : 'light';
         })();
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">

@@ -25,7 +25,7 @@ $map_embed_url = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3819.382
 <head>
     <meta charset="UTF-8">
     <title>Print QR Code for <?= e($table['table_number'] ?? 'Table') ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/admin/assets/css/tailwind.css">
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         @page { size: A4; margin: 1cm; }

@@ -41,6 +41,10 @@ Paicafe Custom Stylesheet
     color-scheme: light;
 }
 
+.light {
+    color-scheme: light;
+}
+
 .dark {
     color-scheme: dark;
     --brand-primary: #FB923C;

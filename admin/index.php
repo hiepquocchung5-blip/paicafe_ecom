@@ -780,16 +780,16 @@ window.todayHourlyChart = new Chart(ctx, {
 
 function dashboardNotifications() {
     return {
-        darkMode: localStorage.getItem('darkMode') === 'true',
+        darkMode: document.documentElement.classList.contains('dark'),
         init() {
             this.checkForNewRedemptions();
             setInterval(() => {
-                this.darkMode = localStorage.getItem('darkMode') === 'true';
+                this.darkMode = document.documentElement.classList.contains('dark');
                 this.checkForNewRedemptions();
             }, 10000);
 
-            // Watch for darkMode change (root html element watches it, we sync Chart.js)
-            this.$watch('$parent.darkMode', (val) => {
+            const syncChartTheme = (val) => {
+                this.darkMode = val;
                 const gridColor = val ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
                 const textColor = val ? '#94a3b8' : '#64748b';
                 
@@ -799,7 +799,16 @@ function dashboardNotifications() {
                     window.todayHourlyChart.options.scales.y.ticks.color = textColor;
                     window.todayHourlyChart.update();
                 }
+            };
+
+            window.addEventListener('paicafe-theme-change', (event) => {
+                syncChartTheme(Boolean(event.detail && event.detail.dark));
             });
+
+            const observer = new MutationObserver(() => {
+                syncChartTheme(document.documentElement.classList.contains('dark'));
+            });
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         },
         checkForNewRedemptions() {
             // Point to the dedicated admin API location
