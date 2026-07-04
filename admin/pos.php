@@ -637,7 +637,7 @@ $tailwind_css = load_tailwind_css([
     </div>
 
 <script>
-    const PAICAFE_CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+    let PAICAFE_CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
 
     function posSystem(categories, taxRate) {
         return {
@@ -863,11 +863,8 @@ $tailwind_css = load_tailwind_css([
                     });
             },
 
-            submitOrder() {
-                this.processing = true;
-                fetch('api/submit_pos_order.php', { 
-                    method: 'POST', headers: {'Content-Type':'application/json'}, 
-                    body: JSON.stringify({ 
+            buildOrderPayload() {
+                return {
                         cart: this.cart, 
                         payment_method: this.paymentMethod, 
                         customer_phone: this.customerPhone,
@@ -876,9 +873,42 @@ $tailwind_css = load_tailwind_css([
                         discount_amount: this.couponDiscount,
                         order_label: this.orderLabel,
                         order_mode: this.orderMode
-                    })
+                };
+            },
+
+            refreshCsrfToken() {
+                return fetch('api/csrf_token.php', {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
                 })
                 .then(res => res.json())
+                .then(data => {
+                    if (data.status !== 'success' || !data.csrf_token) {
+                        throw new Error(data.message || 'Could not refresh security token.');
+                    }
+                    PAICAFE_CSRF_TOKEN = data.csrf_token;
+                    return data.csrf_token;
+                });
+            },
+
+            sendOrder(retried = false) {
+                return fetch('api/submit_pos_order.php', { 
+                    method: 'POST', headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify(this.buildOrderPayload())
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if (res.status === 403 && data.code === 'csrf_token_invalid' && !retried) {
+                        await this.refreshCsrfToken();
+                        return this.sendOrder(true);
+                    }
+                    return data;
+                });
+            },
+
+            submitOrder() {
+                this.processing = true;
+                this.sendOrder()
                 .then(data => {
                     if (data.status === 'success') {
                         this.receiptDetails = { 
@@ -889,7 +919,12 @@ $tailwind_css = load_tailwind_css([
                         };
                         this.showReceiptModal = true;
                         this.showToast('Transaction Authorized', '#10b981');
-                    } else { alert('Error: ' + data.message); }
+                    } else {
+                        alert('Error: ' + (data.message || 'Could not complete sale.'));
+                    }
+                })
+                .catch(error => {
+                    alert(error.message || 'Network changed while processing. Please try again.');
                 })
                 .finally(() => { this.processing = false; this.openPaymentModal = false; });
             },

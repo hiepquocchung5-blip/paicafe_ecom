@@ -6,8 +6,15 @@
 
 // 1. SESSION MANAGEMENT
 function paicafe_is_https() {
+    $forwarded_proto = strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $forwarded_proto = trim(explode(',', $forwarded_proto)[0] ?? '');
+    $cf_visitor = (string)($_SERVER['HTTP_CF_VISITOR'] ?? '');
+
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+        || $forwarded_proto === 'https'
+        || (($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '') === 'on')
+        || (($_SERVER['HTTP_FRONT_END_HTTPS'] ?? '') === 'on')
+        || (strpos($cf_visitor, '"scheme":"https"') !== false)
         || (($_SERVER['SERVER_PORT'] ?? '') === '443');
 }
 
@@ -169,9 +176,30 @@ function require_csrf_token($token = null) {
     $token = $token ?? ($_POST['csrf_token'] ?? '');
 
     if (!verify_csrf_token($token)) {
-        http_response_code(403);
-        die('Invalid security token. Please refresh the page and try again.');
+        paicafe_csrf_failure_response();
     }
+}
+
+function paicafe_csrf_failure_response() {
+    http_response_code(403);
+
+    $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+    if (strpos($accept, 'application/json') !== false) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'error',
+            'code' => 'csrf_token_invalid',
+            'message' => 'Your security session changed. Refresh the page and try again.',
+        ]);
+        exit();
+    }
+
+    $back_url = $_SERVER['HTTP_REFERER'] ?? ($_SERVER['REQUEST_URI'] ?? '/admin/');
+    $back_url = htmlspecialchars($back_url, ENT_QUOTES, 'UTF-8');
+
+    header('Content-Type: text/html; charset=UTF-8');
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Security Check</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#edf7f4;color:#14323a;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.card{width:min(420px,calc(100vw - 32px));padding:28px;border-radius:22px;background:rgba(255,255,255,.78);border:1px solid rgba(21,94,117,.18);box-shadow:0 24px 70px rgba(15,76,91,.16);text-align:center}.icon{width:56px;height:56px;margin:0 auto 16px;border-radius:18px;display:grid;place-items:center;background:rgba(249,115,22,.12);color:#ea580c;font-size:24px}h1{margin:0 0 10px;font-size:22px;line-height:1.15}p{margin:0 0 20px;color:#64748b;line-height:1.5}.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}a,button{appearance:none;border:0;border-radius:14px;padding:12px 16px;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.08em;text-decoration:none;cursor:pointer}.primary{background:#ea580c;color:#fff}.secondary{background:#e2e8f0;color:#14323a}</style></head><body><main class="card"><div class="icon">!</div><h1>Security session changed</h1><p>Your VPN or network may have refreshed the browser session. Please reload the page, then submit again.</p><div class="actions"><button class="primary" onclick="location.reload()">Reload page</button><a class="secondary" href="' . $back_url . '">Go back</a></div></main></body></html>';
+    exit();
 }
 
 function start_admin_csrf_form_injection() {

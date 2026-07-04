@@ -15,7 +15,11 @@ $data = is_array($data) ? $data : [];
 
 if (!verify_csrf_token($data['csrf_token'] ?? '')) {
     http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid security token. Please refresh and try again.']);
+    echo json_encode([
+        'status' => 'error',
+        'code' => 'csrf_token_invalid',
+        'message' => 'Security check refreshed. Please submit again if the sale does not continue automatically.',
+    ]);
     exit();
 }
 
