@@ -53,7 +53,7 @@ if (isset($_GET['review_id'])) {
                 <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Offline Intelligence</h2>
             </div>
             <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">LLM Prompt Engine</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Compile and generate custom prompts for Local LLMs using product specifications, images, and videos.</p>
+            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Compile brand-locked Local LLM prompts for PAICAFE products, images, videos, and campaign assets.</p>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -155,7 +155,20 @@ if (isset($_GET['review_id'])) {
         <!-- Right Side: Prompt Configuration & Output -->
         <div class="lg:col-span-5 space-y-6">
             <!-- Configuration Box -->
-            <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
+            <div class="liquid-surface rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 rounded-2xl bg-black border border-white/10 shadow-xl flex items-center justify-center overflow-hidden">
+                        <span class="text-white text-2xl font-black tracking-tight">PAI</span>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Brand Lock</p>
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight">PAICAFE Logo on Solid Black</h3>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">Generated image and video prompts will strongly require the clean PAI/PAICAFE mark on a solid black logo field.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="liquid-surface rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Prompt Controls</h3>
                 
                 <!-- Review Response Active Context Info -->
@@ -178,6 +191,18 @@ if (isset($_GET['review_id'])) {
                             <option value="Marketing Launch Copy">New Asset Launch Release</option>
                             <option value="Local LLM Classification Prompt">LLM Catalog Classification</option>
                             <option value="Reply to Customer Review" x-show="reviewData">Reply to Customer Review</option>
+                        </select>
+                    </div>
+
+                    <!-- Creative Asset Mode -->
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Image / Video Prompt Mode</label>
+                        <select x-model="mediaMode" class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 appearance-none">
+                            <option value="Balanced Image + Video Campaign">Balanced Image + Video Campaign</option>
+                            <option value="Image Generation Prompt">Image Generation Prompt</option>
+                            <option value="Video Generation Prompt">Video Generation Prompt</option>
+                            <option value="Product Photo Enhancement Prompt">Product Photo Enhancement Prompt</option>
+                            <option value="Short Reels / TikTok Script Prompt">Short Reels / TikTok Script Prompt</option>
                         </select>
                     </div>
 
@@ -213,7 +238,7 @@ if (isset($_GET['review_id'])) {
             </div>
 
             <!-- Output Prompt Result Box -->
-            <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl relative">
+            <div class="liquid-surface rounded-[2rem] border border-slate-200 dark:border-slate-800 p-8 shadow-xl relative">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Generated Prompt</h3>
                     <span class="text-[9px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded" x-text="computedPrompt.length + ' chars'"></span>
@@ -262,6 +287,7 @@ function promptGeneratorState() {
         
         // Form Controls
         promptType: selectedReview ? 'Reply to Customer Review' : 'Social Media Advertisement',
+        mediaMode: 'Balanced Image + Video Campaign',
         tone: 'Luxurious and Premium',
         language: 'Bilingual (English with Burmese translation)',
         customInstructions: '',
@@ -277,6 +303,30 @@ function promptGeneratorState() {
         
         formatCurrency(amount) {
             return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 0 });
+        },
+
+        getBrandIdentityBlock() {
+            return `--- BRAND IDENTITY LOCK ---
+Brand Name: PAICAFE Lounge & Cafe
+Logo Rule: Use the PAICAFE identity consistently. If a compact logo mark is needed, use "PAI" exactly. Do not write "PIA", "Pai Cafe", or any other misspelling.
+Logo Placement: The logo must appear as a clean, high-contrast white PAI/PAICAFE mark on a solid black rectangular or square field.
+Visual Style: premium cafe, clean liquid-glass user experience, refined reflections, sharp product visibility, uncluttered composition, modern Myanmar cafe atmosphere.
+Avoid: busy backgrounds behind the logo, distorted text, extra fake brand marks, unreadable typography, over-saturated filters, low-resolution food imagery, and messy UI overlays.`;
+        },
+
+        getMediaDirectionBlock() {
+            const shared = `Keep every asset suitable for PAICAFE menu, social media, and in-store QR promotion. Product media must look appetizing, clean, premium, and realistic.`;
+            const modes = {
+                'Image Generation Prompt': `Create an image-generation-ready prompt. Prioritize a single polished hero image, clear food/drink detail, controlled lighting, solid black logo field, and clean liquid-glass styling.`,
+                'Video Generation Prompt': `Create a video-generation-ready prompt. Include camera movement, scene order, duration guidance, product close-ups, logo end card on solid black, and motion that feels premium rather than noisy.`,
+                'Product Photo Enhancement Prompt': `Create a product-photo-enhancement prompt. Preserve the real product identity, improve lighting, background cleanliness, color accuracy, menu readability, and add only tasteful PAICAFE branding.`,
+                'Short Reels / TikTok Script Prompt': `Create a short vertical video prompt/script. Include hook, shot list, on-screen text, product close-ups, logo end card on solid black, QR/order CTA, and concise captions.`,
+                'Balanced Image + Video Campaign': `Create both image and video guidance. Include a hero image prompt, supporting product image variations, a short-form video shot list, logo end card direction, and CTA copy.`
+            };
+            return `--- CREATIVE ASSET MODE ---
+Selected Mode: ${this.mediaMode}
+${modes[this.mediaMode] || modes['Balanced Image + Video Campaign']}
+${shared}`;
         },
         
         filteredProducts() {
@@ -310,6 +360,8 @@ function promptGeneratorState() {
                 let prompt = `System Instructions:\nYou are a customer relation officer for ${this.appName}.
 Write a warm, polite, and professional reply to a customer review left on our product "${this.reviewData.product_name}".
 The response tone should be "${this.tone}" and written in "${this.language}".
+
+${this.getBrandIdentityBlock()}
 
 --- CUSTOMER REVIEW DETAILS ---
 Customer: ${this.reviewData.user_name || 'Guest User'}
@@ -345,6 +397,9 @@ Action: Please select one or more products from the catalog grid to compile a lo
             let prompt = `System Instructions:\nYou are an advanced marketing assistant for ${this.appName}.
 Create a highly-optimized, structured, and compelling ${this.promptType} for the items listed below.
 The target tone should be "${this.tone}" and the language format must be "${this.language}".
+${this.getBrandIdentityBlock()}
+
+${this.getMediaDirectionBlock()}
 `;
             if (this.customInstructions.trim()) {
                 prompt += `Special Directives:\n- ${this.customInstructions.trim()}\n`;
@@ -370,10 +425,13 @@ The target tone should be "${this.tone}" and the language format must be "${this
             });
             
             prompt += `\n--- OUTPUT REQUIREMENTS ---\n`;
-            prompt += `1. Draft an engaging promotional headline.\n`;
-            prompt += `2. Write detailed, appetizing sales copy emphasizing product characteristics, presentation, images, and videos.\n`;
-            prompt += `3. Include local-offline optimization cues for a LocalLLM (no external API lookup needed).\n`;
-            prompt += `4. Add call-to-actions, QR scanning notes, and relevant hashtags (#paicafe #payvia).`;
+            prompt += `1. Draft an engaging promotional headline that matches the selected objective.\n`;
+            prompt += `2. Write detailed, appetizing sales copy emphasizing product characteristics, presentation, available image references, and available video references.\n`;
+            prompt += `3. Include a dedicated Image Prompt section when the selected mode needs images, with exact composition, lighting, background, aspect ratio, and logo placement.\n`;
+            prompt += `4. Include a dedicated Video Prompt section when the selected mode needs video, with duration, shot list, camera movement, pacing, text overlays, and solid-black PAICAFE logo end card.\n`;
+            prompt += `5. Strongly enforce the PAICAFE/PAI brand logo rule: white PAI or PAICAFE logo, exact spelling, solid black field, no distorted text.\n`;
+            prompt += `6. Include local-offline optimization cues for a LocalLLM (no external API lookup needed).\n`;
+            prompt += `7. Add call-to-actions, QR scanning notes, and relevant hashtags (#paicafe #payvia).`;
             
             return prompt;
         },
