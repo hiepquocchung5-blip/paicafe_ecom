@@ -73,7 +73,7 @@ if (isset($_GET['review_id'])) {
         
         <!-- Left Side: Products Selection Grid -->
         <div class="lg:col-span-7 space-y-6">
-            <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+            <div class="liquid-surface rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Product Catalog</h3>
                 
                 <!-- Real-time Catalog Search -->
@@ -144,7 +144,15 @@ if (isset($_GET['review_id'])) {
                                 <template x-if="prod.discount_percentage > 0">
                                     <span class="text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black uppercase" x-text="'-' + parseFloat(prod.discount_percentage) + '%'"></span>
                                 </template>
-                                <span class="text-[8px] font-bold text-slate-400 mt-1 uppercase" x-text="prod.video_url ? '📷 + 🎥 Media' : '📷 Photo Only'"></span>
+                                <div class="flex items-center gap-1.5 mt-1 text-[8px] font-bold text-slate-400 uppercase">
+                                    <i class="fas fa-image"></i>
+                                    <template x-if="prod.video_url">
+                                        <span class="flex items-center gap-1.5"><i class="fas fa-video"></i><span>Media Ready</span></span>
+                                    </template>
+                                    <template x-if="!prod.video_url">
+                                        <span>Photo Only</span>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </template>
