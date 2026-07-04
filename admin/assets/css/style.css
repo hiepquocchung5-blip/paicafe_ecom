@@ -73,37 +73,55 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: clamp(18px, 4vw, 40px);
     background:
-        radial-gradient(circle at 22% 16%, rgba(94, 234, 212, 0.16), transparent 28%),
-        radial-gradient(circle at 82% 10%, rgba(167, 139, 250, 0.12), transparent 26%),
-        color-mix(in srgb, var(--page-bg) 86%, rgba(255, 255, 255, 0.28));
-    backdrop-filter: blur(14px) saturate(1.18);
-    -webkit-backdrop-filter: blur(14px) saturate(1.18);
+        radial-gradient(circle at 20% 18%, rgba(94, 234, 212, 0.2), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(167, 139, 250, 0.16), transparent 28%),
+        radial-gradient(circle at 72% 86%, rgba(251, 191, 36, 0.12), transparent 28%),
+        color-mix(in srgb, var(--page-bg) 90%, rgba(255, 255, 255, 0.18));
+    backdrop-filter: blur(22px) saturate(1.28);
+    -webkit-backdrop-filter: blur(22px) saturate(1.28);
     opacity: 1;
     visibility: visible;
-    transition: opacity 260ms ease, visibility 260ms ease;
+    transition: opacity 320ms ease, visibility 320ms ease;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.admin-page-loader::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.24), transparent 22%, transparent 72%, rgba(255, 255, 255, 0.1)),
+        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.18), transparent 24%);
+    opacity: 0.82;
 }
 
 .admin-page-loader--hidden {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 .admin-coffee-loader {
-    width: min(250px, calc(100vw - 32px));
-    min-height: 238px;
+    width: min(280px, calc(100vw - 36px));
+    min-height: 264px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 22px;
-    border-radius: 22px;
+    gap: 14px;
+    padding: clamp(20px, 4vw, 28px);
+    border-radius: 28px;
     color: var(--brand-primary);
     background:
-        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 58%, transparent), color-mix(in srgb, var(--liquid-glass) 82%, transparent));
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-glass-strong) 72%, transparent), color-mix(in srgb, var(--liquid-glass) 88%, transparent));
     border: 1px solid var(--liquid-stroke);
-    box-shadow: 0 18px 42px rgba(15, 49, 58, 0.14), inset 0 1px 0 var(--liquid-inner-stroke);
+    box-shadow: 0 28px 76px rgba(15, 49, 58, 0.18), inset 0 1px 0 var(--liquid-inner-stroke);
     position: relative;
     overflow: hidden;
 }
@@ -120,11 +138,27 @@ body {
     border: 1px solid var(--liquid-inner-stroke);
 }
 
+.admin-coffee-loader::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 18px;
+    height: 3px;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand-primary) 82%, white), var(--brand-accent), transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--brand-primary) 38%, transparent);
+    transform: translateX(-68%);
+    animation: adminLoaderSweep 1.3s ease-in-out infinite;
+    opacity: 0.82;
+}
+
 .admin-coffee-loader__svg {
-    width: min(170px, 58vw);
+    width: min(182px, 58vw);
     height: auto;
     color: color-mix(in srgb, var(--brand-primary) 72%, var(--brand-secondary));
-    filter: drop-shadow(0 14px 22px color-mix(in srgb, var(--brand-primary) 14%, transparent));
+    filter: drop-shadow(0 16px 24px color-mix(in srgb, var(--brand-primary) 18%, transparent));
     position: relative;
     z-index: 1;
 }
@@ -138,16 +172,16 @@ body {
 .admin-coffee-loader__copy span {
     display: block;
     color: var(--text-muted);
-    font-size: 0.58rem;
+    font-size: 0.6rem;
     font-weight: 900;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.2em;
 }
 
 .admin-coffee-loader__copy strong {
     display: block;
-    margin-top: 4px;
+    margin-top: 5px;
     color: var(--text-dark);
-    font-size: 0.86rem;
+    font-size: 0.92rem;
     font-weight: 900;
     letter-spacing: 0.02em;
 }
@@ -201,6 +235,13 @@ body {
     0%, 22% { opacity: 0; transform: translateY(8px); }
     46% { opacity: 0.72; }
     100% { opacity: 0; transform: translateY(-14px); }
+}
+
+@keyframes adminLoaderSweep {
+    0% { transform: translateX(-68%); opacity: 0; }
+    22% { opacity: 0.9; }
+    76% { opacity: 0.9; }
+    100% { transform: translateX(68%); opacity: 0; }
 }
 
 h1, h2, h3 {
@@ -509,14 +550,23 @@ th {
     }
 
     .admin-coffee-loader {
-        width: min(220px, calc(100vw - 28px));
-        min-height: 212px;
+        width: min(232px, calc(100vw - 28px));
+        min-height: 224px;
         padding: 18px;
-        border-radius: 20px;
+        border-radius: 24px;
     }
 
     .admin-coffee-loader__svg {
-        width: min(148px, 54vw);
+        width: min(150px, 54vw);
+    }
+
+    .admin-coffee-loader__copy span {
+        font-size: 0.56rem;
+        letter-spacing: 0.16em;
+    }
+
+    .admin-coffee-loader__copy strong {
+        font-size: 0.84rem;
     }
 }
 

@@ -236,11 +236,30 @@ if (isset($_GET['review_id'])) {
                         </select>
                     </div>
 
+                    <!-- Output Format -->
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">LLM Output Format</label>
+                        <select x-model="outputFormat" class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 appearance-none">
+                            <option value="Structured Marketing Brief">Structured Marketing Brief</option>
+                            <option value="Strict JSON">Strict JSON (.json)</option>
+                            <option value="JSON + Human Readable Copy">JSON + Human Readable Copy</option>
+                            <option value="Clean Copy Blocks">Clean Copy Blocks</option>
+                        </select>
+                    </div>
+
                     <!-- Custom Instructions -->
                     <div class="space-y-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom LLM Instructions</label>
+                        <div class="flex items-center justify-between gap-3">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom LLM Instructions</label>
+                            <button type="button" @click="insertOfficialContact()" class="text-[9px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-500 transition-colors">
+                                Add Contact
+                            </button>
+                        </div>
                         <textarea x-model="customInstructions" placeholder="e.g. Include address, tell users to scan QR code, mention discount specials..." rows="3"
                                   class="w-full bg-slate-100 dark:bg-slate-950 border-none rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-orange-500/50 transition-all"></textarea>
+                        <p x-show="shouldIncludeOfficialContact()" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400" style="display: none;">
+                            Official PAICAFE address, phone, email, and opening hours will be auto-corrected in the prompt.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -258,17 +277,57 @@ if (isset($_GET['review_id'])) {
                 </div>
 
                 <!-- Copy / Download Buttons -->
-                <div class="flex gap-4 mt-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
                     <button @click="copyPrompt()" 
-                            class="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center space-x-2">
+                            class="bg-orange-600 hover:bg-orange-500 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center space-x-2">
                         <i class="fas" :class="copying ? 'fa-check' : 'fa-copy'"></i>
                         <span x-text="copying ? 'Copied!' : 'Copy Prompt'"></span>
                     </button>
+                    <button @click="previewOpen = true"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center space-x-2">
+                        <i class="fas fa-window-maximize"></i>
+                        <span>Preview</span>
+                    </button>
                     <button @click="downloadPrompt()"
-                            class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center space-x-2">
+                            class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center space-x-2">
                         <i class="fas fa-download"></i>
                         <span>Download</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LLM Prompt Preview Modal -->
+    <div x-show="previewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md" @click="previewOpen = false"></div>
+        <div class="liquid-surface relative w-full max-w-4xl max-h-[86vh] overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+            <div class="flex items-center justify-between gap-4 border-b border-slate-200/70 dark:border-white/10 px-6 py-4">
+                <div>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">LLM Modal</p>
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white">Generated Prompt Output</h3>
+                </div>
+                <button @click="previewOpen = false" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
+                <div class="border-b lg:border-b-0 lg:border-r border-slate-200/70 dark:border-white/10 p-5 space-y-3">
+                    <div class="rounded-2xl bg-black p-4 text-white">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-white/50">Brand</p>
+                        <p class="mt-1 text-2xl font-black tracking-tight">PAI</p>
+                    </div>
+                    <div class="text-xs font-bold text-slate-600 dark:text-slate-300 space-y-2">
+                        <p><span class="text-slate-400">Format:</span> <span x-text="outputFormat"></span></p>
+                        <p><span class="text-slate-400">Mode:</span> <span x-text="mediaMode"></span></p>
+                        <p><span class="text-slate-400">Language:</span> <span x-text="language"></span></p>
+                    </div>
+                    <button @click="copyPrompt()" class="w-full bg-orange-600 hover:bg-orange-500 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                        Copy Modal Prompt
+                    </button>
+                </div>
+                <div class="lg:col-span-2 p-5">
+                    <pre class="max-h-[58vh] overflow-y-auto custom-scrollbar whitespace-pre-wrap rounded-2xl bg-slate-100 dark:bg-slate-950 p-5 text-xs leading-relaxed text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800" x-text="computedPrompt"></pre>
                 </div>
             </div>
         </div>
@@ -296,6 +355,7 @@ function promptGeneratorState() {
         // Form Controls
         promptType: selectedReview ? 'Reply to Customer Review' : 'Social Media Advertisement',
         mediaMode: 'Balanced Image + Video Campaign',
+        outputFormat: 'Structured Marketing Brief',
         tone: 'Luxurious and Premium',
         language: 'Bilingual (English with Burmese translation)',
         customInstructions: '',
@@ -303,7 +363,14 @@ function promptGeneratorState() {
         
         // Copy UI Feedback state
         copying: false,
+        previewOpen: false,
         appName: 'PAICAFE Lounge & Cafe',
+        officialContact: {
+            address: 'No.88, Thantumar Main Street, Thuwunna Tsp, Yangon, Myanmar',
+            phone: '+95 9 8 9 0 9 0 7 7 2 4',
+            email: 'contact@paicafe.online',
+            hours: 'Open Daily: 9:00 AM - 6:00 PM'
+        },
         
         init() {
             // Watch settings changes and auto compile
@@ -311,6 +378,36 @@ function promptGeneratorState() {
         
         formatCurrency(amount) {
             return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 0 });
+        },
+
+        shouldIncludeOfficialContact() {
+            return /\b(address|location|contact|phone|email|open|opening|hours|daily)\b/i.test(this.customInstructions);
+        },
+
+        getOfficialContactBlock() {
+            return `--- OFFICIAL PAICAFE CONTACT DETAILS ---
+Address: ${this.officialContact.address}
+Phone: ${this.officialContact.phone}
+Email: ${this.officialContact.email}
+Hours: ${this.officialContact.hours}`;
+        },
+
+        insertOfficialContact() {
+            const directive = 'Include the official PAICAFE address, phone, email, and opening hours.';
+            if (!this.customInstructions.toLowerCase().includes('official paicafe address')) {
+                this.customInstructions = this.customInstructions.trim()
+                    ? `${this.customInstructions.trim()}\n${directive}`
+                    : directive;
+            }
+        },
+
+        getNormalizedCustomInstructions() {
+            let instructions = this.customInstructions.trim();
+            if (this.shouldIncludeOfficialContact()) {
+                const contactDirective = `Use only this corrected official contact information:\n${this.getOfficialContactBlock()}`;
+                instructions = instructions ? `${instructions}\n\n${contactDirective}` : contactDirective;
+            }
+            return instructions;
         },
 
         getBrandIdentityBlock() {
@@ -335,6 +432,115 @@ Avoid: busy backgrounds behind the logo, distorted text, extra fake brand marks,
 Selected Mode: ${this.mediaMode}
 ${modes[this.mediaMode] || modes['Balanced Image + Video Campaign']}
 ${shared}`;
+        },
+
+        getOutputFormatBlock() {
+            const jsonSchema = `{
+  "brand": {
+    "name": "PAICAFE Lounge & Cafe",
+    "short_mark": "PAI",
+    "logo_rule": "Use exact PAICAFE or PAI mark, white on solid black field",
+    "visual_style": "premium cafe, clean liquid-glass UI, realistic food and drink detail"
+  },
+  "campaign": {
+    "objective": "",
+    "tone": "",
+    "language": "",
+    "headline": "",
+    "subheadline": "",
+    "short_caption": "",
+    "long_caption": "",
+    "cta": "",
+    "hashtags": [],
+    "platform_notes": {
+      "facebook": "",
+      "instagram": "",
+      "in_store_qr": ""
+    }
+  },
+  "contact": {
+    "address": "${this.officialContact.address}",
+    "phone": "${this.officialContact.phone}",
+    "email": "${this.officialContact.email}",
+    "hours": "${this.officialContact.hours}"
+  },
+  "assets": {
+    "image": {
+      "prompt": "",
+      "aspect_ratio": "1:1 or 4:5",
+      "composition": "",
+      "lighting": "",
+      "logo_placement": "white PAICAFE or PAI logo on solid black field",
+      "negative_prompt": "misspelled logo, PIA, distorted text, busy logo background, low-resolution product"
+    },
+    "video": {
+      "prompt": "",
+      "duration_seconds": 8,
+      "aspect_ratio": "9:16",
+      "shot_list": [],
+      "camera_motion": "",
+      "text_overlays": [],
+      "end_card": "solid black background with white PAICAFE or PAI logo"
+    }
+  },
+  "products": [
+    {
+      "name_en": "",
+      "name_mm": "",
+      "category": "",
+      "price_ks": "",
+      "discount": "",
+      "description": "",
+      "image_reference": "",
+      "video_reference": "",
+      "selling_points": []
+    }
+  ],
+  "quality_check": {
+    "logo_spelling_verified": true,
+    "uses_official_contact_when_requested": true,
+    "no_external_lookup_required": true,
+    "ready_for_local_llm": true
+  }
+}`;
+
+            if (this.outputFormat === 'Strict JSON') {
+                return `--- OUTPUT FORMAT ---
+Return valid JSON only.
+Do not wrap the answer in markdown.
+Do not add commentary before or after the JSON.
+Use double quotes for all JSON keys and strings.
+Do not use trailing commas.
+Use arrays for hashtags, shot_list, text_overlays, products, and selling_points.
+Fill every useful field. If a value is unknown, use an empty string instead of null.
+Use this schema:
+${jsonSchema}`;
+            }
+
+            if (this.outputFormat === 'JSON + Human Readable Copy') {
+                return `--- OUTPUT FORMAT ---
+First return a valid JSON object using this schema. Then add the readable copy after the JSON.
+The JSON must be valid, use double quotes, avoid trailing commas, and use empty strings for unknown values:
+${jsonSchema}
+
+After the JSON, add a short "Readable Copy" section with polished customer-facing text.`;
+            }
+
+            if (this.outputFormat === 'Clean Copy Blocks') {
+                return `--- OUTPUT FORMAT ---
+Use clean labeled sections:
+Headline
+Short Caption
+Long Caption
+Image Prompt
+Video Prompt
+CTA
+Hashtags
+Contact Details`;
+            }
+
+            return `--- OUTPUT FORMAT ---
+Use a structured marketing brief with clear sections for headline, campaign copy, image prompt, video prompt, CTA, hashtags, and contact details when requested.`;
         },
         
         filteredProducts() {
@@ -384,14 +590,17 @@ Description: ${p ? p.description_en : 'No description'}
 Image: ${p ? p.image : 'No image'}
 Video: ${p ? (p.video_url || 'No video') : 'No video'}
 `;
-                if (this.customInstructions.trim()) {
-                    prompt += `\nSpecial Directives:\n- ${this.customInstructions.trim()}\n`;
+                const normalizedInstructions = this.getNormalizedCustomInstructions();
+                if (normalizedInstructions) {
+                    prompt += `\nSpecial Directives:\n${normalizedInstructions}\n`;
                 }
+                prompt += `\n${this.getOutputFormatBlock()}\n`;
                 prompt += `\n--- OUTPUT REQUIREMENTS ---\n`;
                 prompt += `1. Express sincere gratitude for the customer's feedback.\n`;
                 prompt += `2. Address specific points raised in their comment.\n`;
                 prompt += `3. Maintain a positive brand image and invite them back to PAICAFE.\n`;
-                prompt += `4. Keep the output offline-optimization friendly (no external API calls needed).`;
+                prompt += `4. Use official PAICAFE contact details exactly when address or contact info is requested.\n`;
+                prompt += `5. Keep the output offline-optimization friendly (no external API calls needed).`;
                 return prompt;
             }
 
@@ -408,9 +617,12 @@ The target tone should be "${this.tone}" and the language format must be "${this
 ${this.getBrandIdentityBlock()}
 
 ${this.getMediaDirectionBlock()}
+
+${this.getOutputFormatBlock()}
 `;
-            if (this.customInstructions.trim()) {
-                prompt += `Special Directives:\n- ${this.customInstructions.trim()}\n`;
+            const normalizedInstructions = this.getNormalizedCustomInstructions();
+            if (normalizedInstructions) {
+                prompt += `Special Directives:\n${normalizedInstructions}\n`;
             }
             
             prompt += `\n--- SOURCE PRODUCTS DATA ---\n`;
@@ -439,7 +651,8 @@ ${this.getMediaDirectionBlock()}
             prompt += `4. Include a dedicated Video Prompt section when the selected mode needs video, with duration, shot list, camera movement, pacing, text overlays, and solid-black PAICAFE logo end card.\n`;
             prompt += `5. Strongly enforce the PAICAFE/PAI brand logo rule: white PAI or PAICAFE logo, exact spelling, solid black field, no distorted text.\n`;
             prompt += `6. Include local-offline optimization cues for a LocalLLM (no external API lookup needed).\n`;
-            prompt += `7. Add call-to-actions, QR scanning notes, and relevant hashtags (#paicafe #payvia).`;
+            prompt += `7. Add call-to-actions, QR scanning notes, and relevant hashtags (#paicafe #payvia).\n`;
+            prompt += `8. If address, contact, phone, email, opening hours, or location are requested, use the official PAICAFE contact block exactly.`;
             
             return prompt;
         },

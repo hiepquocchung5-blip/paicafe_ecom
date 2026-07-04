@@ -134,6 +134,48 @@ $tailwind_css = load_tailwind_css([
             border-color: rgba(94, 234, 212, 0.36) !important;
         }
 
+        .active-pill {
+            background: rgba(249, 115, 22, 0.18) !important;
+            color: #fed7aa !important;
+            border-color: rgba(249, 115, 22, 0.38) !important;
+        }
+
+        .product-grid-compact .product-card {
+            padding: 0.65rem;
+        }
+
+        .product-grid-compact .product-card .product-image {
+            margin-bottom: 0.55rem;
+        }
+
+        .product-grid-compact .product-card h3 {
+            font-size: 0.68rem;
+            line-height: 1rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .pos-product-grid.product-grid-compact {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (min-width: 768px) {
+            .pos-product-grid.product-grid-compact {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .pos-product-grid.product-grid-compact {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .pos-product-grid.product-grid-compact {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+            }
+        }
+
         #rotate-overlay { 
             display: none; 
             position: fixed; 
@@ -246,6 +288,12 @@ $tailwind_css = load_tailwind_css([
                         <span>Held</span>
                         <span x-show="heldOrders.length" x-text="heldOrders.length" class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center"></span>
                     </button>
+                    <button @click="compactGrid = !compactGrid; saveUiPrefs()" class="h-10 px-3 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest" title="Toggle compact product grid">
+                        <i class="fas" :class="compactGrid ? 'fa-grip' : 'fa-grip-vertical'"></i>
+                    </button>
+                    <button @click="showShortcuts = true" class="h-10 px-3 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest" title="POS shortcuts">
+                        <i class="fas fa-keyboard"></i>
+                    </button>
                     <button @click="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl soft-panel text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Toggle color theme" title="Toggle theme">
                         <i class="fas" :class="darkMode ? 'fa-sun text-yellow-400' : 'fa-moon text-blue-500'"></i>
                     </button>
@@ -261,15 +309,35 @@ $tailwind_css = load_tailwind_css([
                     <button @click="selectedCategory = 'All'" 
                             :class="selectedCategory === 'All' ? 'active-category' : 'bg-white/5 text-slate-400 hover:bg-white/10'"
                             class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
-                        All Items
+                        All <span class="opacity-60" x-text="'(' + products.length + ')'"></span>
                     </button>
                     <template x-for="category in categories">
                         <button @click="selectedCategory = category" 
                                 :class="selectedCategory === category ? 'active-category' : 'bg-white/5 text-slate-400 hover:bg-white/10'"
-                                x-text="category"
                                 class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                            <span x-text="category"></span>
+                            <span class="opacity-60" x-text="'(' + (categoryCounts[category] || 0) + ')'"></span>
                         </button>
                     </template>
+                </div>
+            </div>
+
+            <!-- Quantity Presets -->
+            <div class="pos-rail border-b border-white/5 px-4 sm:px-6 py-3 no-print">
+                <div class="flex items-center justify-between gap-3 overflow-x-auto custom-scrollbar pb-1">
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Add Qty</span>
+                        <template x-for="qty in [1, 2, 3, 5]" :key="'qty-' + qty">
+                            <button @click="quickQty = qty"
+                                    :class="quickQty === qty ? 'active-pill' : 'soft-panel text-slate-400'"
+                                    class="min-w-11 h-10 rounded-xl border text-xs font-black transition-all"
+                                    x-text="'x' + qty">
+                            </button>
+                        </template>
+                    </div>
+                    <button @click="quickQty = 1; searchTerm = ''; selectedCategory = 'All'" class="h-10 px-4 rounded-xl soft-panel text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all flex-shrink-0">
+                        Reset Filters
+                    </button>
                 </div>
             </div>
 
@@ -299,7 +367,8 @@ $tailwind_css = load_tailwind_css([
                     <p class="font-mono text-xs uppercase tracking-widest">No matching products found.</p>
                 </div>
 
-                <div x-show="!loading" class="pos-product-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+                <div x-show="!loading" class="pos-product-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4"
+                     :class="compactGrid ? 'product-grid-compact' : ''">
                     <template x-for="product in filteredProducts" :key="product.id">
                         <div @click="addToCart(product)" 
                              class="product-card group rounded-2xl p-3 cursor-pointer flex flex-col relative overflow-hidden">
@@ -311,7 +380,7 @@ $tailwind_css = load_tailwind_css([
                                 </div>
                             </template>
 
-                            <div class="aspect-square rounded-xl overflow-hidden mb-3 bg-slate-800">
+                            <div class="product-image aspect-square rounded-xl overflow-hidden mb-3 bg-slate-800">
                                 <img :src="product.image || '/assets/uploads/placeholder.png'" 
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             </div>
@@ -324,7 +393,8 @@ $tailwind_css = load_tailwind_css([
                                 </template>
                                 <div class="flex items-center justify-between">
                                     <p class="text-orange-500 font-black text-sm" x-text="formatCurrency(product.price - (product.price * product.discount_percentage / 100))"></p>
-                                    <div class="w-6 h-6 rounded-lg bg-orange-600/10 flex items-center justify-center group-hover:bg-orange-600 transition-colors">
+                                    <div class="min-w-6 h-6 px-1.5 rounded-lg bg-orange-600/10 flex items-center justify-center group-hover:bg-orange-600 transition-colors">
+                                        <span x-show="quickQty > 1" class="text-[9px] font-black text-orange-500 group-hover:text-white mr-1" x-text="'x' + quickQty"></span>
                                         <i class="fas fa-plus text-[10px] text-orange-500 group-hover:text-white"></i>
                                     </div>
                                 </div>
@@ -345,6 +415,7 @@ $tailwind_css = load_tailwind_css([
                         <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
                             <span x-text="cartItemCount"></span> items selected
                         </p>
+                        <p x-show="draftSavedAt" class="text-[9px] text-teal-400 font-black uppercase tracking-widest mt-1" x-text="'Draft saved ' + draftSavedAt"></p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button @click="holdCurrentOrder()" :disabled="Object.keys(cart).length === 0" class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-300 hover:bg-teal-500 hover:text-white disabled:opacity-30 transition-all" title="Hold order">
@@ -359,10 +430,10 @@ $tailwind_css = load_tailwind_css([
 
             <div class="px-4 sm:px-6 pt-5 no-print">
                 <div class="grid grid-cols-2 gap-3">
-                    <button @click="orderMode = 'takeaway'" :class="orderMode === 'takeaway' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                    <button @click="orderMode = 'takeaway'; persistOrderDraft()" :class="orderMode === 'takeaway' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
                         <i class="fas fa-bag-shopping mr-2"></i>Takeaway
                     </button>
-                    <button @click="orderMode = 'dine_in'" :class="orderMode === 'dine_in' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                    <button @click="orderMode = 'dine_in'; persistOrderDraft()" :class="orderMode === 'dine_in' ? 'active-mode' : 'soft-panel text-slate-400'" class="touch-button rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
                         <i class="fas fa-mug-hot mr-2"></i>Dine In
                     </button>
                 </div>
@@ -385,6 +456,7 @@ $tailwind_css = load_tailwind_css([
                         <div class="flex-grow px-3 min-w-0">
                             <p class="text-xs font-bold text-white truncate" x-text="item.name"></p>
                             <p class="text-[10px] text-orange-500 font-black mt-0.5" x-text="formatCurrency(item.price)"></p>
+                            <p class="text-[9px] text-slate-500 font-bold mt-0.5" x-text="'Line ' + formatCurrency(item.price * item.quantity)"></p>
                         </div>
                         <div class="flex items-center bg-black/20 rounded-xl p-1">
                             <button @click="updateQuantity(productId, -1)" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
@@ -407,10 +479,24 @@ $tailwind_css = load_tailwind_css([
             <div class="p-4 sm:p-6 pos-rail border-t border-white/5 space-y-4 no-print">
                 <div>
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Order Label</label>
-                    <input type="text" x-model="orderLabel" placeholder="Name, table, or short note" 
+                    <input type="text" x-model.debounce.400ms="orderLabel" @input.debounce.500ms="persistOrderDraft()" placeholder="Name, table, or short note" 
                            class="w-full pos-field border rounded-2xl px-4 py-3 text-sm text-white focus:border-orange-500/50 focus:outline-none transition-all">
                 </div>
                 <div class="space-y-2">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="soft-panel rounded-2xl p-3">
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lines</p>
+                            <p class="text-lg font-black text-white leading-none mt-1" x-text="Object.keys(cart).length"></p>
+                        </div>
+                        <div class="soft-panel rounded-2xl p-3">
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Items</p>
+                            <p class="text-lg font-black text-white leading-none mt-1" x-text="cartItemCount"></p>
+                        </div>
+                        <div class="soft-panel rounded-2xl p-3">
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Mode</p>
+                            <p class="text-sm font-black text-white leading-none mt-1" x-text="orderMode === 'dine_in' ? 'Dine' : 'Go'"></p>
+                        </div>
+                    </div>
                     <div class="flex justify-between text-xs font-bold">
                         <span class="text-slate-500 uppercase tracking-widest">Subtotal</span>
                         <span class="text-slate-200" x-text="formatCurrency(totals.subtotal)"></span>
@@ -471,7 +557,10 @@ $tailwind_css = load_tailwind_css([
                             <div class="relative">
                                 <input type="tel" x-model="customerPhone" placeholder="09..." 
                                        class="w-full pos-field border rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all">
-                                <button @click="findCustomer()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Verify</button>
+                                <button @click="findCustomer()" class="absolute right-12 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Verify</button>
+                                <button @click="clearCustomer()" x-show="customerPhone" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-500">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
                             </div>
                             <p x-text="customerMessage" class="text-[10px] mt-2 font-bold px-2" :class="customerName ? 'text-emerald-500' : 'text-slate-500'"></p>
                         </div>
@@ -481,7 +570,10 @@ $tailwind_css = load_tailwind_css([
                             <div class="relative">
                                 <input type="text" x-model="couponCode" placeholder="Enter code..." 
                                        class="w-full pos-field border rounded-2xl px-5 py-4 text-white focus:border-orange-500/50 focus:outline-none transition-all uppercase">
-                                <button @click="applyCoupon()" class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Apply</button>
+                                <button @click="applyCoupon()" class="absolute right-12 top-1/2 -translate-y-1/2 text-orange-500 font-black text-[10px] uppercase tracking-widest">Apply</button>
+                                <button @click="clearCoupon()" x-show="couponCode" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-500">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
                             </div>
                             <p x-text="couponMessage" class="text-[10px] mt-2 font-bold px-2" :class="couponDiscount > 0 ? 'text-emerald-500' : 'text-red-500'"></p>
                         </div>
@@ -511,7 +603,7 @@ $tailwind_css = load_tailwind_css([
                             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Cash Received</label>
                             <input type="number" x-model.number="amountTendered" class="w-full pos-field border rounded-2xl px-5 py-4 text-white text-2xl font-black mb-4 focus:outline-none">
                             <div class="grid grid-cols-4 gap-2">
-                                <template x-for="val in [5000, 10000, 20000]">
+                                <template x-for="val in tenderSuggestions" :key="'cash-' + val">
                                     <button @click="amountTendered = val" class="py-2 rounded-xl soft-panel text-[10px] font-black hover:bg-white/10 transition-all" x-text="val.toLocaleString()"></button>
                                 </template>
                                 <button @click="amountTendered = totals.final" class="py-2 rounded-xl bg-orange-600/20 border border-orange-600/30 text-orange-500 text-[10px] font-black">EXACT</button>
@@ -572,6 +664,33 @@ $tailwind_css = load_tailwind_css([
                                 <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHORTCUTS MODAL -->
+    <div x-show="showShortcuts" x-cloak class="fixed inset-0 z-[160] no-print">
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-xl" @click="showShortcuts = false"></div>
+        <div class="absolute left-1/2 top-1/2 w-[min(620px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] glass-panel overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-black uppercase tracking-tight text-white">POS Shortcuts</h2>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Fast controls for counter service.</p>
+                </div>
+                <button @click="showShortcuts = false" class="w-10 h-10 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <template x-for="shortcut in shortcuts" :key="shortcut.key">
+                    <div class="soft-panel rounded-2xl p-4 flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-black text-white" x-text="shortcut.label"></p>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1" x-text="shortcut.help"></p>
+                        </div>
+                        <kbd class="px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[10px] font-black text-orange-300" x-text="shortcut.key"></kbd>
                     </div>
                 </template>
             </div>
@@ -648,13 +767,22 @@ $tailwind_css = load_tailwind_css([
             showReceiptModal: false, receiptDetails: { orderId: null, cart: [], totals: { subtotal: 0, tax: 0, final: 0 } }, 
             couponCode: '', couponDiscount: 0, couponMessage: '',
             orderLabel: '', orderMode: 'takeaway', showHeldOrders: false, heldOrders: [],
-            favoriteProductIds: [],
+            favoriteProductIds: [], quickQty: 1, compactGrid: false, showShortcuts: false, draftSavedAt: '',
             darkMode: document.documentElement.classList.contains('dark'),
+            shortcuts: [
+                { key: 'Ctrl/Cmd K', label: 'Search products', help: 'Jump to product search' },
+                { key: 'F2', label: 'Hold order', help: 'Park current cart' },
+                { key: 'F4', label: 'Checkout', help: 'Open payment panel' },
+                { key: 'Esc', label: 'Close panel', help: 'Close modals and overlays' },
+                { key: 'Alt + 1-5', label: 'Quick quantity', help: 'Set add quantity' }
+            ],
             
             init() {
                 this.darkMode = document.documentElement.classList.contains('dark');
                 this.loadHeldOrders();
                 this.loadFavorites();
+                this.loadUiPrefs();
+                this.loadOrderDraft();
                 this.fetchProducts();
                 window.addEventListener('paicafe-theme-change', (event) => {
                     this.darkMode = Boolean(event.detail && event.detail.dark);
@@ -671,6 +799,15 @@ $tailwind_css = load_tailwind_css([
                     if (event.key === 'F4' && Object.keys(this.cart).length > 0) {
                         event.preventDefault();
                         this.openPaymentModal = true;
+                    }
+                    if (event.key === 'Escape') {
+                        this.openPaymentModal = false;
+                        this.showHeldOrders = false;
+                        this.showShortcuts = false;
+                    }
+                    if (event.altKey && ['1', '2', '3', '4', '5'].includes(event.key)) {
+                        event.preventDefault();
+                        this.quickQty = parseInt(event.key, 10);
                     }
                 });
             },
@@ -710,8 +847,22 @@ $tailwind_css = load_tailwind_css([
             get filteredProducts() {
                 let f = this.products;
                 if (this.selectedCategory !== 'All') { f = f.filter(p => p.category_name === this.selectedCategory); }
-                if (this.searchTerm.trim() !== '') { f = f.filter(p => p.name_en.toLowerCase().includes(this.searchTerm.toLowerCase())); }
+                if (this.searchTerm.trim() !== '') {
+                    const query = this.searchTerm.toLowerCase();
+                    f = f.filter(p =>
+                        p.name_en.toLowerCase().includes(query) ||
+                        (p.category_name && p.category_name.toLowerCase().includes(query))
+                    );
+                }
                 return f;
+            },
+
+            get categoryCounts() {
+                return this.products.reduce((counts, product) => {
+                    const category = product.category_name || 'Uncategorized';
+                    counts[category] = (counts[category] || 0) + 1;
+                    return counts;
+                }, {});
             },
 
             get favoriteProducts() {
@@ -727,17 +878,26 @@ $tailwind_css = load_tailwind_css([
             get cartItemCount() {
                 return Object.values(this.cart).reduce((sum, item) => sum + item.quantity, 0);
             },
+
+            get tenderSuggestions() {
+                const final = Math.ceil((this.totals.final || 0) / 1000) * 1000;
+                const suggestions = [final, Math.ceil(final / 5000) * 5000, final + 5000, final + 10000]
+                    .filter(value => value > 0);
+                return [...new Set(suggestions)].slice(0, 4);
+            },
             
             addToCart(p) { 
                 const finalPrice = p.price - (p.price * (p.discount_percentage || 0) / 100);
-                if(this.cart[p.id]){this.cart[p.id].quantity++;}
-                else{this.cart[p.id]={id:p.id,name:p.name_en,price:parseFloat(finalPrice),quantity:1, image: p.image};}
+                const qty = Number(this.quickQty) > 0 ? Number(this.quickQty) : 1;
+                if(this.cart[p.id]){this.cart[p.id].quantity += qty;}
+                else{this.cart[p.id]={id:p.id,name:p.name_en,price:parseFloat(finalPrice),quantity:qty, image: p.image};}
                 this.rememberFavorite(p.id);
+                this.persistOrderDraft();
             },
 
-            updateQuantity(id, amt) { if(this.cart[id]){this.cart[id].quantity+=amt; if(this.cart[id].quantity<=0){delete this.cart[id];}}},
-            manualUpdateQuantity(id, val) { const q = parseInt(val); if(!isNaN(q) && q > 0){this.cart[id].quantity=q;}else{delete this.cart[id];}},
-            removeFromCart(id) { delete this.cart[id]; },
+            updateQuantity(id, amt) { if(this.cart[id]){this.cart[id].quantity+=amt; if(this.cart[id].quantity<=0){delete this.cart[id];} this.persistOrderDraft();}},
+            manualUpdateQuantity(id, val) { const q = parseInt(val); if(!isNaN(q) && q > 0){this.cart[id].quantity=q;}else{delete this.cart[id];} this.persistOrderDraft();},
+            removeFromCart(id) { delete this.cart[id]; this.persistOrderDraft(); },
 
             rememberFavorite(id) {
                 const normalized = String(id);
@@ -751,6 +911,53 @@ $tailwind_css = load_tailwind_css([
                     this.favoriteProductIds = Array.isArray(stored) ? stored : [];
                 } catch (error) {
                     this.favoriteProductIds = [];
+                }
+            },
+
+            loadUiPrefs() {
+                this.compactGrid = localStorage.getItem('paicafe-pos-compact-grid') === 'true';
+            },
+
+            saveUiPrefs() {
+                localStorage.setItem('paicafe-pos-compact-grid', this.compactGrid ? 'true' : 'false');
+            },
+
+            persistOrderDraft() {
+                if (Object.keys(this.cart).length === 0) {
+                    localStorage.removeItem('paicafe-pos-draft');
+                    this.draftSavedAt = '';
+                    return;
+                }
+                const draft = {
+                    cart: this.cart,
+                    orderLabel: this.orderLabel,
+                    orderMode: this.orderMode,
+                    customerPhone: this.customerPhone,
+                    customerName: this.customerName,
+                    couponCode: this.couponCode,
+                    couponDiscount: this.couponDiscount,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem('paicafe-pos-draft', JSON.stringify(draft));
+                this.draftSavedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                this.saveUiPrefs();
+            },
+
+            loadOrderDraft() {
+                try {
+                    const draft = JSON.parse(localStorage.getItem('paicafe-pos-draft') || 'null');
+                    if (!draft || !draft.cart || Object.keys(draft.cart).length === 0) return;
+                    this.cart = draft.cart;
+                    this.orderLabel = draft.orderLabel || '';
+                    this.orderMode = draft.orderMode || 'takeaway';
+                    this.customerPhone = draft.customerPhone || '';
+                    this.customerName = draft.customerName || '';
+                    this.couponCode = draft.couponCode || '';
+                    this.couponDiscount = Number(draft.couponDiscount || 0);
+                    this.draftSavedAt = draft.savedAt ? new Date(draft.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                    this.showToast('Recovered saved POS draft', '#14b8a6');
+                } catch (error) {
+                    localStorage.removeItem('paicafe-pos-draft');
                 }
             },
 
@@ -806,6 +1013,7 @@ $tailwind_css = load_tailwind_css([
                 this.couponDiscount = heldOrder.couponDiscount || 0;
                 this.heldOrders = this.heldOrders.filter(order => order.id !== id);
                 this.saveHeldOrders();
+                this.persistOrderDraft();
                 this.showHeldOrders = false;
                 this.showToast('Held order recalled', '#14b8a6');
             },
@@ -840,9 +1048,17 @@ $tailwind_css = load_tailwind_css([
                     this.couponMessage = data.message;
                     if (data.status === 'success') { 
                         this.couponDiscount = data.discount; 
+                        this.persistOrderDraft();
                         this.showToast('Voucher Authenticated', '#10b981');
                     } else { this.couponDiscount = 0; }
                 });
+            },
+
+            clearCoupon() {
+                this.couponCode = '';
+                this.couponDiscount = 0;
+                this.couponMessage = '';
+                this.persistOrderDraft();
             },
 
             findCustomer() {
@@ -855,12 +1071,21 @@ $tailwind_css = load_tailwind_css([
                             this.customerName = data.user.username;
                             this.customerPoints = data.user.loyalty_points;
                             this.customerMessage = `ID: ${this.customerName.toUpperCase()} / ${this.customerPoints} PTS`;
+                            this.persistOrderDraft();
                             this.showToast('Customer Identified', '#3b82f6');
                         } else {
                             this.customerName = '';
                             this.customerMessage = 'No saved customer found. This sale can continue.';
                         }
                     });
+            },
+
+            clearCustomer() {
+                this.customerPhone = '';
+                this.customerName = '';
+                this.customerPoints = 0;
+                this.customerMessage = '';
+                this.persistOrderDraft();
             },
 
             buildOrderPayload() {
@@ -917,6 +1142,8 @@ $tailwind_css = load_tailwind_css([
                             couponCode: this.couponCode, couponDiscount: this.couponDiscount,
                             label: this.orderLabel
                         };
+                        localStorage.removeItem('paicafe-pos-draft');
+                        this.draftSavedAt = '';
                         this.showReceiptModal = true;
                         this.showToast('Transaction Authorized', '#10b981');
                     } else {
@@ -933,6 +1160,7 @@ $tailwind_css = load_tailwind_css([
                 this.cart={}; this.paymentMethod='Cash'; this.customerPhone=''; this.amountTendered=null; 
                 this.couponCode=''; this.couponDiscount=0; this.couponMessage=''; 
                 this.customerName=''; this.customerPoints=0; this.customerMessage=''; this.orderLabel=''; this.orderMode='takeaway';
+                this.persistOrderDraft();
             },
 
             printReceipt() {
