@@ -6,18 +6,22 @@ function paicafe_load_env($path) {
         $line = trim($line);
         if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) continue;
         [$key, $value] = array_map('trim', explode('=', $line, 2));
-        if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $key) || getenv($key) !== false) continue;
+        if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $key)) continue;
+        $system_value = getenv($key);
+        if ($system_value !== false || array_key_exists($key, $_ENV) || array_key_exists($key, $_SERVER)) continue;
         if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
             $value = substr($value, 1, -1);
         }
-        putenv($key . '=' . $value);
         $_ENV[$key] = $value;
     }
 }
 
 function env_value($key, $default = null) {
     $value = getenv($key);
-    return $value === false ? $default : $value;
+    if ($value !== false) return $value;
+    if (array_key_exists($key, $_ENV)) return $_ENV[$key];
+    if (array_key_exists($key, $_SERVER)) return $_SERVER[$key];
+    return $default;
 }
 
 function env_bool($key, $default = false) {
