@@ -242,7 +242,7 @@ if (!empty($_SESSION['cart'])) {
       <i class="fas fa-book text-lg"></i>
       <span class="text-xs mt-1">Guide</span>
     </a>
-    <button type="button" class="theme-toggle flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400" aria-label="Toggle color theme">
+    <button type="button" class="theme-toggle knife-handle-action flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400" aria-label="Toggle color theme">
       <i class="fas fa-moon text-lg theme-icon-moon"></i>
       <i class="fas fa-sun text-lg theme-icon-sun hidden"></i>
       <span class="text-xs mt-1">Theme</span>

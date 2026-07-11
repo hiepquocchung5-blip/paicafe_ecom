@@ -357,8 +357,7 @@ body { line-height: 1.65; }
     .cafe-main h2.text-4xl { font-size: 1.9rem !important; }
     .mobile-floating-bar { margin: 0 .65rem .65rem; border-radius: 1.25rem; box-shadow: 0 12px 35px rgba(30,20,14,.2); }
 }
-
-@media (max-width: 420px) { .cafe-highlights { grid-template-columns: 1fr; } }
+ { .cafe-highlights { grid-template-columns: 1fr; } }
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -711,4 +710,74 @@ footer.bg-white {
     .menu-product-card > div { padding: 1rem !important; }
     .menu-product-card h3 { font-size: 1rem !important; }
     .menu-product-card .text-xl, .menu-product-card .text-2xl { font-size: 1.05rem !important; }
+}
+
+
+/* Chef knife mobile navigation — based on the supplied blade reference */
+@media (max-width: 767px) {
+    .mobile-floating-bar {
+        width: min(96%, 480px);
+        min-height: 72px;
+        padding: .3rem .35rem .3rem .65rem;
+        border: 1px solid rgba(117,105,92,.26) !important;
+        border-radius: 2.6rem 1.4rem 1.4rem 2.6rem !important;
+        background:
+            linear-gradient(100deg, transparent 78%, rgba(255,255,255,.2) 78.5%, transparent 80%),
+            linear-gradient(90deg, #fffdfa 0 78%, #683a24 78%, #321b14 100%) !important;
+        box-shadow: 0 18px 35px rgba(35,25,19,.25), inset 0 1px 0 white, inset 0 -2px 4px rgba(61,48,37,.08) !important;
+    }
+    .mobile-floating-bar::before {
+        inset: 5px 21.5% 5px 5px;
+        border: 1px solid rgba(183,170,155,.25);
+        border-radius: 2.2rem .55rem .55rem 2.2rem;
+    }
+    .mobile-floating-bar::after {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        top: -1px;
+        bottom: -1px;
+        left: 76.5%;
+        width: 8%;
+        border-radius: 45% 20% 20% 45%;
+        background: linear-gradient(100deg, #6b7280, #f8fafc 43%, #71717a 62%, #3f3f46);
+        box-shadow: inset 1px 0 2px rgba(255,255,255,.8), 3px 0 8px rgba(0,0,0,.2);
+        transform: skewX(-10deg);
+        pointer-events: none;
+    }
+    .mobile-floating-bar > div { position: relative; z-index: 1; padding-right: 0; }
+    .mobile-floating-bar a, .mobile-floating-bar button { max-width: none; border-radius: .9rem; }
+    .mobile-floating-bar a:nth-child(-n+5) { flex: .95; }
+    .mobile-floating-bar .knife-handle-action {
+        flex: 1.15;
+        margin-left: .45rem;
+        color: #fff7ed !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,.55);
+    }
+    .mobile-floating-bar .knife-handle-action::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: .25rem;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 999px;
+        background: repeating-linear-gradient(8deg, transparent 0 5px, rgba(255,255,255,.035) 6px, rgba(0,0,0,.05) 8px);
+    }
+    .mobile-floating-bar .cart-link {
+        top: 0 !important;
+        max-width: none;
+        height: 52px;
+        padding: 0 !important;
+        color: var(--text-muted) !important;
+        background: transparent !important;
+        border: 0;
+        box-shadow: none !important;
+    }
+    .mobile-floating-bar .cart-link.active { color: var(--brand-primary) !important; background: rgba(194,65,12,.08) !important; }
+    .mobile-menu-action.active .cutlery-emblem { width: 38px; height: 38px; }
+    .dark .mobile-floating-bar {
+        border-color: rgba(255,237,213,.2) !important;
+        background: linear-gradient(90deg, #26221e 0 78%, #60351f 78%, #25130e 100%) !important;
+        box-shadow: 0 18px 38px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    }
 }
