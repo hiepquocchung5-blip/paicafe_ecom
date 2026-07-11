@@ -260,14 +260,14 @@ if ($hour < 12) {
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <!-- Node: Kitchen -->
-            <a href="https://kitchen.paicafes.com" target="_blank" class="node-card premium-glass glass-card-hover glow-orange rounded-2xl p-5 flex items-center justify-between group border">
+            <a href="https://poskitchen.paicafes.com" target="_blank" class="node-card premium-glass glass-card-hover glow-orange rounded-2xl p-5 flex items-center justify-between group border">
                 <div class="flex items-center space-x-5">
                     <div class="w-12 h-12 bg-orange-600/10 rounded-xl flex items-center justify-center group-hover:bg-orange-600 group-hover:rotate-[360deg] transition-all duration-700">
                         <i class="fas fa-fire-burner text-orange-500 text-xl group-hover:text-white"></i>
                     </div>
                     <div>
                         <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">KITCHEN SCREEN</p>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">kitchen.paicafes.com</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">poskitchen.paicafes.com</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -277,14 +277,14 @@ if ($hour < 12) {
             </a>
 
             <!-- Node: Table System -->
-            <a href="https://table.paicafes.com" target="_blank" class="node-card premium-glass glass-card-hover glow-blue rounded-2xl p-5 flex items-center justify-between group border">
+            <a href="https://postable.paicafes.com" target="_blank" class="node-card premium-glass glass-card-hover glow-blue rounded-2xl p-5 flex items-center justify-between group border">
                 <div class="flex items-center space-x-5">
                     <div class="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:rotate-[360deg] transition-all duration-700">
                         <i class="fas fa-couch text-blue-400 text-xl group-hover:text-white"></i>
                     </div>
                     <div>
                         <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">TABLE SERVICE</p>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">table.paicafes.com</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">postable.paicafes.com</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">

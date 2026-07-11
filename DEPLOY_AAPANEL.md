@@ -6,6 +6,7 @@
 4. Enable PHP extensions `pdo_mysql`, `mbstring`, `openssl`, and optionally `redis`.
 5. Issue SSL for `paicafes.com` and `www.paicafes.com`, force HTTPS, and redirect `www` to the canonical domain.
 6. Keep Redis bound to `127.0.0.1`; never expose port 6379 publicly.
+7. For the kitchen and table subdomains, follow `DEPLOY_SUBDOMAINS_AAPANEL.md`.
 
 After updates:
 
