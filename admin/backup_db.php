@@ -1,6 +1,7 @@
 <?php
 // This script is protected by the functions file
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../config.php';
 require_admin_login();
 
 // Only developers should be able to run this
@@ -8,12 +9,10 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'developer') {
     die("Access Denied.");
 }
 
-// --- IMPORTANT: Database Credentials from your db_connect.php file ---
-// You must manually enter the same credentials you use in your db_connect.php
-$db_host = 'localhost';
-$db_name = 'zmmlpszw_paicafe'; // Your database name
-$db_user = 'zmmlpszw_filip';       // Your database username
-$db_pass = '@fekgygn85cCM43';           // Your database password
+$db_host = DB_HOST;
+$db_name = DB_NAME;
+$db_user = DB_USER;
+$db_pass = DB_PASS;
 
 // --- File Name for the Backup ---
 $backup_file_name = $db_name . '_backup_' . date("Y-m-d_H-i-s") . '.sql';
@@ -28,7 +27,10 @@ header('Pragma: public');
 // --- Execute the mysqldump command ---
 // passthru() executes the command and passes the output directly to the browser
 // Note: shell_exec() must be enabled on your server for this to work.
-$command = "mysqldump --host={$db_host} --user={$db_user} --password={$db_pass} {$db_name}";
+$command = sprintf(
+    'mysqldump --host=%s --port=%d --user=%s --password=%s --single-transaction --skip-lock-tables %s',
+    escapeshellarg($db_host), DB_PORT, escapeshellarg($db_user), escapeshellarg($db_pass), escapeshellarg($db_name)
+);
 passthru($command, $return_var);
 
 // Check if the command was successful

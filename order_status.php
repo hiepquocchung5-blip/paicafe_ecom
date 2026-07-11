@@ -121,7 +121,7 @@ include 'includes/header.php';
         <div class="flex justify-center space-x-4">
           <?php
             $share_text = "Just had a great meal at Paicafe!";
-            $share_url = "https://paicafe.online/order_status.php?order_id=" . $order_id;
+            $share_url = "https://paicafes.com/order_status.php?order_id=" . $order_id;
           ?>
           <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($share_url) ?>&quote=<?= urlencode($share_text) ?>" target="_blank" class="flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-2xl">
             <i class="fab fa-facebook-f"></i>

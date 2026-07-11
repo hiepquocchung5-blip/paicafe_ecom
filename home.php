@@ -1,20 +1,24 @@
 <?php
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+$page_title = 'Pai Cafe Yangon | Halal Cafe & Restaurant in Thuwunna, Thingangyun';
+$page_description = 'Visit Pai Cafe in Thuwunna, Thingangyun, Yangon for halal meals, specialty coffee, burgers, pasta and desserts. Browse our QR menu or reserve a table.';
+$page_keywords = 'cafe Yangon, cafe Thuwunna, cafe Thingangyun, halal cafe Yangon, restaurant Thuwunna, coffee shop Thingangyun, Pai Cafe, cafe near me Yangon';
+$page_canonical = 'https://paicafes.com/home.php';
 include 'includes/header.php';
 
 // --- Fetch Today's Special Products ---
-$specials = $pdo->query("
+$specials = paicafe_cache_remember('home:specials', 300, function () use ($pdo) { return $pdo->query("
     SELECT p.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count
     FROM products p
     LEFT JOIN reviews r ON p.id = r.product_id
     WHERE p.is_special_today = 1 AND p.is_available = 1
     GROUP BY p.id
     LIMIT 3
-")->fetchAll();
+")->fetchAll(); });
 
 // --- Fetch Top-Rated Products (Favorites) ---
-$favorites = $pdo->query("
+$favorites = paicafe_cache_remember('home:favorites', 300, function () use ($pdo) { return $pdo->query("
     SELECT p.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count
     FROM products p
     JOIN reviews r ON p.id = r.product_id
@@ -23,35 +27,46 @@ $favorites = $pdo->query("
     HAVING avg_rating >= 3.5
     ORDER BY avg_rating DESC, COUNT(r.id) DESC
     LIMIT 3
-")->fetchAll();
+")->fetchAll(); });
 
 // --- Fetch Active Loyalty Rewards ---
-$rewards = $pdo->query("SELECT * FROM loyalty_rewards WHERE is_active = 1 ORDER BY points_cost ASC LIMIT 4")->fetchAll();
+$rewards = paicafe_cache_remember('home:rewards', 600, function () use ($pdo) { return $pdo->query("SELECT * FROM loyalty_rewards WHERE is_active = 1 ORDER BY points_cost ASC LIMIT 4")->fetchAll(); });
 
 // --- Fetch Recent Reviews for Testimonial Section ---
-$recent_reviews = $pdo->query("
+$recent_reviews = paicafe_cache_remember('home:reviews', 180, function () use ($pdo) { return $pdo->query("
     SELECT r.*, p.name_en as product_name, p.image as product_image, u.username
     FROM reviews r
     JOIN products p ON r.product_id = p.id
     JOIN users u ON r.user_id = u.id
     ORDER BY r.created_at DESC
     LIMIT 3
-")->fetchAll();
+")->fetchAll(); });
 ?>
 
 <!-- Section 1: Hero Section -->
-<div class="relative bg-gray-800 text-white rounded-lg shadow-2xl overflow-hidden mb-20" style="height: 50vh;">
-    <img src="https://paicafe.online/assets/uploads/bgg.png" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="Cafe background">
+<div class="cafe-hero relative bg-gray-800 text-white rounded-lg shadow-2xl overflow-hidden mb-20">
+    <img src="https://paicafes.com/assets/uploads/bgg.png" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="Cafe background">
     <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-8">
-        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Welcome to Paicafe</h1>
-        <p class="text-lg md:text-xl max-w-2xl mb-8">Experience the finest coffee and freshest meals in town. Join our family and get rewarded for every sip and bite!</p>
-        <a href="/register.php" class="btn-brand text-lg">Join Our Loyalty Program Now</a>
+        <span class="cafe-hero__eyebrow">Halal café & restaurant · Yangon</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Good food. Great coffee.<br><span>A place to slow down.</span></h1>
+        <p class="text-lg md:text-xl max-w-2xl mb-8">Fresh halal meals, handcrafted drinks, and warm hospitality—served every day at Paicafe.</p>
+        <div class="cafe-hero__actions">
+            <a href="/menu.php" class="btn-brand text-lg">Explore Our Menu</a>
+            <a href="/reserve_table.php" class="cafe-hero__secondary text-lg">Reserve a Table</a>
+        </div>
     </div>
 </div>
 
 <div class="flex justify-center -mt-12 mb-12">
     <img width="64" height="64" src="https://img.icons8.com/external-doodles-line-amoghdesign/64/EA580C/external-food-islam-doodles-line-amoghdesign.png" alt="Halal Food Icon"/>
 </div>
+
+<section class="cafe-highlights" aria-label="Why visit Pai Cafe">
+    <article><i class="fas fa-mug-hot"></i><div><strong>Specialty coffee</strong><span>Freshly crafted hot and iced drinks</span></div></article>
+    <article><i class="fas fa-certificate"></i><div><strong>Halal kitchen</strong><span>Comfort food prepared with care</span></div></article>
+    <article><i class="fas fa-location-dot"></i><div><strong>Easy to find</strong><span>Thuwunna, Thingangyun, Yangon</span></div></article>
+    <article><i class="fas fa-mobile-screen-button"></i><div><strong>Quick QR ordering</strong><span>Browse, order and track from your phone</span></div></article>
+</section>
 
 <!-- Section 2: Today's Specials -->
 <div class="text-center mb-12 animate-on-scroll" x-data="{ featuredProduct: null, showModal: false }">
@@ -220,7 +235,7 @@ $recent_reviews = $pdo->query("
 <div class="mt-24">
     <div class="text-center mb-12">
         <h2 class="text-4xl font-bold text-gray-800">Visit Us</h2>
-        <p class="text-lg text-gray-600">We're waiting to serve you!</p>
+        <p class="text-lg text-gray-600">Your neighborhood café and halal restaurant in Thuwunna, Thingangyun, Yangon.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white p-8 rounded-lg shadow-xl">
         <div>
@@ -228,7 +243,7 @@ $recent_reviews = $pdo->query("
             <div class="space-y-3 text-gray-700">
                 <p><i class="fas fa-map-marker-alt fa-fw mr-2 text-orange-500"></i> No.88,Thantumar Main Street, Thuwunna Tsp, Yangon, Myanmar</p>
                 <p><i class="fas fa-phone fa-fw mr-2 text-orange-500"></i> +95 9 8 9 0 9 0 7 7 2 4</p>
-                <p><i class="fas fa-envelope fa-fw mr-2 text-orange-500"></i> contact@paicafe.online</p>
+                <p><i class="fas fa-envelope fa-fw mr-2 text-orange-500"></i> contact@paicafes.com</p>
                 <p><i class="fas fa-clock fa-fw mr-2 text-orange-500"></i> Open Daily: 9:00 AM - 6:00 PM</p>
             </div>
         </div>

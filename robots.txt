@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /kitchen/
+Disallow: /table/
+Disallow: /checkout.php
+Disallow: /profile.php
+
+Sitemap: https://paicafes.com/sitemap.xml

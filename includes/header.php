@@ -1,7 +1,7 @@
 <?php 
 // FIX: The database connection must be included here for the cart count logic to work.
 require_once 'db_connect.php';
-require_once 'functions.php'; 
+require_once 'functions.php';
 
 $current_page = $current_page ?? pathinfo($_SERVER['SCRIPT_NAME'] ?? '', PATHINFO_FILENAME);
 
@@ -26,10 +26,34 @@ if (!empty($_SESSION['cart'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paicafe - Halal Coffee & Meals in Yangon | QR Menu Ordering</title>
+    <?php
+    $seo_title = $page_title ?? 'Pai Cafe Yangon | Halal Cafe & Restaurant in Thuwunna';
+    $seo_description = $page_description ?? 'Pai Cafe serves specialty coffee and fresh halal meals in Thuwunna, Thingangyun, Yangon. Browse the menu, order online or reserve a table.';
+    $seo_keywords = $page_keywords ?? 'Pai Cafe, cafe Yangon, halal restaurant Yangon, coffee shop Thuwunna, cafe Thingangyun';
+    $seo_canonical = $page_canonical ?? ('https://paicafes.com' . strtok($_SERVER['REQUEST_URI'] ?? '/', '?'));
+    $seo_image = $page_image ?? 'https://paicafes.com/assets/uploads/bgg.png';
+    ?>
+    <title><?= e($seo_title) ?></title>
     <link rel="icon" type="image/png" href="/assets/public_photo/coffee.png" />
-    <meta name="description" content="Scan QR for easy ordering at Paicafe. Enjoy fresh halal food, loyalty rewards, and daily specials. Open 9AM-6PM.">
-    <meta name="keywords" content="halal cafe Yangon, QR menu Myanmar, coffee shop Thuwunna">
+    <meta name="description" content="<?= e($seo_description) ?>">
+    <meta name="keywords" content="<?= e($seo_keywords) ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="author" content="Pai Cafe & Lounge">
+    <meta name="geo.region" content="MM-06">
+    <meta name="geo.placename" content="Thuwunna, Thingangyun, Yangon">
+    <link rel="canonical" href="<?= e($seo_canonical) ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pai Cafe & Lounge">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="<?= e($seo_title) ?>">
+    <meta property="og:description" content="<?= e($seo_description) ?>">
+    <meta property="og:url" content="<?= e($seo_canonical) ?>">
+    <meta property="og:image" content="<?= e($seo_image) ?>">
+    <meta property="og:image:alt" content="Pai Cafe and Lounge in Thuwunna, Yangon">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= e($seo_title) ?>">
+    <meta name="twitter:description" content="<?= e($seo_description) ?>">
+    <meta name="twitter:image" content="<?= e($seo_image) ?>">
     <script>
         (function () {
             const storedTheme = localStorage.getItem('paicafe-theme') || localStorage.getItem('darkMode');
@@ -68,8 +92,15 @@ if (!empty($_SESSION['cart'])) {
                         "addressCountry": "MM"
                       },
                       "telephone": "+95 9 8 9 0 9 0 7 7 2 4",
-                      "url": "https://paicafe.online",
-                      "servesCuisine": "Halal, Cafe"
+                      "url": "https://paicafes.com",
+                      "image": "https://paicafes.com/assets/uploads/bgg.png",
+                      "priceRange": "$$",
+                      "servesCuisine": ["Halal", "Cafe", "Coffee", "Burgers", "Asian"],
+                      "acceptsReservations": true,
+                      "areaServed": ["Thuwunna", "Thingangyun", "Yangon"],
+                      "openingHoursSpecification": [{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"09:00","closes":"18:00"}],
+                      "geo": {"@type":"GeoCoordinates","latitude":16.8175613,"longitude":96.1947021},
+                      "hasMap": "https://www.google.com/maps/search/?api=1&query=Pai+Cafe+%26+Lounge+Yangon"
                     }
     </script>
 </head>
@@ -111,7 +142,7 @@ if (!empty($_SESSION['cart'])) {
         </div>
     </div>
     
-    <nav class="bg-white dark:bg-slate-900 shadow-md hidden md:block border-b border-transparent dark:border-slate-800 transition-colors duration-300"> 
+    <nav class="cafe-navbar bg-white dark:bg-slate-900 shadow-md hidden md:block border-b border-transparent dark:border-slate-800 transition-colors duration-300">
         <div class="container mx-auto px-6 py-3 flex justify-between items-center">
             
             <a class="flex items-center" href="/home.php">
@@ -137,7 +168,7 @@ if (!empty($_SESSION['cart'])) {
                     <i class="fas fa-moon theme-icon-moon"></i>
                     <i class="fas fa-sun theme-icon-sun hidden"></i>
                  </button>
-                 
+
                  <div class="border-l pl-4 flex items-center space-x-2 text-green-600">
                    <img width="50" height="50" src="https://img.icons8.com/ios/50/EA580C/halal-sign.png" alt="halal-sign"/>
                  </div>
@@ -190,4 +221,4 @@ if (!empty($_SESSION['cart'])) {
   </div>
 </div>
 
-    <main class="container mx-auto px-6 py-8 flex-grow">
+    <main class="cafe-main container mx-auto px-6 py-8 flex-grow">

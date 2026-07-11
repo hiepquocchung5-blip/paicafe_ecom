@@ -17,7 +17,7 @@ if ($table_id > 0) {
     $table = $stmt->fetch();
 }
 
-$qr_url = "https://paicafe.online/menu.php?qr_table_id_menu=" . urlencode($table['qr_code_identifier'] ?? '');
+$qr_url = "https://paicafes.com/menu.php?qr_table_id_menu=" . urlencode($table['qr_code_identifier'] ?? '');
 $qr_image_src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . $qr_url;
 
 // Google Maps Embed URL for your address
@@ -95,7 +95,7 @@ $map_embed_url = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3819.382
                         <p class="text-sm text-slate-500 font-bold uppercase tracking-[0.18em] mt-1">Scan, order, relax</p>
                     </div>
                 </div>
-                
+
                 <div class="inline-flex items-center gap-3 rounded-full bg-teal-500/10 border border-teal-500/20 px-5 py-2 mb-5">
                     <span class="h-2.5 w-2.5 rounded-full bg-teal-500"></span>
                     <span class="text-xs font-black uppercase tracking-[0.2em] text-teal-700">Table Stand</span>
@@ -103,12 +103,12 @@ $map_embed_url = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3819.382
 
                 <h1 class="text-6xl font-black text-orange-600 my-3 tracking-tight"><?= e($table['table_number']) ?></h1>
                 <p class="text-xl text-slate-700 mb-6 font-bold"><?= e($table['floor']) ?></p>
-                
+
                 <img src="<?= e($qr_image_src) ?>" alt="QR Code for Table" class="w-64 h-64 mx-auto mb-8 p-3 bg-white border-4 border-orange-200 rounded-3xl shadow-xl">
 
                 <p class="text-xl font-black text-slate-900 mb-2">Scan this QR code</p>
                 <p class="text-base text-slate-600 leading-relaxed max-w-sm mx-auto">Browse the menu and order your favorites directly from your seat.</p>
-                
+
                 <div class="mt-10 border-t-2 border-dashed border-slate-300 pt-6 text-sm text-slate-700">
                     <p class="font-black text-base mb-2 text-slate-900">Find Us Here</p>
                     <p>No 11, Thanthumar Housing, Thanthumar Rd</p>

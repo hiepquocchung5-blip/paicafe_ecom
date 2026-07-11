@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS `paicafes` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'paicafes'@'127.0.0.1' IDENTIFIED BY 'REPLACE_WITH_ENV_PASSWORD';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES
+ON `paicafes`.* TO 'paicafes'@'127.0.0.1';
+FLUSH PRIVILEGES;
+
+-- For remote access, replace WEB_SERVER_IP with one trusted static IP.
+-- Never use '%' without strict firewall and TLS controls.
+-- CREATE USER IF NOT EXISTS 'paicafes'@'WEB_SERVER_IP' IDENTIFIED BY 'REPLACE_WITH_ENV_PASSWORD';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON `paicafes`.* TO 'paicafes'@'WEB_SERVER_IP';

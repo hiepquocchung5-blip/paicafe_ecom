@@ -152,6 +152,47 @@ function e($string) {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+/** Return a shared Redis connection, or null when Redis is unavailable. */
+function paicafe_redis() {
+    static $client = false;
+    if ($client !== false) return $client;
+    $client = null;
+    if (!defined('REDIS_ENABLED') || !REDIS_ENABLED || !class_exists('Redis')) return null;
+    try {
+        $redis = new Redis();
+        $redis->connect(REDIS_HOST, REDIS_PORT, 0.35);
+        if (REDIS_PASSWORD !== '') $redis->auth(REDIS_PASSWORD);
+        $redis->select(REDIS_DATABASE);
+        $client = $redis;
+    } catch (Throwable $error) {
+        error_log('Paicafe Redis unavailable: ' . $error->getMessage());
+    }
+    return $client;
+}
+
+/** Cache computed public data; failures always fall back to the database. */
+function paicafe_cache_remember($key, $ttl, callable $resolver) {
+    $redis = paicafe_redis();
+    $cache_key = (defined('CACHE_PREFIX') ? CACHE_PREFIX : 'paicafe:') . $key;
+    if ($redis) {
+        try {
+            $cached = $redis->get($cache_key);
+            if ($cached !== false) return unserialize($cached, ['allowed_classes' => false]);
+        } catch (Throwable $error) { error_log('Paicafe cache read failed: ' . $error->getMessage()); }
+    }
+    $value = $resolver();
+    if ($redis) {
+        try { $redis->setex($cache_key, max(1, (int)$ttl), serialize($value)); }
+        catch (Throwable $error) { error_log('Paicafe cache write failed: ' . $error->getMessage()); }
+    }
+    return $value;
+}
+
+function paicafe_cache_forget($key) {
+    $redis = paicafe_redis();
+    if ($redis) $redis->del((defined('CACHE_PREFIX') ? CACHE_PREFIX : 'paicafe:') . $key);
+}
+
 function csrf_token() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

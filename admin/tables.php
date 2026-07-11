@@ -47,7 +47,7 @@ $flash_message_type = $_SESSION['flash_message_type'] ?? 'error';
 unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 
 $tables = $pdo->query("SELECT * FROM tables ORDER BY floor, table_number ASC")->fetchAll();
-$base_url = "https://paicafe.online"; // FIX: Hardcode the base URL for consistency
+$base_url = "https://paicafes.com"; // FIX: Hardcode the base URL for consistency
 ?>
 
 <div class="max-w-7xl mx-auto">
@@ -99,7 +99,7 @@ $base_url = "https://paicafe.online"; // FIX: Hardcode the base URL for consiste
             <table class="w-full text-left">
                 <thead><tr><th class="p-4">Table</th><th class="p-4">Floor</th><th class="p-4">Status</th><th class="p-4">Change Status</th><th class="p-4 text-right">Actions</th></tr></thead>
                 <tbody>
-                    <?php foreach ($tables as $table): 
+                    <?php foreach ($tables as $table):
                         $status_colors = ['free' => 'bg-green-100 text-green-800', 'in_use' => 'bg-blue-100 text-blue-800', 'needs_cleaning' => 'bg-yellow-100 text-yellow-800', 'reserved' => 'bg-purple-100 text-purple-800', 'maintenance' => 'bg-red-100 text-red-800'];
                         $color = $status_colors[$table['status']] ?? 'bg-gray-100';
                     ?>

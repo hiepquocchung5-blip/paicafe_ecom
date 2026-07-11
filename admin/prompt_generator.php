@@ -368,7 +368,7 @@ function promptGeneratorState() {
         officialContact: {
             address: 'No.88, Thantumar Main Street, Thuwunna Tsp, Yangon, Myanmar',
             phone: '+95 9 8 9 0 9 0 7 7 2 4',
-            email: 'contact@paicafe.online',
+            email: 'contact@paicafes.com',
             hours: 'Open Daily: 9:00 AM - 6:00 PM'
         },
         

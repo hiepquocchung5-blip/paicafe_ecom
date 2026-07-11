@@ -21,7 +21,7 @@ ErrorDocument 404 /404.php
 Options -Indexes
 
 # Block access to sensitive files that might contain configuration details or logs.
-<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|sql|bak)$">
+<FilesMatch "(^\.env|\.(htaccess|htpasswd|ini|log|sh|sql|bak)$)">
     Order Allow,Deny
     Deny from all
 </FilesMatch>

@@ -241,6 +241,130 @@ h1, h2, h3 {
     }
 }
 
+/* Public café interface polish */
+html { scroll-behavior: smooth; }
+
+body { line-height: 1.65; }
+
+.cafe-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--surface-card) 90%, transparent) !important;
+    border-color: color-mix(in srgb, var(--border-light) 72%, transparent) !important;
+    box-shadow: 0 8px 30px rgba(50, 35, 24, .07);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.cafe-navbar a { font-weight: 600; transition: color .2s ease, transform .2s ease; }
+.cafe-navbar a:hover { transform: translateY(-1px); }
+.cafe-navbar img { border-radius: 12px; box-shadow: 0 4px 14px rgba(50, 35, 24, .14); }
+
+.cafe-main { max-width: 1280px; }
+
+.cafe-hero {
+    min-height: clamp(520px, 68vh, 720px);
+    border-radius: 2rem !important;
+    isolation: isolate;
+    box-shadow: 0 28px 70px rgba(38, 28, 19, .2);
+}
+
+.cafe-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(90deg, rgba(28, 18, 12, .83), rgba(28, 18, 12, .45) 56%, rgba(28, 18, 12, .22));
+}
+
+.cafe-hero > img { opacity: .72 !important; transform: scale(1.015); }
+.cafe-hero > div { align-items: flex-start !important; text-align: left !important; max-width: 760px; }
+.cafe-hero h1 { letter-spacing: -.045em; text-wrap: balance; text-shadow: 0 3px 24px rgba(0,0,0,.22); }
+.cafe-hero h1 span { color: #fdba74; }
+.cafe-hero p { color: rgba(255,255,255,.85); }
+.cafe-hero__eyebrow {
+    display: inline-flex;
+    margin-bottom: 1.25rem;
+    padding: .5rem .9rem;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 999px;
+    background: rgba(255,255,255,.12);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+}
+.cafe-hero__actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+.cafe-hero__secondary {
+    padding: .75rem 1.5rem;
+    border: 1px solid rgba(255,255,255,.55);
+    border-radius: 999px;
+    color: white;
+    font-weight: 600;
+    transition: .25s ease;
+}
+.cafe-hero__secondary:hover { background: white; color: #7c2d12; transform: translateY(-2px); }
+
+.btn-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 46px;
+    padding: .7rem 1.35rem;
+    box-shadow: 0 10px 22px rgba(194, 65, 12, .22);
+}
+
+.cafe-main h2 { letter-spacing: -.035em; text-wrap: balance; }
+.cafe-highlights {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: -1rem 0 5rem;
+}
+.cafe-highlights article {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.2rem;
+    border: 1px solid var(--border-light);
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--surface-card) 92%, transparent);
+    box-shadow: 0 12px 32px rgba(40, 31, 22, .06);
+}
+.cafe-highlights i { color: var(--brand-primary); font-size: 1.35rem; }
+.cafe-highlights strong, .cafe-highlights span { display: block; }
+.cafe-highlights strong { font-size: .9rem; color: var(--text-dark); }
+.cafe-highlights span { margin-top: .15rem; color: var(--text-muted); font-size: .74rem; line-height: 1.45; }
+.cafe-main .bg-white, .cafe-main .bg-gray-50 { border: 1px solid color-mix(in srgb, var(--border-light) 70%, transparent); }
+.cafe-main .shadow-lg, .cafe-main .shadow-xl, .cafe-main .shadow-md { box-shadow: var(--shadow-soft) !important; }
+.cafe-main img.object-cover { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+.cafe-main a:hover img.object-cover, .cafe-main .overflow-hidden:hover > img.object-cover { transform: scale(1.035); }
+
+@media (max-width: 767px) {
+    body { padding-bottom: 74px; }
+    .cafe-main { padding: 1rem !important; }
+    .cafe-hero { min-height: 560px; margin-bottom: 4rem !important; border-radius: 1.35rem !important; }
+    .cafe-hero > div { padding: 1.5rem !important; justify-content: flex-end !important; }
+    .cafe-hero h1 { font-size: clamp(2.35rem, 11vw, 3.5rem); }
+    .cafe-hero__actions { width: 100%; }
+    .cafe-hero__actions a { width: 100%; }
+    .cafe-highlights { grid-template-columns: 1fr 1fr; margin-bottom: 3.5rem; }
+    .cafe-highlights article { align-items: flex-start; padding: 1rem; }
+    .cafe-main .py-20 { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
+    .cafe-main h2.text-4xl { font-size: 1.9rem !important; }
+    .mobile-floating-bar { margin: 0 .65rem .65rem; border-radius: 1.25rem; box-shadow: 0 12px 35px rgba(30,20,14,.2); }
+}
+
+@media (max-width: 420px) { .cafe-highlights { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
 /*
 --------------------------------
 4. Dark Mode Compatibility Layer
