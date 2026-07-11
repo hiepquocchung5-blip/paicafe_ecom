@@ -30,6 +30,13 @@ if [[ ! -f .env ]]; then
   exit 1
 fi
 chmod 600 .env
+
+for placeholder in kitchen/index.html table/index.html; do
+  if [[ -f "$placeholder" ]] && grep -Eqi 'aaPanel|Congratulations|404 Not Found' "$placeholder"; then
+    mv "$placeholder" "/tmp/$(basename "$(dirname "$placeholder")")-index.html.$(date +%s).bak"
+    echo "Disabled aaPanel placeholder: $placeholder"
+  fi
+done
 if ! "$PHP" -r 'exit(in_array("mysql", PDO::getAvailableDrivers(), true) ? 0 : 1);'; then
   echo "The selected PHP does not have the PDO MySQL driver."
   echo "In aaPanel: App Store > PHP > Install extensions > pdo_mysql, then restart PHP."

@@ -53,6 +53,37 @@ Do not redirect `/api/` to the main domain: each module has its own API routes.
 Both modules safely load the shared `.env` and PDO connection from the parent
 repository.
 
+The primary kitchen and pickup pages also load CSS/logo assets from
+`https://paicafes.com`, so they remain styled even before the optional alias is
+configured.
+
+## Required Nginx index and PHP routing
+
+aaPanel often creates a placeholder `index.html`, which takes priority and can
+show its default 404 page. Remove only the generated placeholders:
+
+```bash
+rm -f /www/wwwroot/paicafes.com/kitchen/index.html
+rm -f /www/wwwroot/paicafes.com/table/index.html
+```
+
+In each subdomain Nginx `server` block, use:
+
+```nginx
+index index.php index.html;
+
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
+}
+
+location ~ \.php$ {
+    include enable-php-83.conf;
+}
+```
+
+Replace `83` with the PHP version assigned in aaPanel. The website roots must be
+exactly the module directories listed above—not `/www/wwwroot/paicafes.com`.
+
 ## Verification
 
 ```bash

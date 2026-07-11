@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Ready | Pai Cafe</title>
     <meta name="robots" content="noindex, nofollow, noarchive">
-    <link rel="stylesheet" href="/assets/css/tailwind.css?v=<?= filemtime(__DIR__ . '/../assets/css/tailwind.css') ?>">
+    <link rel="stylesheet" href="https://paicafes.com/assets/css/tailwind.css?v=<?= filemtime(__DIR__ . '/../assets/css/tailwind.css') ?>">
     <style>
         :root { --cream:#f5efe6; --ink:#241b15; --orange:#c2410c; --green:#1f6b55; }
         * { box-sizing:border-box; }
@@ -38,7 +38,7 @@
 </head>
 <body>
     <header class="pickup-header">
-        <div class="brand"><div class="brand-mark"><img src="/assets/svg/pai-mark.svg" alt="Pai Cafe"></div><div><h1>Ready for pickup</h1><p>Pai Cafe &amp; Lounge · Please collect your order at the counter</p></div></div>
+        <div class="brand"><div class="brand-mark"><img src="https://paicafes.com/assets/svg/pai-mark.svg" alt="Pai Cafe"></div><div><h1>Ready for pickup</h1><p>Pai Cafe &amp; Lounge · Please collect your order at the counter</p></div></div>
         <div class="updated" id="updated">Checking ready orders…</div>
     </header>
     <main>

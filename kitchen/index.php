@@ -17,7 +17,7 @@ require_kitchen_login();
     
     <!-- Fonts & Styles -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/tailwind.css?v=<?= filemtime(__DIR__ . '/../assets/css/tailwind.css') ?>">
+    <link rel="stylesheet" href="https://paicafes.com/assets/css/tailwind.css?v=<?= filemtime(__DIR__ . '/../assets/css/tailwind.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -97,7 +97,7 @@ require_kitchen_login();
             <div class="flex items-center space-x-5">
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-orange-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div class="relative p-1 bg-black rounded-xl border border-orange-600/30"><img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10"></div>
+                    <div class="relative p-1 bg-black rounded-xl border border-orange-600/30"><img src="https://paicafes.com/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10"></div>
                 </div>
                 <div>
                     <h1 class="text-lg font-black tracking-tight text-white leading-none">Pai Cafe <span class="text-orange-500">Kitchen</span></h1>
