@@ -191,8 +191,7 @@ if (!empty($_SESSION['cart'])) {
                     <i class="fas fa-bag-shopping"></i><span>Cart</span><b id="cart-count"><?= $total_cart_items ?></b>
                  </a>
                  <button type="button" class="theme-toggle h-10 w-10 rounded-full border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors" aria-label="Toggle color theme" title="Toggle theme">
-                    <i class="fas fa-moon theme-icon-moon"></i>
-                    <i class="fas fa-sun theme-icon-sun hidden"></i>
+                    <svg class="theme-glyph" viewBox="0 0 24 24" aria-hidden="true"><g class="theme-glyph__moon"><path d="M20 15.2A8.5 8.5 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z"/></g><g class="theme-glyph__sun"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></g></svg>
                  </button>
 
                  <div class="halal-badge" title="Halal food">
@@ -250,8 +249,7 @@ if (!empty($_SESSION['cart'])) {
       <span class="text-xs mt-1">Guide</span>
     </a>
     <button type="button" class="theme-toggle knife-handle-action flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400" aria-label="Toggle color theme">
-      <i class="fas fa-moon text-lg theme-icon-moon"></i>
-      <i class="fas fa-sun text-lg theme-icon-sun hidden"></i>
+      <svg class="theme-glyph" viewBox="0 0 24 24" aria-hidden="true"><g class="theme-glyph__moon"><path d="M20 15.2A8.5 8.5 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z"/></g><g class="theme-glyph__sun"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></g></svg>
       <span class="text-xs mt-1">Theme</span>
     </button>
   </div>

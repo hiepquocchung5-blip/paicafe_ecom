@@ -656,6 +656,13 @@ footer.bg-white {
 .theme-toggle {
     flex-shrink: 0;
 }
+.theme-glyph { display:block; width:20px; height:20px; margin:auto; overflow:visible; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+.theme-glyph__moon { display:block; }
+.theme-glyph__sun { display:none; }
+.dark .theme-glyph__moon { display:none; }
+.dark .theme-glyph__sun { display:block; }
+.theme-toggle:hover .theme-glyph { transform:rotate(12deg) scale(1.08); }
+.theme-toggle[aria-pressed="true"] .theme-glyph { transform:rotate(20deg); }
 
 @media print {
     body > *:not(.voucher-print-area) {
