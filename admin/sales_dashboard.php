@@ -4,6 +4,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="container mx-auto px-4" x-data="salesDashboard()">
+    <div x-show="error" x-cloak class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-text="error"></div>
     <h1 class="text-3xl font-bold mb-6">Sales Analytics Dashboard</h1>
 
     <!-- Date Range Picker -->
@@ -16,7 +17,7 @@
             <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
             <input type="date" x-model="endDate" class="form-input">
         </div>
-        <button @click="fetchData()" class="btn-brand mt-6">Generate</button>
+        <button @click="fetchData()" :disabled="loading" class="btn-brand mt-6"><span x-show="!loading">Generate</span><span x-show="loading"><i class="fas fa-spinner fa-spin mr-2"></i>Loading</span></button>
     </div>
 
     <!-- Charts Grid -->
@@ -47,18 +48,30 @@ function salesDashboard() {
         salesChart: null,
         orderTypeChart: null,
         topProductsChart: null,
+        loading: false,
+        error: '',
         init() {
             this.fetchData();
         },
         fetchData() {
-            const url = `/api/get_sales_data.php?start_date=${this.startDate}&end_date=${this.endDate}`;
-            fetch(url)
-                .then(res => res.json())
+            const url = `<?= e($admin_asset_base) ?>/api/get_sales_data.php?start_date=${encodeURIComponent(this.startDate)}&end_date=${encodeURIComponent(this.endDate)}`;
+            this.loading = true;
+            this.error = '';
+            fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                .then(async res => {
+                    const contentType = res.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) throw new Error(`The report endpoint returned ${res.status} instead of JSON.`);
+                    const data = await res.json();
+                    if (!res.ok || data.status === 'error') throw new Error(data.message || 'Sales report request failed.');
+                    return data;
+                })
                 .then(data => {
                     this.renderSalesChart(data.sales_by_day);
                     this.renderOrderTypeChart(data.order_types);
                     this.renderTopProductsChart(data.top_products);
-                });
+                })
+                .catch(error => { this.error = error.message; console.error('Sales dashboard:', error); })
+                .finally(() => { this.loading = false; });
         },
         renderSalesChart(data) {
             const ctx = document.getElementById('salesChart').getContext('2d');
