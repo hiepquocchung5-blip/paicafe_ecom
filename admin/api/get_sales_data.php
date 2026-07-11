@@ -39,12 +39,15 @@ try {
     $types->execute([$start, $end]);
     $products = $pdo->prepare("SELECT p.name_en, SUM(oi.quantity) total_sold FROM order_items oi JOIN orders o ON o.id=oi.order_id JOIN products p ON p.id=oi.product_id WHERE o.status='completed' AND DATE(o.created_at) BETWEEN ? AND ? GROUP BY p.id,p.name_en ORDER BY total_sold DESC LIMIT 5");
     $products->execute([$start, $end]);
+    $summary = $pdo->prepare("SELECT COUNT(*) order_count, COALESCE(SUM(final_amount),0) revenue, COALESCE(AVG(final_amount),0) average_order FROM orders WHERE status='completed' AND DATE(created_at) BETWEEN ? AND ?");
+    $summary->execute([$start, $end]);
 
     echo json_encode([
         'status' => 'success',
         'sales_by_day' => $sales->fetchAll(),
         'order_types' => $types->fetchAll(),
         'top_products' => $products->fetchAll(),
+        'summary' => $summary->fetch(),
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $error) {
     error_log('Sales dashboard API failed: ' . $error->getMessage());
