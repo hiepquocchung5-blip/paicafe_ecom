@@ -251,6 +251,29 @@ body { line-height: 1.65; }
 .cafe-navbar a { font-weight: 600; transition: color .2s ease, transform .2s ease; }
 .cafe-navbar a:hover { transform: translateY(-1px); }
 .cafe-navbar img { border-radius: 12px; box-shadow: 0 4px 14px rgba(50, 35, 24, .14); }
+.cafe-navbar__inner { max-width: 1380px; min-height: 70px; }
+.cafe-brand { gap: .7rem; flex-shrink: 0; text-decoration: none; }
+.cafe-brand:hover { transform: none !important; }
+.cafe-brand__mark { display:grid; place-items:center; width:48px; height:48px; filter:drop-shadow(0 7px 9px rgba(154,52,18,.18)); }
+.cafe-brand__mark svg { width:100%; height:100%; }
+.cafe-brand__type { display:flex; flex-direction:column; line-height:1; }
+.cafe-brand__type strong { color:var(--text-dark); font-size:1.05rem; letter-spacing:-.03em; }
+.cafe-brand__type small { margin-top:.3rem; color:var(--brand-primary); font-size:.58rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
+.cafe-nav-link { position:relative; padding:.65rem .8rem; border-radius:.75rem; color:var(--text-muted); font-size:.86rem; }
+.cafe-nav-link:hover,.cafe-nav-link.active { color:var(--brand-primary); background:color-mix(in srgb,var(--brand-primary) 8%,transparent); }
+.cafe-nav-link.active::after { content:""; position:absolute; left:50%; bottom:.25rem; width:16px; height:2px; border-radius:2px; background:var(--brand-primary); transform:translateX(-50%); }
+.desktop-cart-link { display:flex; align-items:center; gap:.45rem; min-height:42px; padding:.55rem .7rem .55rem .9rem; border:1px solid var(--border-light); border-radius:999px; color:var(--text-dark); background:var(--surface-control); }
+.desktop-cart-link b { display:grid; place-items:center; min-width:24px; height:24px; padding:0 .35rem; border-radius:999px; color:white; background:var(--brand-primary); font-size:.68rem; }
+.halal-badge { display:flex; flex-direction:column; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid color-mix(in srgb,var(--brand-secondary) 28%,var(--border-light)); border-radius:50%; color:var(--brand-secondary); background:color-mix(in srgb,var(--brand-secondary) 7%,transparent); line-height:1; }
+.halal-badge span { font-size:.75rem; font-weight:800; }.halal-badge small{margin-top:2px;font-size:.42rem;font-weight:800;letter-spacing:.08em}
+.dark .cafe-brand__type strong { color:#f8fafc; }
+@media (min-width:768px) and (max-width:1120px) {
+    .cafe-navbar__inner { padding-inline:1rem !important; }
+    .cafe-navbar__inner > div { gap:.25rem !important; }
+    .cafe-nav-link { padding-inline:.55rem; }
+    .halal-badge { display:none; }
+    .cafe-brand__type small { display:none; }
+}
 
 .cafe-main { max-width: 1280px; }
 

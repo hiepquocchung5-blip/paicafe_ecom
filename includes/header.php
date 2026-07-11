@@ -169,17 +169,17 @@ if (!empty($_SESSION['cart'])) {
     </div>
     
     <nav class="cafe-navbar bg-white dark:bg-slate-900 shadow-md hidden md:block border-b border-transparent dark:border-slate-800 transition-colors duration-300">
-        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+        <div class="cafe-navbar__inner container mx-auto px-6 py-3 flex justify-between items-center">
             
-            <a class="flex items-center" href="/home.php">
-                <img src="/assets/uploads/pai.jpg" alt="Paicafe Logo" class="h-10 mr-2">
-                <span class="text-xl font-bold text-orange-600">Paicafe</span>
+            <a class="cafe-brand flex items-center" href="/home.php" aria-label="Pai Cafe and Lounge home">
+                <span class="cafe-brand__mark" aria-hidden="true"><svg viewBox="0 0 96 96"><defs><linearGradient id="brandMark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ea580c"/><stop offset="1" stop-color="#9a3412"/></linearGradient></defs><path d="M48 3 87 25v46L48 93 9 71V25z" fill="url(#brandMark)"/><path d="M24 35h49M33 35c-5 8-7 18-7 30M63 35c0 12 1 23 6 31" fill="none" stroke="#fff7ed" stroke-width="9" stroke-linecap="round"/><circle cx="76" cy="20" r="5" fill="#fdba74"/></svg></span>
+                <span class="cafe-brand__type"><strong>Pai Cafe</strong><small>&amp; Lounge</small></span>
             </a>
             
             <div class="flex items-center space-x-4">
-                <a href="/home.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Home</a>
-                <a href="/menu.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Menu</a>
-                <a href="/rewards.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Rewards</a>
+                <a href="/home.php" class="cafe-nav-link <?= $current_page === 'home' ? 'active' : '' ?>">Home</a>
+                <a href="/menu.php" class="cafe-nav-link <?= $current_page === 'menu' ? 'active' : '' ?>">Menu</a>
+                <a href="/rewards.php" class="cafe-nav-link <?= $current_page === 'rewards' ? 'active' : '' ?>">Rewards</a>
                 <?php if (is_user_logged_in()): ?>
                     <a href="/profile.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Profile</a>
                     <a href="/logout.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Logout</a>
@@ -187,16 +187,16 @@ if (!empty($_SESSION['cart'])) {
                     <a href="/login.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Login</a>
                     <a href="/register.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">Register</a>
                 <?php endif; ?>
-                 <a href="/cart.php" class="px-3 py-2 text-gray-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400">
-                    Cart (<span id="cart-count"><?= $total_cart_items ?></span>)
+                 <a href="/cart.php" class="desktop-cart-link">
+                    <i class="fas fa-bag-shopping"></i><span>Cart</span><b id="cart-count"><?= $total_cart_items ?></b>
                  </a>
                  <button type="button" class="theme-toggle h-10 w-10 rounded-full border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors" aria-label="Toggle color theme" title="Toggle theme">
                     <i class="fas fa-moon theme-icon-moon"></i>
                     <i class="fas fa-sun theme-icon-sun hidden"></i>
                  </button>
 
-                 <div class="border-l pl-4 flex items-center space-x-2 text-green-600">
-                   <img width="50" height="50" src="https://img.icons8.com/ios/50/EA580C/halal-sign.png" alt="halal-sign"/>
+                 <div class="halal-badge" title="Halal food">
+                   <span>حلال</span><small>HALAL</small>
                  </div>
             </div>
         </div>

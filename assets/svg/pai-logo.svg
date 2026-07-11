@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" role="img" aria-labelledby="title desc">
+  <title id="title">Pai Cafe and Lounge</title><desc id="desc">Pi symbol inside a warm hexagonal cafe emblem</desc>
+  <defs><linearGradient id="g" x1="8" y1="4" x2="82" y2="92" gradientUnits="userSpaceOnUse"><stop stop-color="#ea580c"/><stop offset="1" stop-color="#9a3412"/></linearGradient></defs>
+  <path d="M48 3 87 25v46L48 93 9 71V25z" fill="url(#g)"/>
+  <path d="M24 35h49M33 35c-5 8-7 18-7 30M63 35c0 12 1 23 6 31" fill="none" stroke="#fff7ed" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="76" cy="20" r="5" fill="#fdba74"/>
+  <text x="105" y="43" fill="#2d211a" font-family="Poppins,Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="-.5">Pai Cafe</text>
+  <text x="106" y="68" fill="#8a7568" font-family="Poppins,Arial,sans-serif" font-size="13" font-weight="600" letter-spacing="3">&amp; LOUNGE</text>
+</svg>
