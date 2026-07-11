@@ -13,3 +13,12 @@ After updates:
 git pull --ff-only
 ./deploy-aapanel.sh
 ```
+
+If the shell PHP differs from the website PHP, select aaPanel's binary:
+
+```bash
+PHP_BIN=/www/server/php/83/bin/php ./deploy-aapanel.sh
+```
+
+Replace `83` with the PHP version assigned to the website in aaPanel. The script
+also attempts to find the newest installed aaPanel PHP automatically.
