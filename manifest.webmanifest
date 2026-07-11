@@ -1,0 +1,1 @@
+{"name":"Pai Cafe","short_name":"Pai Cafe","description":"Pai Cafe menu and ordering","start_url":"/menu.php","scope":"/","display":"standalone","background_color":"#f5efe6","theme_color":"#c2410c","icons":[{"src":"/assets/public_photo/coffee.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}

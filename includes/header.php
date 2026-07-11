@@ -39,6 +39,9 @@ if (!empty($_SESSION['cart'])) {
     ?>
     <title><?= e($seo_title) ?></title>
     <link rel="icon" type="image/png" href="/assets/public_photo/coffee.png" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="/assets/public_photo/coffee.png">
     <meta name="description" content="<?= e($seo_description) ?>">
     <meta name="keywords" content="<?= e($seo_keywords) ?>">
     <meta name="robots" content="<?= e($seo_robots) ?>">
@@ -77,6 +80,7 @@ if (!empty($_SESSION['cart'])) {
     <link rel="stylesheet" href="/assets/css/style.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="/assets/js/pwa.js"></script>
     <script>
         window.addEventListener('load', function() {
             const loader = document.getElementById('page-loader');

@@ -12,6 +12,8 @@ require_kitchen_login();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pai Cafe | Kitchen Display</title>
     <meta name="robots" content="noindex, nofollow, noarchive">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#c2410c">
     
     <!-- Fonts & Styles -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
@@ -128,6 +130,8 @@ require_kitchen_login();
             </div>
             
             <div class="flex items-center space-x-6">
+                <button @click="soundEnabled=!soundEnabled; localStorage.setItem('kitchen-sound',soundEnabled?'1':'0')" class="p-3 rounded-xl bg-white/5 text-gray-300" :title="soundEnabled?'Mute alerts':'Enable alerts'"><i class="fas" :class="soundEnabled?'fa-volume-high':'fa-volume-xmark'"></i></button>
+                <button @click="toggleFullscreen()" class="p-3 rounded-xl bg-white/5 text-gray-300" title="Fullscreen"><i class="fas fa-expand"></i></button>
                 <div class="hidden sm:block text-right font-mono">
                     <p class="text-[10px] text-gray-500 font-bold uppercase" x-text="currentDate"></p>
                     <p class="text-base font-black text-white tracking-widest" x-text="currentTime"></p>
@@ -148,6 +152,10 @@ require_kitchen_login();
 
     <!-- Command Center Grid -->
     <main class="container mx-auto p-6 pt-8">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-7">
+            <div class="flex gap-2 bg-black/20 p-1.5 rounded-2xl" role="tablist"><template x-for="tab in ['all','new','preparing']"><button @click="stageFilter=tab" class="px-5 py-2.5 rounded-xl text-sm font-bold capitalize" :class="stageFilter===tab?'bg-orange-600 text-white':'text-gray-400'" x-text="tab"></button></template></div>
+            <div class="flex items-center gap-2"><span class="text-xs text-gray-500 font-bold uppercase">Station</span><select x-model="stationFilter" class="bg-[#24201c] border border-white/10 rounded-xl px-4 py-2.5 text-sm"><option>All</option><option>Kitchen</option><option>Bar</option><option>Dessert</option></select></div>
+        </div>
         
         <!-- Loading UI -->
         <div x-show="loading && orders.length === 0" class="flex flex-col items-center justify-center py-40">
@@ -169,7 +177,7 @@ require_kitchen_login();
 
         <!-- Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-            <template x-for="order in sortedOrders" :key="order.id">
+            <template x-for="order in visibleOrders" :key="order.id">
                 
                 <div :id="'order-' + order.id" 
                      class="glass-panel rounded-2xl flex flex-col transition-all duration-300 relative overflow-hidden group"
@@ -228,6 +236,7 @@ require_kitchen_login();
 
                     <!-- Bottom Action -->
                     <div class="p-5 bg-black/40 border-t border-white/5">
+                        <button @click="printTicket(order)" class="w-full mb-2 py-2 text-xs font-bold text-gray-400 hover:text-white"><i class="fas fa-print mr-2"></i>Print ticket</button>
                         <button @click="bumpOrder(order.id)" 
                                 class="w-full py-4 rounded-xl text-white font-black uppercase tracking-[0.3em] text-[11px] transition-all active:scale-95 flex items-center justify-center relative overflow-hidden group/btn"
                                 :class="allPrepped(order) ? 'bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-500'">
@@ -254,6 +263,9 @@ require_kitchen_login();
                 now: Date.now(),
                 lastPacketIds: new Set(),
                 prepLocal: {}, // { orderId: [preppedIndices] }
+                stageFilter: 'all',
+                stationFilter: 'All',
+                soundEnabled: localStorage.getItem('kitchen-sound') !== '0',
                 
                 init() {
                     this.refreshClock();
@@ -269,6 +281,19 @@ require_kitchen_login();
                 get sortedOrders() {
                     // Critical/Oldest orders always first
                     return [...this.orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                },
+                get visibleOrders() {
+                    return this.sortedOrders.filter(order => {
+                        const started = Boolean(this.prepLocal[order.id] && this.prepLocal[order.id].length);
+                        const stageMatch = this.stageFilter === 'all' || (this.stageFilter === 'new' && !started) || (this.stageFilter === 'preparing' && started);
+                        if (!stageMatch || this.stationFilter === 'All') return stageMatch;
+                        return order.items.some(item => {
+                            const category = String(item.category_name || '').toLowerCase();
+                            if (this.stationFilter === 'Bar') return /coffee|drink|beverage|juice|smoothie|latte/.test(category);
+                            if (this.stationFilter === 'Dessert') return /dessert|cake|sweet|bakery/.test(category);
+                            return !/coffee|drink|beverage|juice|smoothie|latte|dessert|cake|sweet|bakery/.test(category);
+                        });
+                    });
                 },
 
                 get totalItemsInQueue() {
@@ -355,7 +380,7 @@ require_kitchen_login();
                 },
 
                 triggerIncomingAlert(id) {
-                    document.getElementById('alert-ping').play().catch(() => {});
+                    if (this.soundEnabled) document.getElementById('alert-ping').play().catch(() => {});
                     Toastify({
                         text: `New kitchen order #${id}`,
                         duration: 5000,
@@ -368,6 +393,18 @@ require_kitchen_login();
                             boxShadow: "0 10px 30px rgba(234, 88, 12, 0.4)"
                         }
                     }).showToast();
+                },
+
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.();
+                },
+
+                printTicket(order) {
+                    const items = order.items.map(item => `${item.quantity} × ${item.name_en}`).join('\n');
+                    const popup = window.open('', '_blank', 'width=420,height=650');
+                    if (!popup) return;
+                    popup.document.write(`<title>Order #${order.id}</title><style>body{font-family:system-ui;padding:24px}h1{font-size:28px}pre{font:16px/1.8 system-ui;white-space:pre-wrap}</style><h1>Pai Cafe · Order #${order.id}</h1><p>${order.table_number ? 'Table '+order.table_number : 'Web order'}</p><pre>${items.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</pre>`);
+                    popup.document.close(); popup.focus(); popup.print();
                 },
 
                 bumpOrder(id) {
@@ -394,6 +431,9 @@ require_kitchen_login();
                 }
             }
         }
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(reg=>reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker&&worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller&&confirm('Kitchen display update ready. Reload now?'))location.reload();});})).catch(()=>{}));
     </script>
 </body>
 </html>

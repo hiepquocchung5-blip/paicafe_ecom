@@ -91,6 +91,15 @@ $pending_orders = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pendi
 $ready_for_pickup = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'ready_for_pickup'")->fetchColumn();
 $todays_revenue = $can_view_reports ? ($pdo->query("SELECT SUM(final_amount) FROM orders WHERE status = 'completed' AND DATE(created_at) = CURDATE()")->fetchColumn() ?? 0) : 0;
 $total_products = $pdo->query("SELECT COUNT(*) FROM products WHERE is_available = 1")->fetchColumn();
+$todays_orders = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE() AND status != 'cancelled'")->fetchColumn();
+$average_order_value = $todays_orders > 0 ? $todays_revenue / $todays_orders : 0;
+$pending_reservations = (int)$pdo->query("SELECT COUNT(*) FROM reservations WHERE status = 'pending'")->fetchColumn();
+$low_stock_count = (int)$pdo->query("SELECT COUNT(*) FROM inventory_items WHERE stock_quantity <= low_stock_threshold")->fetchColumn();
+$average_prep_minutes = (float)($pdo->query("SELECT AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) FROM orders WHERE DATE(created_at)=CURDATE() AND status IN ('ready_for_pickup','completed')")->fetchColumn() ?? 0);
+$best_sellers = $pdo->query("SELECT p.name_en, SUM(oi.quantity) quantity FROM order_items oi JOIN orders o ON o.id=oi.order_id JOIN products p ON p.id=oi.product_id WHERE DATE(o.created_at)=CURDATE() AND o.status!='cancelled' GROUP BY p.id,p.name_en ORDER BY quantity DESC LIMIT 5")->fetchAll();
+$payment_rows = $pdo->query("SELECT payment_method, SUM(amount) total FROM payments WHERE DATE(created_at)=CURDATE() AND status='approved' GROUP BY payment_method ORDER BY total DESC")->fetchAll();
+$payment_labels = array_column($payment_rows, 'payment_method');
+$payment_values = array_map('floatval', array_column($payment_rows, 'total'));
 
 // Join users and tables to display richer data in recent transmissions
 $recent_orders = $can_manage_orders ? $pdo->query("
@@ -448,6 +457,13 @@ if ($hour < 12) {
         </div>
     </div>
 
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="premium-glass rounded-2xl p-5"><p class="text-xs text-slate-500 font-bold">Orders today</p><strong class="text-3xl text-slate-800 dark:text-white"><?= $todays_orders ?></strong></div>
+        <div class="premium-glass rounded-2xl p-5"><p class="text-xs text-slate-500 font-bold">Average order</p><strong class="text-2xl text-slate-800 dark:text-white"><?= number_format($average_order_value) ?> Ks</strong></div>
+        <div class="premium-glass rounded-2xl p-5"><p class="text-xs text-slate-500 font-bold">Low stock items</p><strong class="text-3xl <?= $low_stock_count ? 'text-red-500' : 'text-emerald-500' ?>"><?= $low_stock_count ?></strong></div>
+        <div class="premium-glass rounded-2xl p-5"><p class="text-xs text-slate-500 font-bold">Pending reservations</p><strong class="text-3xl text-orange-500"><?= $pending_reservations ?></strong></div>
+    </section>
+
     <!-- CHARTS & ACTION HUB -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Sales Load Activity Chart -->
@@ -502,6 +518,12 @@ if ($hour < 12) {
                 <span class="font-mono text-emerald-500 font-bold animate-pulse">● LIVE CONSOLE</span>
             </div>
         </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div class="premium-glass rounded-[2rem] p-7 lg:col-span-1"><h2 class="text-lg font-black text-slate-800 dark:text-white mb-1">Payment mix</h2><p class="text-xs text-slate-500 mb-4">Today's approved payments</p><div class="h-56"><canvas id="paymentMethodChart"></canvas></div></div>
+        <div class="premium-glass rounded-[2rem] p-7"><h2 class="text-lg font-black text-slate-800 dark:text-white mb-4">Best sellers today</h2><div class="space-y-3"><?php foreach ($best_sellers as $i=>$item): ?><div class="flex items-center justify-between"><span class="text-sm text-slate-700 dark:text-slate-200"><b class="text-orange-500 mr-2">#<?= $i+1 ?></b><?= e($item['name_en']) ?></span><b class="text-sm"><?= (int)$item['quantity'] ?></b></div><?php endforeach; ?><?php if (!$best_sellers): ?><p class="text-sm text-slate-500">No completed sales yet today.</p><?php endif; ?></div></div>
+        <div class="premium-glass rounded-[2rem] p-7"><h2 class="text-lg font-black text-slate-800 dark:text-white mb-4">Kitchen performance</h2><div class="text-5xl font-black text-orange-500"><?= number_format($average_prep_minutes, 0) ?><small class="text-base text-slate-500"> min</small></div><p class="text-sm text-slate-500 mt-2">Average preparation time today</p><a href="https://poskitchen.paicafes.com" class="inline-flex mt-6 text-sm font-bold text-orange-600">Open kitchen display →</a></div>
     </div>
     
     <!-- DATA TERMINALS (ORDERS & LOYALTY) -->
@@ -775,6 +797,15 @@ window.todayHourlyChart = new Chart(ctx, {
         }
     }
 });
+
+const paymentCanvas = document.getElementById('paymentMethodChart');
+if (paymentCanvas) {
+    window.paymentMethodChart = new Chart(paymentCanvas, {
+        type: 'doughnut',
+        data: { labels: <?= json_encode($payment_labels) ?>, datasets: [{ data: <?= json_encode($payment_values) ?>, backgroundColor: ['#c2410c','#0f766e','#d97706','#7c3aed','#2563eb'], borderWidth: 0 }] },
+        options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, usePointStyle:true } } } }
+    });
+}
 
 function dashboardNotifications() {
     return {

@@ -6,7 +6,7 @@ try {
     // Fetch orders that are in the 'processing' state
     $stmt = $pdo->prepare("
         SELECT 
-            o.id, o.table_id, t.table_number
+            o.id, o.table_id, o.created_at, t.table_number
         FROM orders o
         LEFT JOIN tables t ON o.table_id = t.id
         WHERE o.status = 'processing'
@@ -18,9 +18,10 @@ try {
     $result = [];
     foreach ($orders as $order) {
         $items_stmt = $pdo->prepare("
-            SELECT oi.quantity, p.name_en
+            SELECT oi.quantity, p.name_en, c.name_en category_name
             FROM order_items oi
             JOIN products p ON oi.product_id = p.id
+            LEFT JOIN categories c ON c.id = p.category_id
             WHERE oi.order_id = ?
         ");
         $items_stmt->execute([$order['id']]);
