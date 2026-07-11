@@ -23,6 +23,9 @@ $tailwind_css = load_tailwind_css([
       x-init="$watch('darkMode', val => window.PaicafeTheme ? window.PaicafeTheme.set(val) : (document.documentElement.classList.toggle('dark', val), document.documentElement.classList.toggle('light', !val), document.documentElement.dataset.theme = val ? 'dark' : 'light'))"
       :class="{ 'dark': darkMode, 'light': !darkMode }">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAICAFE Admin Hub</title>

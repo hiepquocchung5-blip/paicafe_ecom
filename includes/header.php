@@ -46,6 +46,9 @@ if (!empty($_SESSION['cart'])) {
     <meta name="geo.region" content="MM-06">
     <meta name="geo.placename" content="Thuwunna, Thingangyun, Yangon">
     <link rel="canonical" href="<?= e($seo_canonical) ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Poppins:wght@400;600;700&display=swap">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Pai Cafe & Lounge">
     <meta property="og:locale" content="en_US">

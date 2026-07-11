@@ -4,15 +4,6 @@ Paicafe Custom Stylesheet
 ================================
 */
 
-/* FIX: The @import rule MUST be the first thing in the file */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-@import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Poppins:wght@400;600;700&display=swap');
-/* Add the font that supports Myanmar script */
-@import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Poppins:wght@400;600;700&display=swap');
-
-/* ... your other styles ... */
-
 /* Class to apply the Myanmar font */
 .lang-mm {
     font-family: 'Padauk', sans-serif;

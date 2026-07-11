@@ -7,7 +7,6 @@
     <meta name="robots" content="noindex, nofollow, noarchive">
     <link rel="stylesheet" href="/assets/css/tailwind.css?v=<?= filemtime(__DIR__ . '/../assets/css/tailwind.css') ?>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
         :root { --cream:#f5efe6; --ink:#241b15; --orange:#c2410c; --green:#1f6b55; }
         * { box-sizing:border-box; }
         body { margin:0; min-height:100vh; color:var(--ink); background:radial-gradient(circle at 10% 0%,#fff9ef,transparent 30%),var(--cream); font-family:Poppins,sans-serif; }
@@ -32,6 +31,9 @@
         @media(max-width:600px){.pickup-header{align-items:flex-start;flex-direction:column;gap:.6rem}.pickup-grid{grid-template-columns:1fr 1fr}.order-display-card{min-height:175px;padding:1.1rem}.order-number{font-size:3rem;margin-bottom:1rem}}
         @media(prefers-reduced-motion:reduce){*{animation:none!important}}
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap">
 </head>
 <body>
     <header class="pickup-header">

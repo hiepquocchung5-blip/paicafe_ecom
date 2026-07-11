@@ -142,8 +142,6 @@ if ($hour < 12) {
 ?>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap');
-    
     body {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
