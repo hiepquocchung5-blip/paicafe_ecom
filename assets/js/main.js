@@ -65,3 +65,25 @@ function animateCartPop() {
       cartLink.classList.remove('cart-pop-animation');
     }, { once: true });
   }
+
+function initMobileCartBadge() {
+  const badge = document.getElementById('mobile-cart-count');
+  if (!badge) return;
+
+  const sync = () => {
+    const count = Number.parseInt(badge.textContent || '0', 10) || 0;
+    badge.classList.toggle('hidden', count <= 0);
+  };
+
+  sync();
+  new MutationObserver(() => {
+    sync();
+    animateCartPop();
+  }).observe(badge, { childList: true, characterData: true, subtree: true });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMobileCartBadge);
+} else {
+  initMobileCartBadge();
+}

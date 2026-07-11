@@ -301,7 +301,9 @@ function updateCartCounts(count) {
     const mobileCount = document.getElementById('mobile-cart-count');
     if (mobileCount) {
         mobileCount.textContent = count;
+        mobileCount.classList.toggle('hidden', Number(count) <= 0);
     }
+    if (typeof animateCartPop === 'function') animateCartPop();
 }
 </script>
 

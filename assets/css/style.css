@@ -680,18 +680,26 @@ footer.bg-white {
 .menu-empty h2 { color: var(--text-dark); font-size: 1.5rem; }
 .menu-empty button { margin-top: 1rem; padding: .7rem 1rem; border-radius: 999px; background: var(--brand-primary); color: white; font-weight: 700; }
 
-.mobile-floating-bar { left: 50% !important; right: auto !important; bottom: max(.7rem, env(safe-area-inset-bottom)) !important; width: min(94%, 430px); transform: translateX(-50%); padding: .3rem .35rem; border: 1px solid color-mix(in srgb, var(--border-light) 80%, transparent) !important; border-radius: 1.45rem !important; box-shadow: 0 18px 48px rgba(31,23,18,.2) !important; }
+.mobile-floating-bar { left: 50% !important; right: auto !important; bottom: max(.7rem, env(safe-area-inset-bottom)) !important; width: min(94%, 430px); transform: translateX(-50%); padding: .3rem .35rem; border: 1px solid color-mix(in srgb, var(--brand-primary) 32%, var(--border-light)) !important; border-radius: 1.45rem !important; box-shadow: 0 18px 48px rgba(31,23,18,.2), inset 0 1px 0 rgba(255,255,255,.8) !important; overflow: visible; }
+.mobile-floating-bar::before { content:""; position:absolute; inset:3px; border:1px solid color-mix(in srgb, var(--brand-accent) 16%, transparent); border-radius:1.18rem; pointer-events:none; }
 .mobile-floating-bar > div { height: 62px !important; }
 .mobile-floating-bar a, .mobile-floating-bar button { position: relative; flex: 1; min-width: 0; height: 52px; border-radius: 1rem; font-size: .68rem; transition: color .2s ease, background .2s ease, transform .2s ease; }
 .mobile-floating-bar a:active, .mobile-floating-bar button:active { transform: scale(.92); }
 .mobile-floating-bar .active:not(.cart-link) { color: var(--brand-primary) !important; background: color-mix(in srgb, var(--brand-primary) 10%, transparent); }
 .mobile-floating-bar .active::after { display: none !important; }
-.mobile-menu-action__icon { display: grid; place-items: center; width: 28px; height: 28px; }
-.mobile-menu-action__icon svg { width: 25px; height: 25px; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
-.mobile-menu-action.active .mobile-menu-action__icon svg { animation: cutleryHello .55s ease both; }
+.mobile-menu-action__icon { display: grid; place-items: center; width: 34px; height: 34px; perspective: 180px; transform-style: preserve-3d; }
+.cutlery-emblem { width: 34px; height: 34px; overflow: visible; filter: drop-shadow(0 5px 5px rgba(67,20,7,.25)); transform-style: preserve-3d; transition: transform .35s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
+.cutlery-tools { transform-origin: 32px 31px; }
+.cutlery-shine { stroke-dasharray: 32; stroke-dashoffset: 32; }
+.mobile-menu-action:hover .cutlery-emblem, .mobile-menu-action:focus-visible .cutlery-emblem { transform: rotateX(12deg) rotateY(-14deg) translateY(-2px) scale(1.08); }
+.mobile-menu-action.active .cutlery-emblem { width: 43px; height: 43px; animation: cutleryFloat 3.2s ease-in-out infinite; filter: drop-shadow(0 8px 8px rgba(154,52,18,.34)); }
+.mobile-menu-action.active .cutlery-tools { animation: cutleryTools .65s cubic-bezier(.2,.9,.3,1) both; }
+.mobile-menu-action.active .cutlery-shine { animation: plateShine 2.8s ease-in-out infinite .4s; }
 .mobile-floating-bar .cart-link { top: -13px !important; width: 58px; max-width: 58px; height: 58px; padding: .55rem !important; color: white !important; background: linear-gradient(145deg, #ea580c, #b93808) !important; border: 4px solid var(--page-bg); box-shadow: 0 9px 22px rgba(194,65,12,.32) !important; }
 .mobile-floating-bar #mobile-cart-count { color: white !important; background: #0f766e !important; border: 2px solid white; }
-@keyframes cutleryHello { 0% { transform: rotate(0) scale(.9); } 45% { transform: rotate(-12deg) scale(1.15); } 100% { transform: rotate(0) scale(1); } }
+@keyframes cutleryFloat { 0%,100% { transform: translateY(0) rotateX(0); } 50% { transform: translateY(-3px) rotateX(8deg); } }
+@keyframes cutleryTools { 0% { transform: scale(.72) rotate(-12deg); opacity:.2; } 65% { transform: scale(1.12) rotate(4deg); } 100% { transform:scale(1); opacity:1; } }
+@keyframes plateShine { 0%,35% { stroke-dashoffset:32; opacity:0; } 55% { stroke-dashoffset:0; opacity:.75; } 75%,100% { stroke-dashoffset:-32; opacity:0; } }
 
 @media (max-width: 767px) {
     .menu-page { padding-inline: 0 !important; }

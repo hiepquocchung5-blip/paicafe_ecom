@@ -198,24 +198,32 @@ if (!empty($_SESSION['cart'])) {
     <!--Mobile floating bar-->
 <div class="md:hidden fixed bottom-0 left-0 right-0 mobile-floating-bar z-50 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 transition-colors duration-300">
   <div class="flex justify-around items-center h-16">
-    <a href="/home.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'home') ? 'active' : ''; ?>" aria-label="Home">
+    <a href="/home.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'home') ? 'active' : ''; ?>" aria-label="Home" <?= $current_page === 'home' ? 'aria-current="page"' : '' ?>>
       <i class="fas fa-home text-lg"></i>
       <span class="text-xs mt-1">Home</span>
     </a>
-    <a href="/menu.php" class="mobile-menu-action flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'menu') ? 'active' : ''; ?>" aria-label="Open menu">
+    <a href="/menu.php" class="mobile-menu-action flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'menu') ? 'active' : ''; ?>" aria-label="Open menu" <?= $current_page === 'menu' ? 'aria-current="page"' : '' ?>>
       <span class="mobile-menu-action__icon">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 3v10M4.5 3v6c0 3 7 3 7 0V3M8 13v16M22 3c-5 5-5 13 0 15v11M22 3v15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="cutlery-emblem" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset=".45" stop-color="#cbd5e1"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="plate" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fb923c"/><stop offset="1" stop-color="#9a3412"/></linearGradient></defs>
+          <circle class="cutlery-plate-shadow" cx="32" cy="34" r="25" fill="#431407" opacity=".28"/>
+          <circle class="cutlery-plate" cx="32" cy="31" r="24" fill="url(#plate)" stroke="#fed7aa" stroke-width="1.5"/>
+          <circle cx="32" cy="31" r="17" fill="none" stroke="#fff7ed" stroke-opacity=".32" stroke-width="2"/>
+          <g class="cutlery-tools" fill="none" stroke="url(#steel)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 17v13M18.5 17v8c0 5 9 5 9 0v-8M23 30v16"/>
+            <path d="M40 17c-6 6-6 15 0 18v11M40 17v18"/>
+          </g>
+          <path class="cutlery-shine" d="M17 19c7-9 19-12 29-5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+        </svg>
       </span>
       <span class="text-xs mt-1">Menu</span>
     </a>
     <a href="/cart.php" class="cart-link flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'cart') ? 'active' : ''; ?>" aria-label="Cart" id="mobile-cart-link">
         <div class="relative">
             <i class="fas fa-shopping-cart text-lg"></i>
-            <?php if ($total_cart_items > 0): ?>
-            <span id="mobile-cart-count" class="absolute -top-2 -right-3 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold">
+            <span id="mobile-cart-count" class="absolute -top-2 -right-3 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold <?= $total_cart_items > 0 ? '' : 'hidden' ?>">
               <?= $total_cart_items ?>
             </span>
-            <?php endif; ?>
         </div>
         <span class="text-xs mt-1">Cart</span>
     </a>
