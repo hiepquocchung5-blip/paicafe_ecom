@@ -69,6 +69,31 @@ include 'includes/header.php';
     categories: <?= htmlspecialchars(json_encode($categories)) ?>,
     selectedCategory: 'All',
     searchTerm: '',
+    sortBy: 'recommended',
+    offersOnly: false,
+    init() {
+        const params = new URLSearchParams(location.search);
+        const category = params.get('category');
+        if (category && this.categories.some(item => item.name_en === category)) this.selectedCategory = category;
+        this.searchTerm = params.get('search') || '';
+        this.sortBy = ['recommended', 'price-low', 'price-high', 'rating'].includes(params.get('sort')) ? params.get('sort') : 'recommended';
+        this.offersOnly = params.get('offers') === '1';
+        this.$watch('selectedCategory', () => this.syncUrl());
+        this.$watch('searchTerm', () => this.syncUrl());
+        this.$watch('sortBy', () => this.syncUrl());
+        this.$watch('offersOnly', () => this.syncUrl());
+    },
+    syncUrl() {
+        const params = new URLSearchParams(location.search);
+        ['category', 'search', 'sort', 'offers'].forEach(key => params.delete(key));
+        if (this.selectedCategory !== 'All') params.set('category', this.selectedCategory);
+        if (this.searchTerm.trim()) params.set('search', this.searchTerm.trim());
+        if (this.sortBy !== 'recommended') params.set('sort', this.sortBy);
+        if (this.offersOnly) params.set('offers', '1');
+        history.replaceState({}, '', `${location.pathname}${params.toString() ? '?' + params : ''}`);
+    },
+    resetFilters() { this.selectedCategory = 'All'; this.searchTerm = ''; this.sortBy = 'recommended'; this.offersOnly = false; },
+    finalPrice(product) { return Number(product.price) * (1 - Number(product.discount_percentage || 0) / 100); },
     get filteredProducts() {
         let items = this.products;
         if (this.selectedCategory !== 'All') {
@@ -80,6 +105,11 @@ include 'includes/header.php';
                 (p.description_en && p.description_en.toLowerCase().includes(this.searchTerm.toLowerCase()))
             );
         }
+        if (this.offersOnly) items = items.filter(p => Number(p.discount_percentage || 0) > 0);
+        items = [...items];
+        if (this.sortBy === 'price-low') items.sort((a, b) => this.finalPrice(a) - this.finalPrice(b));
+        if (this.sortBy === 'price-high') items.sort((a, b) => this.finalPrice(b) - this.finalPrice(a));
+        if (this.sortBy === 'rating') items.sort((a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0));
         return items;
     }
         }">
@@ -113,13 +143,17 @@ include 'includes/header.php';
                 <button @click="selectedCategory = category.name_en; searchTerm = ''" :class="{ 'bg-orange-500 text-white shadow-md': selectedCategory === category.name_en, 'bg-gray-100 hover:bg-gray-200': selectedCategory !== category.name_en }" x-text="category.name_en" class="px-3 sm:px-4 py-2 rounded-lg font-semibold flex-shrink-0 text-sm sm:text-base transition-all duration-200"></button>
             </template>
         </div>
-        <p class="menu-result-count"><strong x-text="filteredProducts.length"></strong> items available</p>
+        <div class="menu-filter-row">
+            <label class="menu-offer-toggle"><input type="checkbox" x-model="offersOnly"><span><i class="fas fa-tag"></i> Offers</span></label>
+            <label class="menu-sort"><span>Sort</span><select x-model="sortBy" aria-label="Sort menu items"><option value="recommended">Recommended</option><option value="rating">Top rated</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
+        </div>
+        <div class="menu-result-meta"><p class="menu-result-count"><strong x-text="filteredProducts.length"></strong> items available</p><button x-show="selectedCategory !== 'All' || searchTerm || offersOnly || sortBy !== 'recommended'" @click="resetFilters()">Reset filters</button></div>
     </div>
 
     <div class="menu-empty" x-show="filteredProducts.length === 0" x-cloak>
         <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M19 7v20M13 7v12c0 5 12 5 12 0V7M19 27v30M43 7c-8 9-8 24 0 26v24M43 7v26" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <h2>No dishes found</h2><p>Try another name or choose a different category.</p>
-        <button @click="searchTerm=''; selectedCategory='All'">Show all menu items</button>
+        <button @click="resetFilters()">Show all menu items</button>
     </div>
     
     <?php if (!empty($combos)): ?>
@@ -145,8 +179,8 @@ include 'includes/header.php';
         <?php endif; ?>
     
         <?php foreach ($categories as $category): ?>
-        <div class="mb-8 sm:mb-12" 
-         x-show="selectedCategory === 'All' || selectedCategory === '<?= e($category['name_en']) ?>'">
+        <div class="mb-8 sm:mb-12"
+         x-show="(selectedCategory === 'All' || selectedCategory === '<?= e($category['name_en']) ?>') && filteredProducts.some(p => Number(p.category_id) === <?= (int)$category['id'] ?>)">
 
         <h2 class="text-2xl sm:text-3xl font-semibold border-b-2 border-orange-500 pb-2 mb-4 sm:mb-6">
         <?= e($category['name_en']) ?>
