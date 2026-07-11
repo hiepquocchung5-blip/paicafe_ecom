@@ -651,3 +651,48 @@ footer.bg-white {
         visibility: visible;
     }
 }
+
+/* Lightweight menu and mobile navigation */
+[x-cloak] { display: none !important; }
+.menu-intro { max-width: 680px; margin: 1.5rem auto 2.25rem; text-align: center; }
+.menu-intro span { color: var(--brand-primary); font-size: .75rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.menu-intro h1 { margin: .45rem 0 .3rem; font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.05; letter-spacing: -.055em; }
+.menu-intro p { color: var(--text-muted); }
+.menu-toolbar { top: 68px !important; margin-inline: auto; padding: .8rem !important; border: 1px solid var(--border-light) !important; border-radius: 1.2rem; box-shadow: 0 10px 35px rgba(35,25,18,.08); }
+.menu-toolbar .relative { margin-bottom: .65rem !important; }
+.menu-toolbar .form-input { margin-top: 0; min-height: 48px; border-radius: .85rem; box-shadow: none !important; }
+.menu-search-clear { position: absolute; right: .75rem; top: 50%; translate: 0 -50%; width: 32px; height: 32px; border-radius: 50%; color: var(--text-muted); background: var(--surface-control); }
+.menu-result-count { margin: .65rem .25rem 0; color: var(--text-muted); font-size: .75rem; }
+.menu-result-count strong { color: var(--brand-primary); }
+.menu-product-card { border-radius: 1.35rem !important; content-visibility: auto; contain-intrinsic-size: auto 430px; }
+.menu-product-card > a { background: var(--surface-card-muted); }
+.menu-product-card img { aspect-ratio: 4 / 3; height: auto !important; }
+.menu-empty { margin: 4rem auto; max-width: 420px; text-align: center; color: var(--text-muted); }
+.menu-empty svg { width: 56px; margin: 0 auto 1rem; color: var(--brand-primary); }
+.menu-empty h2 { color: var(--text-dark); font-size: 1.5rem; }
+.menu-empty button { margin-top: 1rem; padding: .7rem 1rem; border-radius: 999px; background: var(--brand-primary); color: white; font-weight: 700; }
+
+.mobile-floating-bar { left: 50% !important; right: auto !important; bottom: max(.7rem, env(safe-area-inset-bottom)) !important; width: min(94%, 430px); transform: translateX(-50%); padding: .3rem .35rem; border: 1px solid color-mix(in srgb, var(--border-light) 80%, transparent) !important; border-radius: 1.45rem !important; box-shadow: 0 18px 48px rgba(31,23,18,.2) !important; }
+.mobile-floating-bar > div { height: 62px !important; }
+.mobile-floating-bar a, .mobile-floating-bar button { position: relative; flex: 1; min-width: 0; height: 52px; border-radius: 1rem; font-size: .68rem; transition: color .2s ease, background .2s ease, transform .2s ease; }
+.mobile-floating-bar a:active, .mobile-floating-bar button:active { transform: scale(.92); }
+.mobile-floating-bar .active:not(.cart-link) { color: var(--brand-primary) !important; background: color-mix(in srgb, var(--brand-primary) 10%, transparent); }
+.mobile-floating-bar .active::after { display: none !important; }
+.mobile-menu-action__icon { display: grid; place-items: center; width: 28px; height: 28px; }
+.mobile-menu-action__icon svg { width: 25px; height: 25px; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+.mobile-menu-action.active .mobile-menu-action__icon svg { animation: cutleryHello .55s ease both; }
+.mobile-floating-bar .cart-link { top: -13px !important; width: 58px; max-width: 58px; height: 58px; padding: .55rem !important; color: white !important; background: linear-gradient(145deg, #ea580c, #b93808) !important; border: 4px solid var(--page-bg); box-shadow: 0 9px 22px rgba(194,65,12,.32) !important; }
+.mobile-floating-bar #mobile-cart-count { color: white !important; background: #0f766e !important; border: 2px solid white; }
+@keyframes cutleryHello { 0% { transform: rotate(0) scale(.9); } 45% { transform: rotate(-12deg) scale(1.15); } 100% { transform: rotate(0) scale(1); } }
+
+@media (max-width: 767px) {
+    .menu-page { padding-inline: 0 !important; }
+    .menu-intro { margin-top: .5rem; padding-inline: .75rem; }
+    .menu-toolbar { top: .5rem !important; margin-inline: 0; }
+    .menu-product-card { display: grid !important; grid-template-columns: 116px 1fr; min-height: 150px; }
+    .menu-product-card > a { height: 100%; }
+    .menu-product-card img { width: 100%; height: 100% !important; aspect-ratio: auto; }
+    .menu-product-card > div { padding: 1rem !important; }
+    .menu-product-card h3 { font-size: 1rem !important; }
+    .menu-product-card .text-xl, .menu-product-card .text-2xl { font-size: 1.05rem !important; }
+}

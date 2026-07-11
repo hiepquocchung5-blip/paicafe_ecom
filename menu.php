@@ -3,6 +3,9 @@ require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
 
 $current_page = 'menu';
+$page_title = 'Menu | Pai Cafe Thuwunna, Yangon';
+$page_description = 'Browse halal meals, specialty coffee, burgers, pasta and café favorites from Pai Cafe in Thuwunna, Thingangyun, Yangon.';
+$page_canonical = APP_URL . '/menu.php';
 
 $table_number = null; 
 
@@ -61,7 +64,7 @@ $combos = $combos_stmt->fetchAll();
 include 'includes/header.php';
 ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ 
+<div class="menu-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{
     products: <?= htmlspecialchars(json_encode($products)) ?>, 
     categories: <?= htmlspecialchars(json_encode($categories)) ?>,
     selectedCategory: 'All',
@@ -80,7 +83,11 @@ include 'includes/header.php';
         return items;
     }
         }">
-    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-10">Our Menu</h1>
+    <header class="menu-intro">
+        <span>Freshly made · Halal kitchen</span>
+        <h1>Find your favorite</h1>
+        <p>Comfort food, café classics and handcrafted drinks—ready to order.</p>
+    </header>
     <?php if ($table_number): ?>
   <div class="sticky top-16 right-4 z-30 flex justify-end">
     <div class="bg-orange-600 text-white font-semibold text-sm sm:text-base px-4 py-2 rounded-full shadow-lg flex items-center space-x-2 select-none">
@@ -94,10 +101,11 @@ include 'includes/header.php';
 <?php endif; ?>
 
 
-    <div class="sticky top-0 bg-white/95 backdrop-blur-md z-20 py-4 border-b border-gray-200 mb-4 sm:mb-8">
+    <div class="menu-toolbar sticky top-0 bg-white/95 backdrop-blur-md z-20 py-4 border-b border-gray-200 mb-4 sm:mb-8">
         <div class="relative mb-4">
-            <input type="text" x-model.debounce.300ms="searchTerm" placeholder="Search menu items..." class="form-input w-full pl-10 pr-4 py-3 rounded-xl text-base shadow-sm focus:ring-2 focus:ring-orange-500">
+            <input type="search" x-model.debounce.200ms="searchTerm" placeholder="Search coffee, burgers, noodles…" aria-label="Search menu" class="form-input w-full pl-10 pr-12 py-3 rounded-xl text-base shadow-sm focus:ring-2 focus:ring-orange-500">
             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <button type="button" x-show="searchTerm" @click="searchTerm = ''" class="menu-search-clear" aria-label="Clear search"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="flex space-x-2 overflow-x-auto" style="-ms-overflow-style: none; scrollbar-width: none;">
             <button @click="selectedCategory = 'All'; searchTerm = ''" :class="{ 'bg-orange-500 text-white shadow-md': selectedCategory === 'All', 'bg-gray-100 hover:bg-gray-200': selectedCategory !== 'All' }" class="px-3 sm:px-4 py-2 rounded-lg font-semibold flex-shrink-0 text-sm sm:text-base transition-all duration-200">All</button>
@@ -105,6 +113,13 @@ include 'includes/header.php';
                 <button @click="selectedCategory = category.name_en; searchTerm = ''" :class="{ 'bg-orange-500 text-white shadow-md': selectedCategory === category.name_en, 'bg-gray-100 hover:bg-gray-200': selectedCategory !== category.name_en }" x-text="category.name_en" class="px-3 sm:px-4 py-2 rounded-lg font-semibold flex-shrink-0 text-sm sm:text-base transition-all duration-200"></button>
             </template>
         </div>
+        <p class="menu-result-count"><strong x-text="filteredProducts.length"></strong> items available</p>
+    </div>
+
+    <div class="menu-empty" x-show="filteredProducts.length === 0" x-cloak>
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M19 7v20M13 7v12c0 5 12 5 12 0V7M19 27v30M43 7c-8 9-8 24 0 26v24M43 7v26" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h2>No dishes found</h2><p>Try another name or choose a different category.</p>
+        <button @click="searchTerm=''; selectedCategory='All'">Show all menu items</button>
     </div>
     
     <?php if (!empty($combos)): ?>
@@ -139,7 +154,7 @@ include 'includes/header.php';
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         <template x-for="product in filteredProducts.filter(p => p.category_id === <?= (int)$category['id'] ?>)" :key="product.id">
-            <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+            <div class="menu-product-card bg-white rounded-xl shadow-md overflow-hidden flex flex-col transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
                  x-data="{ busy: false, isFavorite: <?= json_encode($user_favorites) ?>.includes(product.id) }">
 
                 <a :href="`product_details.php?id=${product.id}`" class="block relative overflow-hidden">

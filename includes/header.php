@@ -181,11 +181,13 @@ if (!empty($_SESSION['cart'])) {
   <div class="flex justify-around items-center h-16">
     <a href="/home.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'home') ? 'active' : ''; ?>" aria-label="Home">
       <i class="fas fa-home text-lg"></i>
-      <span class="text-xs mt-1 hidden sm:block">Home</span>
+      <span class="text-xs mt-1">Home</span>
     </a>
-    <a href="/menu.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'menu') ? 'active' : ''; ?>" aria-label="Menu">
-      <i class="fas fa-utensils text-lg"></i>
-      <span class="text-xs mt-1 hidden sm:block">Menu</span>
+    <a href="/menu.php" class="mobile-menu-action flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'menu') ? 'active' : ''; ?>" aria-label="Open menu">
+      <span class="mobile-menu-action__icon">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 3v10M4.5 3v6c0 3 7 3 7 0V3M8 13v16M22 3c-5 5-5 13 0 15v11M22 3v15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="text-xs mt-1">Menu</span>
     </a>
     <a href="/cart.php" class="cart-link flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'cart') ? 'active' : ''; ?>" aria-label="Cart" id="mobile-cart-link">
         <div class="relative">
@@ -196,27 +198,27 @@ if (!empty($_SESSION['cart'])) {
             </span>
             <?php endif; ?>
         </div>
-        <span class="text-xs mt-1 hidden sm:block">Cart</span>
+        <span class="text-xs mt-1">Cart</span>
     </a>
     <?php if (is_user_logged_in()): ?>
       <a href="/profile.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'profile') ? 'active' : ''; ?>" aria-label="Profile">
         <i class="fas fa-user text-lg"></i>
-        <span class="text-xs mt-1 hidden sm:block">Profile</span>
+        <span class="text-xs mt-1">Profile</span>
       </a>
     <?php else: ?>
       <a href="/login.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'login') ? 'active' : ''; ?>" aria-label="Login">
         <i class="fas fa-sign-in-alt text-lg"></i>
-        <span class="text-xs mt-1 hidden sm:block">Login</span>
+        <span class="text-xs mt-1">Login</span>
       </a>
     <?php endif; ?>
     <a href="/user_guide.php" class="flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400 <?php echo ($current_page == 'user_guide') ? 'active' : ''; ?>" aria-label="User Guide">
       <i class="fas fa-book text-lg"></i>
-      <span class="text-xs mt-1 hidden sm:block">Guide</span>
+      <span class="text-xs mt-1">Guide</span>
     </a>
     <button type="button" class="theme-toggle flex flex-col items-center justify-center text-gray-600 dark:text-slate-400 hover:text-orange-400" aria-label="Toggle color theme">
       <i class="fas fa-moon text-lg theme-icon-moon"></i>
       <i class="fas fa-sun text-lg theme-icon-sun hidden"></i>
-      <span class="text-xs mt-1 hidden sm:block">Theme</span>
+      <span class="text-xs mt-1">Theme</span>
     </button>
   </div>
 </div>
