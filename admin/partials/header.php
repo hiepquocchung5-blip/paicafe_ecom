@@ -144,6 +144,10 @@ $tailwind_css = load_tailwind_css([
                 <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-bars-staggered text-xl"></i>
                 </button>
+                <div class="admin-header-brand flex items-center gap-3">
+                    <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10">
+                    <div class="hidden md:block leading-none"><strong class="text-sm text-slate-800 dark:text-white">Pai Cafe</strong><small class="block mt-1 text-[9px] text-orange-500 font-black tracking-[.18em]">ADMIN</small></div>
+                </div>
                 <div class="hidden sm:block">
                     <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Authenticated Session</p>
                     <h2 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">

@@ -12,7 +12,8 @@
         body { margin:0; min-height:100vh; color:var(--ink); background:radial-gradient(circle at 10% 0%,#fff9ef,transparent 30%),var(--cream); font-family:Poppins,sans-serif; }
         .pickup-header { display:flex; align-items:center; justify-content:space-between; gap:2rem; padding:1.5rem clamp(1rem,4vw,4rem); border-bottom:1px solid #ded3c5; background:rgba(255,252,247,.9); }
         .brand { display:flex; align-items:center; gap:.8rem; }
-        .brand-mark { display:grid; place-items:center; width:46px; height:46px; border-radius:14px; color:#fff; background:var(--orange); font-size:1.35rem; }
+        .brand-mark { display:grid; place-items:center; width:52px; height:52px; filter:drop-shadow(0 7px 9px rgba(154,52,18,.18)); }
+        .brand-mark img { width:100%; height:100%; }
         .brand h1 { margin:0; font-size:clamp(1.2rem,3vw,1.8rem); }
         .brand p,.updated { margin:.15rem 0 0; color:#77695e; font-size:.78rem; }
         main { width:min(1500px,100%); margin:auto; padding:clamp(1.25rem,4vw,4rem); }
@@ -37,7 +38,7 @@
 </head>
 <body>
     <header class="pickup-header">
-        <div class="brand"><div class="brand-mark">✓</div><div><h1>Ready for pickup</h1><p>Pai Cafe · Please collect your order at the counter</p></div></div>
+        <div class="brand"><div class="brand-mark"><img src="/assets/svg/pai-mark.svg" alt="Pai Cafe"></div><div><h1>Ready for pickup</h1><p>Pai Cafe &amp; Lounge · Please collect your order at the counter</p></div></div>
         <div class="updated" id="updated">Checking ready orders…</div>
     </header>
     <main>

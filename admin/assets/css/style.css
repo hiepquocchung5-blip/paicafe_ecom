@@ -921,6 +921,8 @@ hr {
     backdrop-filter: none !important;
 }
 .node-card:hover { transform: translateY(-3px) !important; box-shadow: 0 18px 42px rgba(52,39,27,.13) !important; }
+.admin-header-brand { padding-right:1rem; border-right:1px solid var(--border-light); }
+.admin-header-brand img { filter:drop-shadow(0 6px 8px rgba(154,52,18,.18)); }
 .node-card [class*="rotate-"] { transform: none !important; }
 .pulse-ring-indicator::before { animation-duration: 3s !important; }
 /*

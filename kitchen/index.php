@@ -97,9 +97,7 @@ require_kitchen_login();
             <div class="flex items-center space-x-5">
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-orange-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div class="relative p-3 bg-black rounded-lg border border-orange-600/30">
-                        <i class="fas fa-hat-chef text-xl text-[var(--brand-primary)]"></i>
-                    </div>
+                    <div class="relative p-1 bg-black rounded-xl border border-orange-600/30"><img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10"></div>
                 </div>
                 <div>
                     <h1 class="text-lg font-black tracking-tight text-white leading-none">Pai Cafe <span class="text-orange-500">Kitchen</span></h1>
