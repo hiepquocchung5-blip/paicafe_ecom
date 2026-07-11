@@ -923,6 +923,59 @@ hr {
 .node-card:hover { transform: translateY(-3px) !important; box-shadow: 0 18px 42px rgba(52,39,27,.13) !important; }
 .admin-header-brand { padding-right:1rem; border-right:1px solid var(--border-light); }
 .admin-header-brand img { filter:drop-shadow(0 6px 8px rgba(154,52,18,.18)); }
+
+/* Unified admin pages */
+.admin-shell-main > .absolute { opacity:.28 !important; }
+.admin-shell-main > .relative { max-width:1600px; width:100%; margin-inline:auto; }
+.admin-shell-main h1 { letter-spacing:-.045em; text-wrap:balance; }
+.admin-shell-main h2,.admin-shell-main h3 { letter-spacing:-.025em; }
+.admin-shell-main .bg-white,
+.admin-shell-main .liquid-surface,
+.admin-shell-main .premium-glass {
+    border:1px solid var(--border-light) !important;
+    border-radius:22px !important;
+    background:var(--surface-card) !important;
+    box-shadow:0 12px 36px rgba(47,36,28,.07) !important;
+}
+.admin-shell-main .shadow-md,.admin-shell-main .shadow-lg,.admin-shell-main .shadow-xl { box-shadow:0 12px 36px rgba(47,36,28,.08) !important; }
+.admin-shell-main input:not([type="checkbox"]):not([type="radio"]),
+.admin-shell-main select,.admin-shell-main textarea {
+    min-height:44px;
+    border:1px solid var(--border-light) !important;
+    border-radius:12px !important;
+    background:var(--surface-control) !important;
+    color:var(--text-dark) !important;
+    transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+.admin-shell-main textarea { min-height:100px; }
+.admin-shell-main input:focus,.admin-shell-main select:focus,.admin-shell-main textarea:focus {
+    outline:none !important;border-color:var(--brand-primary) !important;background:var(--surface-card) !important;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-primary) 16%,transparent) !important;
+}
+.admin-shell-main label { font-weight:700; color:var(--text-muted); }
+.admin-shell-main table { width:100%; border-collapse:separate; border-spacing:0; }
+.admin-shell-main thead { background:color-mix(in srgb,var(--surface-control) 82%,transparent) !important; }
+.admin-shell-main th { padding:.9rem 1rem !important; color:var(--text-muted) !important; font-size:.68rem !important; font-weight:800 !important; letter-spacing:.09em; text-transform:uppercase; }
+.admin-shell-main td { padding:.95rem 1rem !important; border-bottom:1px solid var(--border-light) !important; vertical-align:middle; }
+.admin-shell-main tbody tr { transition:background .18s ease; }
+.admin-shell-main tbody tr:hover { background:color-mix(in srgb,var(--brand-primary) 4%,transparent) !important; }
+.admin-shell-main button,.admin-shell-main a { -webkit-tap-highlight-color:transparent; }
+.admin-shell-main button:disabled { opacity:.55; cursor:not-allowed; }
+.admin-shell-main .btn-brand { border-radius:12px !important; box-shadow:0 9px 20px rgba(194,65,12,.2) !important; }
+.admin-sidebar { background:linear-gradient(180deg,#241914,#16110e) !important; border-right:1px solid rgba(253,186,116,.12); }
+.admin-sidebar nav a { margin-inline:.65rem; padding-left:1rem !important; padding-right:1rem !important; border-radius:12px; }
+.admin-sidebar nav a i { width:22px; color:#fb923c; }
+.admin-sidebar nav a.bg-orange-600,.admin-sidebar nav a.bg-green-600,.admin-sidebar nav a.bg-yellow-500 {
+    background:linear-gradient(135deg,#c2410c,#9a3412) !important;box-shadow:0 10px 25px rgba(154,52,18,.25) !important;
+}
+.admin-sidebar nav a.bg-orange-600 i,.admin-sidebar nav a.bg-green-600 i,.admin-sidebar nav a.bg-yellow-500 i { color:white; }
+.admin-shell-header { min-height:72px; }
+
+@media(max-width:767px){
+    .admin-shell-header{padding:.8rem 1rem !important}.admin-header-brand{border:0;padding:0}.admin-page-identity{display:none!important}
+    .admin-shell-main > .relative{padding:1rem !important}.admin-shell-main h1{font-size:2rem !important;line-height:1.05!important}
+    .admin-shell-main .grid{gap:1rem}.admin-shell-main .p-8{padding:1.25rem!important}.admin-shell-main .p-6{padding:1rem!important}
+    .admin-shell-main table{min-width:720px}.admin-shell-main .overflow-x-auto{border-radius:16px}
+}
 .node-card [class*="rotate-"] { transform: none !important; }
 .pulse-ring-indicator::before { animation-duration: 3s !important; }
 /*

@@ -13,6 +13,16 @@ $tailwind_css = load_tailwind_css([
     dirname(__DIR__) . '/assets/css/tailwind.css',
     dirname(__DIR__, 2) . '/assets/css/tailwind.css',
 ]);
+$admin_page_key = pathinfo($_SERVER['SCRIPT_NAME'] ?? 'index.php', PATHINFO_FILENAME);
+$admin_page_names = [
+    'index'=>'Overview','orders'=>'Orders','pos'=>'Point of sale','reservations'=>'Reservations','products'=>'Products',
+    'categories'=>'Categories','combos'=>'Combos','coupons'=>'Coupons','reviews'=>'Customer reviews','recipes'=>'Recipes',
+    'inventory'=>'Inventory','daily_use_stock'=>'Stock usage','inventory_logs'=>'Inventory history','reports'=>'Financial reports',
+    'sales_dashboard'=>'Sales analytics','expenses'=>'Expenses','admins'=>'Team management','user_properties'=>'Customer insights',
+    'tables'=>'Table setup','floor_plan'=>'Floor plan','rewards'=>'Rewards','redemptions'=>'Redemptions','settings'=>'Settings',
+    'permissions'=>'Access control','developer_dashboard'=>'System health','prompt_generator'=>'Content assistant'
+];
+$admin_page_name = $admin_page_names[$admin_page_key] ?? ucwords(str_replace('_', ' ', $admin_page_key));
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full" 
@@ -44,7 +54,6 @@ $tailwind_css = load_tailwind_css([
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= $admin_asset_base ?>/assets/css/style.css">
     <script src="<?= $admin_asset_base ?>/assets/js/theme.js"></script>
     <style>
@@ -148,11 +157,9 @@ $tailwind_css = load_tailwind_css([
                     <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10">
                     <div class="hidden md:block leading-none"><strong class="text-sm text-slate-800 dark:text-white">Pai Cafe</strong><small class="block mt-1 text-[9px] text-orange-500 font-black tracking-[.18em]">ADMIN</small></div>
                 </div>
-                <div class="hidden sm:block">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Authenticated Session</p>
-                    <h2 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">
-                        Welcome back, <?= e($_SESSION['admin_username']) ?>
-                    </h2>
+                <div class="hidden sm:block admin-page-identity">
+                    <p class="text-xs font-bold text-orange-500 uppercase tracking-widest leading-none mb-1">Pai Cafe operations</p>
+                    <h2 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none"><?= e($admin_page_name) ?></h2>
                 </div>
             </div>
             
@@ -164,7 +171,7 @@ $tailwind_css = load_tailwind_css([
 
                 <div class="hidden md:flex flex-col items-end">
                     <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/20">
-                        System Active
+                        Live
                     </span>
                 </div>
                 <div class="h-10 w-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700">

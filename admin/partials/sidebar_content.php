@@ -1,11 +1,9 @@
 <div class="px-8 py-8 border-b border-gray-700/50 bg-gray-900/50">
     <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/20">
-            <i class="fas fa-coffee text-white text-xl"></i>
-        </div>
+        <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-11 h-11 drop-shadow-lg">
         <div>
-            <h1 class="text-xl font-black tracking-tighter text-white">PAICAFE</h1>
-            <p class="text-[10px] text-orange-500 font-bold tracking-[0.2em] uppercase">Admin Hub</p>
+            <h1 class="text-xl font-black tracking-tighter text-white">Pai Cafe</h1>
+            <p class="text-[10px] text-orange-400 font-bold tracking-[0.2em] uppercase">Operations</p>
         </div>
     </div>
 </div>
