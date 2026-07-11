@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" class="bg-white dark:bg-slate-900 shadow-lg rounded-xl px-8 pt-6 pb-8 mb-4 border border-transparent dark:border-slate-800 transition-colors duration-300">
             <?= csrf_field() ?>
             <div class="text-center mb-8">
-                <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-20 h-20 mx-auto drop-shadow-xl">
+                <img src="https://paicafes.com/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-20 h-20 mx-auto drop-shadow-xl">
                 <p class="mt-4 text-[10px] font-black tracking-[.24em] text-orange-500 uppercase">Pai Cafe &amp; Lounge</p>
                 <h1 class="text-2xl mt-2 font-bold text-gray-700 dark:text-slate-100">Operations sign in</h1>
                 <p class="text-sm text-gray-500 mt-1">Secure access for restaurant staff</p>

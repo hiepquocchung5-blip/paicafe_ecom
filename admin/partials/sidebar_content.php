@@ -1,6 +1,6 @@
 <div class="px-8 py-8 border-b border-gray-700/50 bg-gray-900/50">
     <div class="flex items-center space-x-3">
-        <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-11 h-11 drop-shadow-lg">
+        <img src="https://paicafes.com/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-11 h-11 drop-shadow-lg">
         <div>
             <h1 class="text-xl font-black tracking-tighter text-white">Pai Cafe</h1>
             <p class="text-[10px] text-orange-400 font-bold tracking-[0.2em] uppercase">Operations</p>

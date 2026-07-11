@@ -154,7 +154,7 @@ $admin_page_name = $admin_page_names[$admin_page_key] ?? ucwords(str_replace('_'
                     <i class="fas fa-bars-staggered text-xl"></i>
                 </button>
                 <div class="admin-header-brand flex items-center gap-3">
-                    <img src="/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10">
+                    <img src="https://paicafes.com/assets/svg/pai-mark.svg" alt="Pai Cafe" class="w-10 h-10">
                     <div class="hidden md:block leading-none"><strong class="text-sm text-slate-800 dark:text-white">Pai Cafe</strong><small class="block mt-1 text-[9px] text-orange-500 font-black tracking-[.18em]">ADMIN</small></div>
                 </div>
                 <div class="hidden sm:block admin-page-identity">

@@ -47,6 +47,7 @@ $recent_reviews = paicafe_cache_remember('home:reviews', 180, function () use ($
 <div class="cafe-hero relative bg-gray-800 text-white rounded-lg shadow-2xl overflow-hidden mb-20">
     <img src="https://paicafes.com/assets/uploads/bgg.png" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="Cafe background">
     <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-8">
+        <div class="cafe-hero__brand" aria-label="Pai Cafe and Lounge"><img src="/assets/svg/pai-mark.svg" alt=""><span><strong>PAI</strong><small>Cafe &amp; Lounge</small></span></div>
         <span class="cafe-hero__eyebrow">Halal café & restaurant · Yangon</span>
         <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Good food. Great coffee.<br><span>A place to slow down.</span></h1>
         <p class="text-lg md:text-xl max-w-2xl mb-8">Fresh halal meals, handcrafted drinks, and warm hospitality—served every day at Paicafe.</p>
@@ -54,6 +55,7 @@ $recent_reviews = paicafe_cache_remember('home:reviews', 180, function () use ($
             <a href="/menu.php" class="btn-brand text-lg">Explore Our Menu</a>
             <a href="/reserve_table.php" class="cafe-hero__secondary text-lg">Reserve a Table</a>
         </div>
+        <div class="cafe-hero__facts" aria-label="Restaurant information"><span><i class="fas fa-clock"></i> Open daily · 9 AM–6 PM</span><span><i class="fas fa-location-dot"></i> Thuwunna, Yangon</span><span><i class="fas fa-certificate"></i> Halal kitchen</span></div>
     </div>
 </div>
 

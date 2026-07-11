@@ -317,6 +317,9 @@ body { line-height: 1.65; }
     text-transform: uppercase;
     backdrop-filter: blur(8px);
 }
+.cafe-hero__brand { display:flex; align-items:center; gap:.7rem; margin-bottom:1.15rem; padding:.55rem .85rem .55rem .55rem; border:1px solid rgba(255,255,255,.24); border-radius:1rem; background:rgba(23,13,8,.24); backdrop-filter:blur(10px); }
+.cafe-hero__brand img { width:42px; height:42px; filter:drop-shadow(0 6px 7px rgba(0,0,0,.22)); }
+.cafe-hero__brand span { display:flex; flex-direction:column; line-height:1; }.cafe-hero__brand strong{font-size:1rem;letter-spacing:.16em}.cafe-hero__brand small{margin-top:.28rem;color:#fed7aa;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .cafe-hero__actions { display: flex; flex-wrap: wrap; gap: .8rem; }
 .cafe-hero__secondary {
     padding: .75rem 1.5rem;
@@ -327,6 +330,8 @@ body { line-height: 1.65; }
     transition: .25s ease;
 }
 .cafe-hero__secondary:hover { background: white; color: #7c2d12; transform: translateY(-2px); }
+.cafe-hero__facts { display:flex; flex-wrap:wrap; gap:1.2rem; margin-top:2rem; color:rgba(255,255,255,.78); font-size:.72rem; font-weight:600; }
+.cafe-hero__facts span { display:inline-flex; align-items:center; gap:.4rem; }.cafe-hero__facts i{color:#fdba74}
 
 .btn-brand {
     display: inline-flex;
@@ -372,6 +377,7 @@ body { line-height: 1.65; }
     .cafe-hero h1 { font-size: clamp(2.35rem, 11vw, 3.5rem); }
     .cafe-hero__actions { width: 100%; }
     .cafe-hero__actions a { width: 100%; }
+    .cafe-hero__facts { gap:.65rem 1rem; margin-top:1.25rem; }
     .cafe-highlights { grid-template-columns: 1fr 1fr; margin-bottom: 3.5rem; }
     .cafe-highlights article { align-items: flex-start; padding: 1rem; }
     .cafe-main .py-20 { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
