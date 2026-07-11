@@ -32,12 +32,16 @@ if (!empty($_SESSION['cart'])) {
     $seo_keywords = $page_keywords ?? 'Pai Cafe, cafe Yangon, halal restaurant Yangon, coffee shop Thuwunna, cafe Thingangyun';
     $seo_canonical = $page_canonical ?? ('https://paicafes.com' . strtok($_SERVER['REQUEST_URI'] ?? '/', '?'));
     $seo_image = $page_image ?? 'https://paicafes.com/assets/uploads/bgg.png';
+    $private_pages = ['login', 'register', 'cart', 'checkout', 'profile', 'order_status', 'contact_developer'];
+    $seo_robots = $page_robots ?? (in_array($current_page, $private_pages, true)
+        ? 'noindex, nofollow, noarchive'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     ?>
     <title><?= e($seo_title) ?></title>
     <link rel="icon" type="image/png" href="/assets/public_photo/coffee.png" />
     <meta name="description" content="<?= e($seo_description) ?>">
     <meta name="keywords" content="<?= e($seo_keywords) ?>">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="robots" content="<?= e($seo_robots) ?>">
     <meta name="author" content="Pai Cafe & Lounge">
     <meta name="geo.region" content="MM-06">
     <meta name="geo.placename" content="Thuwunna, Thingangyun, Yangon">
@@ -84,6 +88,7 @@ if (!empty($_SESSION['cart'])) {
                         {
                       "@context": "https://schema.org",
                       "@type": "Restaurant",
+                      "@id": "https://paicafes.com/#restaurant",
                       "name": "Paicafe",
               "address": {
                                     "@type": "PostalAddress",
@@ -103,6 +108,20 @@ if (!empty($_SESSION['cart'])) {
                       "hasMap": "https://www.google.com/maps/search/?api=1&query=Pai+Cafe+%26+Lounge+Yangon"
                     }
     </script>
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        '@id' => APP_URL . '/#website',
+        'url' => APP_URL . '/',
+        'name' => 'Pai Cafe & Lounge',
+        'inLanguage' => ['en', 'my'],
+        'publisher' => ['@id' => APP_URL . '/#restaurant'],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+    </script>
+    <?php if (!empty($page_schema)): ?>
+    <script type="application/ld+json"><?= json_encode($page_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
+    <?php endif; ?>
 </head>
 <body class="bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300 <?= ($_SESSION['lang'] ?? 'en') === 'mm' ? 'lang-mm' : '' ?>">
     <div id="page-loader">

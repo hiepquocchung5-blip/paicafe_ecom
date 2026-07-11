@@ -51,6 +51,32 @@ $rating_data = $avg_rating_stmt->fetch();
 $avg_rating = $rating_data['avg_rating'] ?? 0;
 $review_count = $rating_data['review_count'] ?? 0;
 
+$product_name = trim((string)$product['name_en']);
+$product_description = trim(strip_tags((string)($product['description_en'] ?? '')));
+if ($product_description === '') $product_description = $product_name . ' from Pai Cafe, a halal cafe and restaurant in Thuwunna, Thingangyun, Yangon.';
+$product_image = (string)($product['image'] ?: '/assets/uploads/placeholder.png');
+if (strpos($product_image, 'http') !== 0) $product_image = APP_URL . '/' . ltrim($product_image, '/');
+$final_price = (float)$product['price'] * (1 - ((float)($product['discount_percentage'] ?? 0) / 100));
+$page_title = $product_name . ' | Pai Cafe Menu Yangon';
+$page_description = mb_substr($product_description, 0, 155);
+$page_canonical = APP_URL . '/product_details.php?id=' . $product_id;
+$page_image = $product_image;
+$page_schema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'Product',
+    'name' => $product_name,
+    'image' => [$product_image],
+    'description' => $product_description,
+    'category' => (string)($product['category_name'] ?? 'Cafe menu'),
+    'brand' => ['@type' => 'Brand', 'name' => 'Pai Cafe'],
+    'offers' => [
+        '@type' => 'Offer', 'url' => $page_canonical, 'priceCurrency' => 'MMK',
+        'price' => number_format($final_price, 0, '.', ''),
+        'availability' => 'https://schema.org/InStock', 'itemCondition' => 'https://schema.org/NewCondition',
+    ],
+];
+if ($review_count > 0) $page_schema['aggregateRating'] = ['@type' => 'AggregateRating', 'ratingValue' => round((float)$avg_rating, 1), 'reviewCount' => (int)$review_count];
+
 include 'includes/header.php';
 ?>
 

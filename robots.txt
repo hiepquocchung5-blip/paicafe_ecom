@@ -6,5 +6,9 @@ Disallow: /kitchen/
 Disallow: /table/
 Disallow: /checkout.php
 Disallow: /profile.php
+Disallow: /login.php
+Disallow: /register.php
+Disallow: /cart.php
+Disallow: /order_status.php
 
-Sitemap: https://paicafes.com/sitemap.xml
+Sitemap: https://paicafes.com/sitemap.php

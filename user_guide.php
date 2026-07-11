@@ -2,6 +2,9 @@
 // We still include these for the page structure (header/footer)
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+$page_title = 'QR Ordering Guide | Pai Cafe Yangon';
+$page_description = 'Learn how to browse the Pai Cafe QR menu, order from your table, track your order and earn loyalty rewards.';
+$page_canonical = APP_URL . '/user_guide.php';
 include 'includes/header.php';
 ?>
 

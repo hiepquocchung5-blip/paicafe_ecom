@@ -1,6 +1,9 @@
 <?php
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+$page_title = 'Loyalty Rewards | Pai Cafe Yangon';
+$page_description = 'Earn Pai Cafe loyalty points and redeem food, drinks and exclusive café rewards in Thuwunna, Yangon.';
+$page_canonical = APP_URL . '/rewards.php';
 include 'includes/header.php';
 
 // Fetch all active loyalty rewards from the database
