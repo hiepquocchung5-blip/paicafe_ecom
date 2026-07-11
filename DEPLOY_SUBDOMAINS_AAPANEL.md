@@ -10,9 +10,25 @@ copies of the code or `.env`.
 | `paicafes.com` | `/www/wwwroot/paicafes.com` | Customer website |
 | `poskitchen.paicafes.com` | `/www/wwwroot/paicafes.com/kitchen` | Authenticated kitchen display |
 | `postable.paicafes.com` | `/www/wwwroot/paicafes.com/table` | Ready-order display |
+| `posadmin.paicafes.com` | `/www/wwwroot/paicafes.com/admin` | Management dashboard |
 
 Create DNS `A` records for both subdomains pointing to the same server IP. Add
 each subdomain as a separate aaPanel website, issue SSL, and force HTTPS.
+
+## aaPanel anti-cross-site protection
+
+The modules intentionally share `/includes`, `/config.php`, `/assets`, and the
+root `.env`. aaPanel must therefore allow PHP to read the repository root. This
+repository includes a `.user.ini` in each module containing:
+
+```ini
+open_basedir=/www/wwwroot/paicafes.com/:/tmp/
+```
+
+After pulling, make sure aaPanel has not overwritten it with a module-only path.
+Either disable **Anti-XSS attack (open_basedir)** for these three subdomain sites,
+or set their allowed path to `/www/wwwroot/paicafes.com/`. Restart PHP-FPM after
+changing it; PHP may cache `.user.ini` for several minutes.
 
 ## Shared assets
 

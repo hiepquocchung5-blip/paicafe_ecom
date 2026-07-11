@@ -252,11 +252,11 @@ if ($hour < 12) {
 
 <div class="max-w-7xl mx-auto px-2 py-6" x-data="dashboardNotifications()" x-init="init()">
     
-    <!-- ECOSYSTEM LIVE NODES -->
+    <!-- Restaurant workspaces -->
     <div class="mb-10">
         <div class="flex items-center space-x-3 mb-6">
             <div class="w-1.5 h-6 bg-orange-600 rounded-full"></div>
-            <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">Live System Connections</h2>
+            <h2 class="text-xs font-black uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">Restaurant workspaces</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <!-- Node: Kitchen -->
@@ -266,7 +266,7 @@ if ($hour < 12) {
                         <i class="fas fa-fire-burner text-orange-500 text-xl group-hover:text-white"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">KITCHEN SCREEN</p>
+                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">Kitchen display</p>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">poskitchen.paicafes.com</p>
                     </div>
                 </div>
@@ -283,7 +283,7 @@ if ($hour < 12) {
                         <i class="fas fa-couch text-blue-400 text-xl group-hover:text-white"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">TABLE SERVICE</p>
+                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">Pickup display</p>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">postable.paicafes.com</p>
                     </div>
                 </div>
@@ -300,7 +300,7 @@ if ($hour < 12) {
                         <i class="fas fa-globe text-slate-400 dark:text-slate-400 text-xl group-hover:scale-110 transition-transform"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">STOREFRONT</p>
+                        <p class="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">Customer website</p>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity">paicafes.com</p>
                     </div>
                 </div>
@@ -316,12 +316,12 @@ if ($hour < 12) {
                 <i class="fas <?= $greeting_icon ?> text-sm"></i>
                 <span><?= $greeting ?></span>
             </div>
-            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none mb-1">Cafe Control Hub</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium">Real-time order manager and store operations dashboard.</p>
+            <h1 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none mb-1">Restaurant overview</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium">Orders, service and daily operations in one place.</p>
         </div>
         <div class="flex items-center space-x-3 bg-slate-100 dark:bg-gray-900/80 border border-slate-200 dark:border-white/5 px-5 py-2.5 rounded-2xl premium-glass shadow-sm">
             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-ring-indicator shadow-[0_0_12px_rgba(16,185,129,0.5)]"></div>
-            <span class="text-[10px] font-black tracking-widest text-emerald-500">SYSTEM ONLINE</span>
+            <span class="text-[10px] font-black tracking-widest text-emerald-500">OPEN & CONNECTED</span>
             <div class="h-4 w-[1px] bg-slate-300 dark:bg-white/10 mx-2"></div>
             <span class="text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300" id="live-clock"><?= date('H:i:s') ?></span>
         </div>

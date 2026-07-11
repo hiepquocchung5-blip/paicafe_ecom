@@ -10,7 +10,7 @@ require_kitchen_login();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaiCafe Kitchen_OS v3.0</title>
+    <title>Pai Cafe | Kitchen Display</title>
     <meta name="robots" content="noindex, nofollow, noarchive">
     
     <!-- Fonts & Styles -->
@@ -27,9 +27,8 @@ require_kitchen_login();
         :root {
             --brand-primary: #EA580C;
             --brand-secondary: #F97316;
-            --accent-neon: #00f0ff;
-            --bg-dark: #07090c;
-            --card-bg: rgba(15, 18, 24, 0.95);
+            --bg-dark: #171411;
+            --card-bg: #24201c;
             --font-sans: 'Poppins', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -38,9 +37,7 @@ require_kitchen_login();
             font-family: var(--font-sans);
             background-color: var(--bg-dark);
             color: #e5e7eb;
-            background-image: 
-                radial-gradient(circle at 2px 2px, rgba(234, 88, 12, 0.05) 1px, transparent 0);
-            background-size: 32px 32px;
+            background-image: radial-gradient(circle at 15% 0%, rgba(234,88,12,.12), transparent 32%);
             overflow-x: hidden;
         }
 
@@ -51,9 +48,8 @@ require_kitchen_login();
         
         .glass-panel {
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 245, 230, 0.08);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.28);
         }
 
         /* Tactical Priority States */
@@ -85,17 +81,7 @@ require_kitchen_login();
             to { opacity: 0; transform: translateX(150px) rotate(2deg); }
         }
 
-        .shimmer-text {
-            background: linear-gradient(90deg, #fff, var(--brand-secondary), #fff);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s linear infinite;
-        }
-
-        @keyframes shimmer {
-            to { background-position: 200% center; }
-        }
+        button, .glass-panel { border-radius: 18px; }
     </style>
 </head>
 <body x-data="kitchenOS()">
@@ -103,7 +89,7 @@ require_kitchen_login();
     <!-- Audio Link for New Alerts -->
     <audio id="alert-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <!-- OS Header -->
+    <!-- Kitchen header -->
     <header class="sticky top-0 z-50 glass-panel border-b border-white/5">
         <div class="container mx-auto px-6 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-5">
@@ -114,10 +100,10 @@ require_kitchen_login();
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-lg font-black tracking-tighter text-white uppercase leading-none">Kitchen_OS <span class="text-orange-600">v3.0</span></h1>
+                    <h1 class="text-lg font-black tracking-tight text-white leading-none">Pai Cafe <span class="text-orange-500">Kitchen</span></h1>
                     <div class="flex items-center space-x-2 mt-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <p class="text-[9px] text-gray-500 font-mono tracking-[0.2em] uppercase">Sector: Yangon_Main</p>
+                        <p class="text-[10px] text-gray-400 tracking-wide">Live order preparation</p>
                     </div>
                 </div>
             </div>
@@ -126,7 +112,7 @@ require_kitchen_login();
             <div class="hidden lg:flex items-center space-x-8 px-8 border-x border-white/5">
                 <div class="w-48">
                     <div class="flex justify-between text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                        <span>Station Load</span>
+                        <span>Kitchen load</span>
                         <span x-text="loadPercent + '%'"></span>
                     </div>
                     <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -169,7 +155,7 @@ require_kitchen_login();
                 <div class="absolute inset-0 border-4 border-orange-600/10 border-t-orange-600 rounded-full animate-spin"></div>
                 <div class="absolute inset-2 border-4 border-emerald-500/10 border-b-emerald-500 rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
             </div>
-            <p class="mt-8 text-orange-500 font-mono text-[10px] tracking-[0.5em] uppercase animate-pulse">Establishing Neural Link...</p>
+                    <p class="mt-8 text-orange-400 text-sm font-semibold">Loading kitchen orders…</p>
         </div>
 
         <!-- Empty Desk -->
@@ -177,7 +163,8 @@ require_kitchen_login();
             <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center border border-white/5 mb-8">
                 <i class="fas fa-check-circle text-4xl text-emerald-500 opacity-40"></i>
             </div>
-            <h2 class="text-2xl font-light text-gray-500 italic">"The rush has subsided. All stations clear."</h2>
+            <h2 class="text-2xl font-semibold text-gray-300">All caught up</h2>
+            <p class="text-gray-500 mt-2">New orders will appear here automatically.</p>
         </div>
 
         <!-- Grid -->
@@ -193,12 +180,12 @@ require_kitchen_login();
                         <div>
                             <div class="flex items-center space-x-2">
                                 <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping" x-show="isCritical(order.created_at)"></span>
-                                <span class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Ticket Ref</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Order</span>
                             </div>
                             <h2 class="text-4xl font-black text-white tracking-tighter mt-1">#<span x-text="order.id"></span></h2>
                         </div>
                         <div class="text-right">
-                            <span class="text-[10px] text-gray-500 font-black uppercase tracking-widest block mb-1">Queue Age</span>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-1">Waiting</span>
                             <span class="text-xl font-mono font-black tracking-tighter" :class="getTimeColor(order.created_at)" x-text="getTimeDiff(order.created_at)"></span>
                         </div>
                     </div>
@@ -246,7 +233,7 @@ require_kitchen_login();
                                 :class="allPrepped(order) ? 'bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-500'">
                             
                             <i class="fas fa-bolt-lightning mr-2 text-[10px]" :class="allPrepped(order) ? 'animate-pulse' : ''"></i> 
-                            <span x-text="allPrepped(order) ? 'Execute Bump' : 'Bump Order'"></span>
+                            <span x-text="allPrepped(order) ? 'Mark ready' : 'Complete items first'"></span>
 
                             <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                         </button>
@@ -362,7 +349,7 @@ require_kitchen_login();
                             this.loading = false;
                         })
                         .catch(err => {
-                            console.error('UPLINK LOST:', err);
+                            console.error('Kitchen order sync failed:', err);
                             this.loading = false;
                         });
                 },
@@ -370,15 +357,14 @@ require_kitchen_login();
                 triggerIncomingAlert(id) {
                     document.getElementById('alert-ping').play().catch(() => {});
                     Toastify({
-                        text: `TICKET INCOMING: #${id}`,
+                        text: `New kitchen order #${id}`,
                         duration: 5000,
                         gravity: "top",
                         position: "right",
                         style: {
                             background: "linear-gradient(to right, #EA580C, #F97316)",
-                            fontFamily: "JetBrains Mono",
-                            fontWeight: "800",
-                            borderRadius: "4px",
+                            fontWeight: "700",
+                            borderRadius: "14px",
                             boxShadow: "0 10px 30px rgba(234, 88, 12, 0.4)"
                         }
                     }).showToast();
@@ -402,7 +388,7 @@ require_kitchen_login();
                             }, 500);
                         } else {
                             if(el) el.classList.remove('order-exit');
-                            alert('CMD Error: ' + data.message);
+                            alert('Could not complete order: ' + data.message);
                         }
                     });
                 }
