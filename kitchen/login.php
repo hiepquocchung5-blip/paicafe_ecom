@@ -4,7 +4,7 @@ require_once 'includes/functions.php';
 
 // If a kitchen user is already logged in, redirect them to the display system
 if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'kitchen') {
-    header('Location: /kitchen/index.php');
+    header('Location: /index.php');
     exit();
 }
 

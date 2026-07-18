@@ -374,11 +374,12 @@ function require_admin_login() {
 }
 
 /**
- * Redirects to the kitchen login page if a 'kitchen' role user is not logged in.
+ * Redirects to the kitchen subdomain's root-level login page when a kitchen
+ * user is not logged in.
  */
 function require_kitchen_login() {
     if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'kitchen') {
-        header('Location: /kitchen/login.php'); 
+        header('Location: /login.php');
         exit();
     }
 }
