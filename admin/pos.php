@@ -21,7 +21,7 @@ $tailwind_css = load_tailwind_css([
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PAICAFE POS | Terminal</title>
     <script>
         (function () {
@@ -122,6 +122,23 @@ $tailwind_css = load_tailwind_css([
             min-height: 44px;
         }
 
+        /* Mobile-only bottom bar with live total; opens the cart sheet */
+        .pos-mobile-bar {
+            display: none;
+            position: fixed;
+            left: 0.75rem;
+            right: 0.75rem;
+            bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+            z-index: 80;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .pos-cart-close { display: none; }
+
+        .pos-receipt-card { max-height: 92svh; }
+        .pos-receipt-card .voucher-print-area { overflow-y: auto; }
+
         .active-category {
             background: linear-gradient(135deg, #0f766e, #7c3aed) !important;
             color: white !important;
@@ -207,23 +224,38 @@ $tailwind_css = load_tailwind_css([
 
         @media (max-width: 1279px) {
             body { overflow: auto; }
-            .pos-shell { height: auto; min-height: 100svh; overflow: visible; }
-            .pos-layout { flex-direction: column; overflow: visible; }
-            .pos-products { border-right: 0; min-height: 62svh; }
-            .pos-checkout { width: 100%; min-height: 520px; }
+            .pos-shell { height: auto; min-height: 100svh; overflow: visible; padding-bottom: 6.5rem; }
+            .pos-layout { overflow: visible; }
+            .pos-products { border-right: 0; }
             .pos-product-scroll { min-height: 420px; }
+            .pos-checkout {
+                position: fixed;
+                inset: 0;
+                z-index: 90;
+                width: 100%;
+                height: 100svh;
+                border-radius: 0;
+                background-color: var(--pos-bg);
+                transform: translateY(102%);
+                transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .pos-checkout.mobile-cart-open { transform: translateY(0); }
+            .pos-mobile-bar { display: flex; align-items: center; justify-content: space-between; }
+            .pos-cart-close { display: flex; align-items: center; justify-content: center; }
         }
 
         @media (max-width: 768px) {
             .orientation-hint { display: flex; }
-            .pos-shell { padding: 0.625rem; }
+            .pos-shell { padding: 0.625rem; padding-bottom: 6.5rem; }
             .pos-header { gap: 0.75rem; align-items: stretch; }
             .pos-header-actions { width: 100%; flex-wrap: wrap; gap: 0.5rem; }
             .pos-search { flex: 1 1 100%; width: 100%; }
             .pos-search input { width: 100%; }
             .pos-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
             .pos-section-pad { padding-left: 1rem; padding-right: 1rem; }
-            .pos-checkout { border-radius: 1.35rem; }
+            .pos-desktop-only { display: none !important; }
+            /* 16px stops iOS Safari from auto-zooming on focused inputs */
+            .pos-page input, .pos-page select, .pos-page textarea { font-size: 16px !important; }
             .pos-payment-panel { left: 0; max-width: none; }
             .pos-payment-panel .p-8 { padding: 1rem; }
             .pos-payment-panel .text-6xl { font-size: 2.35rem; line-height: 1; }
@@ -291,7 +323,7 @@ $tailwind_css = load_tailwind_css([
                     <button @click="compactGrid = !compactGrid; saveUiPrefs()" class="h-10 px-3 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest" title="Toggle compact product grid">
                         <i class="fas" :class="compactGrid ? 'fa-grip' : 'fa-grip-vertical'"></i>
                     </button>
-                    <button @click="showShortcuts = true" class="h-10 px-3 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest" title="POS shortcuts">
+                    <button @click="showShortcuts = true" class="pos-desktop-only h-10 px-3 flex items-center gap-2 rounded-xl soft-panel text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest" title="POS shortcuts">
                         <i class="fas fa-keyboard"></i>
                     </button>
                     <button @click="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl soft-panel text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Toggle color theme" title="Toggle theme">
@@ -405,8 +437,8 @@ $tailwind_css = load_tailwind_css([
             </main>
         </div>
 
-        <!-- RIGHT: CHECKOUT SIDEBAR -->
-        <div class="pos-checkout flex flex-col glass-panel shadow-2xl z-20 overflow-hidden">
+        <!-- RIGHT: CHECKOUT SIDEBAR (slides up as a full-screen sheet on mobile/tablet) -->
+        <div class="pos-checkout flex flex-col glass-panel shadow-2xl z-20 overflow-hidden" :class="showMobileCart ? 'mobile-cart-open' : ''">
             <!-- Header -->
             <div class="p-4 sm:p-6 border-b border-white/5 bg-white/[0.02]">
                 <div class="flex items-center justify-between">
@@ -418,6 +450,9 @@ $tailwind_css = load_tailwind_css([
                         <p x-show="draftSavedAt" class="text-[9px] text-teal-400 font-black uppercase tracking-widest mt-1" x-text="'Draft saved ' + draftSavedAt"></p>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button @click="showMobileCart = false" class="pos-cart-close w-10 h-10 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all" title="Back to products" aria-label="Back to products">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
                         <button @click="holdCurrentOrder()" :disabled="Object.keys(cart).length === 0" class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-300 hover:bg-teal-500 hover:text-white disabled:opacity-30 transition-all" title="Hold order">
                             <i class="fas fa-pause text-xs"></i>
                         </button>
@@ -459,13 +494,13 @@ $tailwind_css = load_tailwind_css([
                             <p class="text-[9px] text-slate-500 font-bold mt-0.5" x-text="'Line ' + formatCurrency(item.price * item.quantity)"></p>
                         </div>
                         <div class="flex items-center bg-black/20 rounded-xl p-1">
-                            <button @click="updateQuantity(productId, -1)" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
-                                <i class="fas fa-minus text-[8px] text-slate-400"></i>
+                            <button @click="updateQuantity(productId, -1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors" aria-label="Decrease quantity">
+                                <i class="fas fa-minus text-[10px] text-slate-400"></i>
                             </button>
-                            <input type="text" :value="item.quantity" @change="manualUpdateQuantity(productId, $event.target.value)" 
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" :value="item.quantity" @change="manualUpdateQuantity(productId, $event.target.value)"
                                    class="w-8 text-center bg-transparent border-none text-xs font-black text-white focus:ring-0">
-                            <button @click="updateQuantity(productId, 1)" class="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
-                                <i class="fas fa-plus text-[8px] text-slate-400"></i>
+                            <button @click="updateQuantity(productId, 1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors" aria-label="Increase quantity">
+                                <i class="fas fa-plus text-[10px] text-slate-400"></i>
                             </button>
                         </div>
                         <button @click="removeFromCart(productId)" class="ml-2 w-8 h-8 flex items-center justify-center text-slate-600 hover:text-red-500 transition-colors">
@@ -528,7 +563,23 @@ $tailwind_css = load_tailwind_css([
         </div>
     </div>
     </div>
-    
+
+    <!-- MOBILE CART BAR (visible below 1280px only) -->
+    <div @click="showMobileCart = true" class="pos-mobile-bar glass-panel no-print rounded-2xl px-4 py-3 gap-4" role="button" aria-label="View current order">
+        <div class="min-w-0">
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <span x-text="cartItemCount"></span> items · <span x-text="orderMode === 'dine_in' ? 'Dine In' : 'Takeaway'"></span>
+            </p>
+            <p class="text-lg font-black text-white leading-none mt-1" x-text="formatCurrency(totals.final)"></p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] font-black uppercase tracking-widest text-orange-500">View Order</span>
+            <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/20">
+                <i class="fas fa-chevron-up text-white"></i>
+            </div>
+        </div>
+    </div>
+
     <!-- PAYMENT MODAL -->
     <div x-show="openPaymentModal" x-cloak class="fixed inset-0 z-[100] no-print">
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" @click="openPaymentModal = false"></div>
@@ -700,7 +751,7 @@ $tailwind_css = load_tailwind_css([
     <!-- RECEIPT MODAL -->
     <div x-show="showReceiptModal" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-6">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"></div>
-        <div class="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative flex flex-col">
+        <div class="pos-receipt-card bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative flex flex-col">
             <div class="voucher-print-area p-8 text-slate-900 bg-gradient-to-b from-slate-50 to-white">
                 <div class="text-center mb-8 border-b-2 border-dashed border-slate-200 pb-8">
                     <div class="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -768,6 +819,7 @@ $tailwind_css = load_tailwind_css([
             couponCode: '', couponDiscount: 0, couponMessage: '',
             orderLabel: '', orderMode: 'takeaway', showHeldOrders: false, heldOrders: [],
             favoriteProductIds: [], quickQty: 1, compactGrid: false, showShortcuts: false, draftSavedAt: '',
+            showMobileCart: false,
             darkMode: document.documentElement.classList.contains('dark'),
             shortcuts: [
                 { key: 'Ctrl/Cmd K', label: 'Search products', help: 'Jump to product search' },
@@ -804,6 +856,7 @@ $tailwind_css = load_tailwind_css([
                         this.openPaymentModal = false;
                         this.showHeldOrders = false;
                         this.showShortcuts = false;
+                        this.showMobileCart = false;
                     }
                     if (event.altKey && ['1', '2', '3', '4', '5'].includes(event.key)) {
                         event.preventDefault();
@@ -891,6 +944,7 @@ $tailwind_css = load_tailwind_css([
                 const qty = Number(this.quickQty) > 0 ? Number(this.quickQty) : 1;
                 if(this.cart[p.id]){this.cart[p.id].quantity += qty;}
                 else{this.cart[p.id]={id:p.id,name:p.name_en,price:parseFloat(finalPrice),quantity:qty, image: p.image};}
+                if (navigator.vibrate) { navigator.vibrate(10); }
                 this.rememberFavorite(p.id);
                 this.persistOrderDraft();
             },
@@ -995,6 +1049,7 @@ $tailwind_css = load_tailwind_css([
                 this.heldOrders = [heldOrder, ...this.heldOrders].slice(0, 12);
                 this.saveHeldOrders();
                 this.resetOrder();
+                this.showMobileCart = false;
                 this.showToast('Order held for later', '#14b8a6');
             },
 
@@ -1015,6 +1070,7 @@ $tailwind_css = load_tailwind_css([
                 this.saveHeldOrders();
                 this.persistOrderDraft();
                 this.showHeldOrders = false;
+                this.showMobileCart = window.matchMedia('(max-width: 1279px)').matches;
                 this.showToast('Held order recalled', '#14b8a6');
             },
 
@@ -1046,11 +1102,15 @@ $tailwind_css = load_tailwind_css([
                 .then(res => res.json())
                 .then(data => {
                     this.couponMessage = data.message;
-                    if (data.status === 'success') { 
-                        this.couponDiscount = data.discount; 
+                    if (data.status === 'success') {
+                        this.couponDiscount = data.discount;
                         this.persistOrderDraft();
                         this.showToast('Voucher Authenticated', '#10b981');
                     } else { this.couponDiscount = 0; }
+                })
+                .catch(() => {
+                    this.couponDiscount = 0;
+                    this.couponMessage = 'Connection problem. Try again.';
                 });
             },
 
@@ -1077,6 +1137,9 @@ $tailwind_css = load_tailwind_css([
                             this.customerName = '';
                             this.customerMessage = 'No saved customer found. This sale can continue.';
                         }
+                    })
+                    .catch(() => {
+                        this.customerMessage = 'Connection problem. Try again.';
                     });
             },
 
@@ -1144,6 +1207,8 @@ $tailwind_css = load_tailwind_css([
                         };
                         localStorage.removeItem('paicafe-pos-draft');
                         this.draftSavedAt = '';
+                        this.openPaymentModal = false;
+                        this.showMobileCart = false;
                         this.showReceiptModal = true;
                         this.showToast('Transaction Authorized', '#10b981');
                     } else {
@@ -1153,7 +1218,7 @@ $tailwind_css = load_tailwind_css([
                 .catch(error => {
                     alert(error.message || 'Network changed while processing. Please try again.');
                 })
-                .finally(() => { this.processing = false; this.openPaymentModal = false; });
+                .finally(() => { this.processing = false; });
             },
 
             resetOrder() { 
@@ -1170,8 +1235,9 @@ $tailwind_css = load_tailwind_css([
                 }
             },
             
-            startNewOrder() { 
-                this.showReceiptModal = false; 
+            startNewOrder() {
+                this.showReceiptModal = false;
+                this.showMobileCart = false;
                 this.receiptDetails = { orderId: null, cart: [], totals: { subtotal: 0, tax: 0, final: 0 } };
                 this.resetOrder();
             },
