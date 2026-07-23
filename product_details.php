@@ -58,7 +58,7 @@ $product_image = (string)($product['image'] ?: '/assets/uploads/placeholder.png'
 if (strpos($product_image, 'http') !== 0) $product_image = APP_URL . '/' . ltrim($product_image, '/');
 $final_price = (float)$product['price'] * (1 - ((float)($product['discount_percentage'] ?? 0) / 100));
 $page_title = $product_name . ' | Pai Cafe Menu Yangon';
-$page_description = mb_substr($product_description, 0, 155);
+$page_description = function_exists('mb_substr') ? mb_substr($product_description, 0, 155) : substr($product_description, 0, 155);
 $page_canonical = APP_URL . '/product_details.php?id=' . $product_id;
 $page_image = $product_image;
 $page_schema = [
