@@ -1,0 +1,2 @@
+ALTER TABLE order_items
+    ADD COLUMN IF NOT EXISTS prepared_at DATETIME NULL DEFAULT NULL AFTER price_per_item;

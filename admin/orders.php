@@ -8,6 +8,8 @@ if (!has_permission('manage_orders')) {
     die('Access Denied. You do not have permission to manage orders.');
 }
 
+$prep_tracking_available = ensure_order_item_preparation_schema($pdo);
+
 $message = '';
 $message_type = 'success';
 $errors = [];
@@ -33,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $order_stmt->execute([$order_id]);
             $order = $order_stmt->fetch();
 
-            if ($order && $order['status'] !== 'completed') {
-                $stmt = $pdo->prepare("UPDATE orders SET status = 'completed' WHERE id = ?");
+            if ($order && $order['status'] === 'ready_for_pickup') {
+                $stmt = $pdo->prepare("UPDATE orders SET status = 'completed' WHERE id = ? AND status = 'ready_for_pickup'");
                 $stmt->execute([$order_id]);
 
                 // Award Loyalty Points
@@ -60,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $message = "Order #{$order_id} marked as completed.";
                 log_activity($pdo, "Completed Order #$order_id");
+            } else {
+                throw new RuntimeException('Only an order marked ready for pickup can be completed.');
             }
         }
         
@@ -95,14 +99,27 @@ $last_order_date = $pdo->query("SELECT MAX(DATE(created_at)) FROM orders")->fetc
 $prev_date_link = (clone $selected_date)->modify('-1 day')->format('Y-m-d');
 $next_date_link = (clone $selected_date)->modify('+1 day')->format('Y-m-d');
 
+$prepared_units_sql = $prep_tracking_available
+    ? 'SUM(CASE WHEN prepared_at IS NOT NULL THEN quantity ELSE 0 END)'
+    : '0';
 $sql = "
-    SELECT 
-        o.*, u.username, u.phone_number, t.table_number
+    SELECT
+        o.*, u.username, u.phone_number, t.table_number,
+        COALESCE(kp.total_items, 0) total_items,
+        COALESCE(kp.prepared_items, 0) prepared_items
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
     LEFT JOIN tables t ON o.table_id = t.id
+    LEFT JOIN (
+        SELECT order_id, SUM(quantity) total_items, {$prepared_units_sql} prepared_items
+        FROM order_items
+        GROUP BY order_id
+    ) kp ON kp.order_id = o.id
     WHERE DATE(o.created_at) = ?
-    ORDER BY FIELD(o.status, 'pending_approval', 'ready_for_pickup', 'processing', 'completed', 'cancelled'), o.created_at DESC
+    ORDER BY
+        FIELD(o.status, 'pending_approval', 'processing', 'ready_for_pickup', 'completed', 'cancelled'),
+        CASE WHEN o.status IN ('pending_approval', 'processing', 'ready_for_pickup') THEN o.created_at END ASC,
+        o.created_at DESC
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$selected_date->format('Y-m-d')]);
@@ -142,6 +159,9 @@ $orders = $stmt->fetchAll();
                 <i class="fas fa-angles-right text-xs"></i>
             </a>
             <a href="?" class="px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 ml-2">Today</a>
+            <a href="?date=<?= e($selected_date->format('Y-m-d')) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all" title="Refresh kitchen progress" aria-label="Refresh kitchen progress">
+                <i class="fas fa-rotate text-xs"></i>
+            </a>
         </div>
     </div>
 
@@ -153,15 +173,23 @@ $orders = $stmt->fetchAll();
         </div>
     <?php endif; ?>
 
+    <?php if (!$prep_tracking_available): ?>
+        <div class="mb-8 p-5 rounded-2xl border flex items-center space-x-4 bg-amber-500/10 border-amber-500/20 text-amber-600">
+            <i class="fas fa-triangle-exclamation"></i>
+            <p class="text-xs font-black uppercase tracking-widest">Kitchen item progress is temporarily unavailable. Order statuses remain available.</p>
+        </div>
+    <?php endif; ?>
+
     <!-- Orders Terminal -->
     <div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl shadow-slate-200/50 dark:shadow-none">
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Order ID</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Table / Order</th>
                         <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Customer</th>
                         <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Service Mode</th>
+                        <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Kitchen Progress</th>
                         <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Total Price</th>
                         <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em]">Status</th>
                         <th class="p-6 text-[10px] uppercase font-black text-slate-400 tracking-[0.15em] text-center">Actions</th>
@@ -170,7 +198,7 @@ $orders = $stmt->fetchAll();
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php if (empty($orders)): ?>
                         <tr>
-                            <td colspan="6" class="p-20 text-center">
+                            <td colspan="7" class="p-20 text-center">
                                 <div class="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mx-auto mb-4 animate-pulse">
                                     <i class="fas fa-mug-hot text-2xl"></i>
                                 </div>
@@ -182,21 +210,44 @@ $orders = $stmt->fetchAll();
 
                     <?php foreach ($orders as $order): 
                         $status_styles = [
-                            'pending_approval' => 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20', 
-                            'processing' => 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-                            'ready_for_pickup' => 'text-purple-500 bg-purple-500/10 border-purple-500/20', 
+                            'pending_approval' => 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
+                            'processing' => 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+                            'ready_for_pickup' => 'text-purple-500 bg-purple-500/10 border-purple-500/20',
                             'completed' => 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
                             'cancelled' => 'text-red-500 bg-red-500/10 border-red-500/20',
                         ];
+                        $status_labels = [
+                            'pending_approval' => 'Pending',
+                            'processing' => 'Preparing',
+                            'ready_for_pickup' => 'Ready for pickup',
+                            'completed' => 'Completed',
+                            'cancelled' => 'Cancelled',
+                        ];
                         $style = $status_styles[$order['status']] ?? 'text-slate-400 bg-slate-400/10 border-slate-400/20';
+                        $total_items = (int)$order['total_items'];
+                        $prepared_items = (int)$order['prepared_items'];
+                        if (in_array($order['status'], ['ready_for_pickup', 'completed'], true)) {
+                            $prepared_items = $total_items;
+                        }
+                        $remaining_items = max(0, $total_items - $prepared_items);
+                        $prep_percent = $total_items > 0 ? (int)round(($prepared_items / $total_items) * 100) : 0;
+                        if ($order['table_number']) {
+                            $table_label = trim((string)$order['table_number']);
+                            $order_location = preg_match('/^table\b/i', $table_label) ? $table_label : 'Table ' . $table_label;
+                        } elseif ($order['order_type'] === 'pos') {
+                            $order_location = 'Counter';
+                        } else {
+                            $order_location = 'Online';
+                        }
                     ?>
                     <tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all duration-200">
                         <td class="p-6">
                             <div class="flex items-center space-x-3">
                                 <div class="w-2 h-2 rounded-full <?= strpos($order['status'], 'pending') !== false ? 'bg-orange-600 animate-ping' : 'bg-slate-300 dark:bg-slate-700' ?>"></div>
                                 <div>
-                                    <p class="text-sm font-black text-slate-800 dark:text-white group-hover:text-orange-600 transition-colors">#<?= sprintf("%05d", $order['id']) ?></p>
-                                    <p class="text-[9px] font-mono text-slate-400 dark:text-slate-500 uppercase"><?= date('H:i:s', strtotime($order['updated_at'])) ?></p>
+                                    <p class="text-sm font-black text-slate-800 dark:text-white group-hover:text-orange-600 transition-colors"><?= e($order_location) ?></p>
+                                    <p class="text-[10px] font-mono font-bold text-orange-500 uppercase mt-0.5">Order #<?= sprintf("%05d", $order['id']) ?></p>
+                                    <p class="text-[9px] font-mono text-slate-400 dark:text-slate-500 uppercase mt-0.5"><?= date('H:i:s', strtotime($order['updated_at'])) ?></p>
                                 </div>
                             </div>
                         </td>
@@ -231,12 +282,34 @@ $orders = $stmt->fetchAll();
                                 <p class="text-xs font-black text-slate-700 dark:text-slate-300 uppercase">Table <?= e($order['table_number'] ?? 'Takeaway') ?></p>
                             <?php endif; ?>
                         </td>
+                        <td class="p-6" style="min-width: 190px">
+                            <?php if ($order['status'] === 'cancelled'): ?>
+                                <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Cancelled</p>
+                            <?php else: ?>
+                                <div class="flex items-center justify-between gap-3 mb-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                                        <?php if ($order['status'] === 'pending_approval'): ?>
+                                            <?= $total_items ?> waiting
+                                        <?php elseif ($remaining_items > 0): ?>
+                                            <?= $remaining_items ?> remaining
+                                        <?php else: ?>
+                                            All prepared
+                                        <?php endif; ?>
+                                    </p>
+                                    <span class="text-[9px] font-mono font-black text-slate-400"><?= $prep_percent ?>%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden" role="progressbar" aria-label="Kitchen preparation progress" aria-valuenow="<?= $prep_percent ?>" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="h-full rounded-full" style="width: <?= $prep_percent ?>%; background-color: <?= $remaining_items === 0 && $total_items > 0 ? '#10b981' : ($order['status'] === 'pending_approval' ? '#f59e0b' : '#f97316') ?>"></div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 mt-2 font-mono"><?= $prepared_items ?> / <?= $total_items ?> items prepared</p>
+                            <?php endif; ?>
+                        </td>
                         <td class="p-6">
                             <p class="text-sm font-black text-slate-800 dark:text-white"><?= number_format($order['final_amount']) ?> <span class="text-[10px] text-slate-400 font-normal">KS</span></p>
                         </td>
                         <td class="p-6">
                             <span class="inline-flex items-center px-3 py-1 text-[9px] font-black uppercase rounded-full border tracking-widest <?= $style ?>">
-                                <?= str_replace('_', ' ', $order['status']) ?>
+                                <?= e($status_labels[$order['status']] ?? str_replace('_', ' ', $order['status'])) ?>
                             </span>
                         </td>
                         <td class="p-6">
@@ -250,7 +323,7 @@ $orders = $stmt->fetchAll();
                                     </form>
                                 <?php endif; ?>
                                 
-                                <?php if ($order['status'] === 'ready_for_pickup' || $order['status'] === 'processing'): ?>
+                                <?php if ($order['status'] === 'ready_for_pickup'): ?>
                                     <form method="POST" onsubmit="return confirm('Mark order as completed?');">
                                         <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
                                         <button type="submit" name="complete_order" class="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all" title="Complete Order">

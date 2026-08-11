@@ -11,6 +11,11 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'kitchen') {
 }
 
 try {
+    $prep_schema_available = ensure_order_item_preparation_schema($pdo);
+    $prepared_select = $prep_schema_available
+        ? 'CASE WHEN oi.prepared_at IS NOT NULL THEN 1 ELSE 0 END AS is_prepared'
+        : '0 AS is_prepared';
+
     // Pending orders need an explicit kitchen acknowledgement before preparation.
     $stmt = $pdo->prepare("
         SELECT
@@ -25,7 +30,7 @@ try {
     $orders = $stmt->fetchAll();
 
     $items_stmt = $pdo->prepare("
-        SELECT oi.quantity, p.name_en, c.name_en category_name
+        SELECT oi.id, oi.quantity, p.name_en, c.name_en category_name, {$prepared_select}
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         LEFT JOIN categories c ON c.id = p.category_id
@@ -37,6 +42,7 @@ try {
     foreach ($orders as $order) {
         $items_stmt->execute([$order['id']]);
         $order['items'] = $items_stmt->fetchAll();
+        $order['preparation_tracking'] = $prep_schema_available;
         $result[] = $order;
     }
 

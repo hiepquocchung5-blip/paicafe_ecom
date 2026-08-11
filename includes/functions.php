@@ -417,6 +417,35 @@ function log_activity($pdo, $action) {
 }
 
 /**
+ * Ensures order-item preparation can be shared between the kitchen display
+ * and admin order monitoring. Returns false when the database user cannot
+ * apply the backwards-compatible schema upgrade.
+ */
+function ensure_order_item_preparation_schema(PDO $pdo) {
+    static $available = null;
+    if ($available !== null) return $available;
+
+    try {
+        $pdo->query('SELECT prepared_at FROM order_items LIMIT 0');
+        return $available = true;
+    } catch (PDOException $e) {
+        try {
+            $pdo->exec('ALTER TABLE order_items ADD COLUMN prepared_at DATETIME NULL DEFAULT NULL');
+            return $available = true;
+        } catch (PDOException $migration_error) {
+            // Another request may have completed the migration concurrently.
+            try {
+                $pdo->query('SELECT prepared_at FROM order_items LIMIT 0');
+                return $available = true;
+            } catch (PDOException $verification_error) {
+                error_log('Order item preparation schema unavailable: ' . $migration_error->getMessage());
+                return $available = false;
+            }
+        }
+    }
+}
+
+/**
  * Calculates loyalty points to be awarded for a given amount.
  */
 function calculate_points($pdo, $amount) {

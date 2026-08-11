@@ -260,14 +260,15 @@ require_kitchen_login();
                     <div class="p-5 flex-grow">
                         <div class="space-y-3">
                             <template x-for="(item, index) in order.items" :key="index">
-                                <button type="button" @click="toggleItemStatus(order, index)" :disabled="order.status !== 'processing'"
+                                <button type="button" @click="toggleItemStatus(order, item)" :disabled="order.status !== 'processing' || isItemBusy(order.id, item.id)"
                                      class="w-full text-left flex items-center p-3 rounded-xl border border-white/5 transition-all select-none"
-                                     :class="order.status !== 'processing' ? 'bg-black/10 cursor-default' : (isPrepped(order.id, index) ? 'item-prepped bg-black/50' : 'bg-white/[0.03] hover:bg-white/10 cursor-pointer')">
+                                     :class="order.status !== 'processing' ? 'bg-black/10 cursor-default' : (isPrepped(item) ? 'item-prepped bg-black/50' : 'bg-white/[0.03] hover:bg-white/10 cursor-pointer')">
                                     
                                     <div class="w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center mr-4 border transition-colors"
-                                         :class="isPrepped(order.id, index) ? 'bg-emerald-500 border-emerald-500 text-black' : 'bg-orange-600/20 border-orange-600/40 text-orange-500'">
-                                        <span x-show="!isPrepped(order.id, index)" class="text-sm font-black" x-text="item.quantity"></span>
-                                        <i x-show="isPrepped(order.id, index)" class="fas fa-check text-xs"></i>
+                                         :class="isPrepped(item) ? 'bg-emerald-500 border-emerald-500 text-black' : 'bg-orange-600/20 border-orange-600/40 text-orange-500'">
+                                        <span x-show="!isPrepped(item) && !isItemBusy(order.id, item.id)" class="text-sm font-black" x-text="item.quantity"></span>
+                                        <i x-show="isPrepped(item) && !isItemBusy(order.id, item.id)" class="fas fa-check text-xs"></i>
+                                        <i x-show="isItemBusy(order.id, item.id)" class="fas fa-spinner fa-spin text-xs"></i>
                                     </div>
                                     
                                     <div class="flex-grow">
@@ -315,8 +316,8 @@ require_kitchen_login();
                 currentDate: '',
                 now: Date.now(),
                 lastPacketIds: new Set(),
-                prepLocal: {}, // { orderId: [preppedIndices] }
                 busyOrders: {},
+                busyItems: {},
                 stageFilter: 'all',
                 stationFilter: 'All',
                 soundEnabled: localStorage.getItem('kitchen-sound') !== '0',
@@ -407,8 +408,8 @@ require_kitchen_login();
 
                 remainingUnits(order) {
                     if (order.status !== 'processing') return this.totalUnits(order);
-                    return order.items.reduce((total, item, index) => {
-                        return total + (this.isPrepped(order.id, index) ? 0 : Number(item.quantity || 0));
+                    return order.items.reduce((total, item) => {
+                        return total + (this.isPrepped(item) ? 0 : Number(item.quantity || 0));
                     }, 0);
                 },
 
@@ -443,25 +444,20 @@ require_kitchen_login();
                     return ((this.now - new Date(createdAt).getTime()) / 60000) >= 12;
                 },
 
-                // Item Tracking Logic
-                toggleItemStatus(order, idx) {
-                    if (order.status !== 'processing') return;
-                    const orderId = order.id;
-                    if (!this.prepLocal[orderId]) this.prepLocal[orderId] = [];
-                    const pos = this.prepLocal[orderId].indexOf(idx);
-                    if (pos > -1) {
-                        this.prepLocal[orderId].splice(pos, 1);
-                    } else {
-                        this.prepLocal[orderId].push(idx);
-                    }
+                itemBusyKey(orderId, itemId) {
+                    return `${orderId}:${itemId}`;
                 },
 
-                isPrepped(orderId, idx) {
-                    return this.prepLocal[orderId] && this.prepLocal[orderId].includes(idx);
+                isItemBusy(orderId, itemId) {
+                    return Boolean(this.busyItems[this.itemBusyKey(orderId, itemId)]);
+                },
+
+                isPrepped(item) {
+                    return item.is_prepared === true || Number(item.is_prepared) === 1;
                 },
 
                 allPrepped(order) {
-                    return order.items.length > 0 && this.prepLocal[order.id] && this.prepLocal[order.id].length === order.items.length;
+                    return order.items.length > 0 && order.items.every(item => this.isPrepped(item));
                 },
 
                 isBusy(orderId) {
@@ -479,6 +475,9 @@ require_kitchen_login();
                         })
                         .then(data => {
                             const incoming = Array.isArray(data) ? data : (data.orders || []);
+                            incoming.forEach(order => order.items.forEach(item => {
+                                item.is_prepared = item.is_prepared === true || Number(item.is_prepared) === 1;
+                            }));
                             
                             // Protocol for incoming packets
                             if (this.lastPacketIds.size > 0) {
@@ -543,6 +542,33 @@ require_kitchen_login();
                     }).showToast();
                 },
 
+                async toggleItemStatus(order, item) {
+                    if (order.status !== 'processing' || this.isItemBusy(order.id, item.id)) return;
+                    const key = this.itemBusyKey(order.id, item.id);
+                    const nextState = !this.isPrepped(item);
+                    this.busyItems[key] = true;
+
+                    try {
+                        const response = await fetch('/api/update_item_status.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                order_id: order.id,
+                                item_id: item.id,
+                                is_prepared: nextState
+                            })
+                        });
+                        const data = await response.json();
+                        if (!response.ok || data.status !== 'success') throw new Error(data.message || 'Could not update item.');
+                        item.is_prepared = Boolean(data.is_prepared);
+                    } catch (error) {
+                        this.showToast(error.message || 'Could not update item.', 'error');
+                        this.syncFeed();
+                    } finally {
+                        delete this.busyItems[key];
+                    }
+                },
+
                 async acceptOrder(order) {
                     if (order.status !== 'pending_approval' || this.isBusy(order.id)) return;
                     this.busyOrders[order.id] = true;
@@ -586,7 +612,6 @@ require_kitchen_login();
                         this.showToast(`Order #${id} is ready for pickup.`);
                         setTimeout(() => {
                             this.orders = this.orders.filter(o => o.id !== id);
-                            delete this.prepLocal[id];
                             delete this.busyOrders[id];
                         }, 500);
                     } catch (error) {
