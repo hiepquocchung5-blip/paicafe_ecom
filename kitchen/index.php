@@ -54,6 +54,29 @@ require_kitchen_login();
             box-shadow: 0 14px 38px rgba(0, 0, 0, 0.28);
         }
 
+        [x-cloak] { display: none !important; }
+        .ticket-pending {
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), var(--card-bg) 28%);
+        }
+        .ticket-preparing {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.06), var(--card-bg) 28%);
+        }
+        .queue-count { min-width: 1.5rem; }
+        .feed-ok { background: rgba(16, 185, 129, .05); border-color: rgba(16, 185, 129, .14); color: #6ee7b7; }
+        .feed-error { background: rgba(239, 68, 68, .10); border-color: rgba(239, 68, 68, .22); color: #fca5a5; }
+        .feed-dot-ok { background: #34d399; }
+        .feed-dot-error { background: #f87171; }
+        .status-strip-pending { background: #f59e0b; }
+        .status-strip-preparing { background: #10b981; }
+        .status-badge-pending { background: rgba(245, 158, 11, .15); border: 1px solid rgba(245, 158, 11, .24); color: #fbbf24; }
+        .status-badge-preparing { background: rgba(16, 185, 129, .15); border: 1px solid rgba(16, 185, 129, .24); color: #6ee7b7; }
+        .action-accept { background: #ea580c; box-shadow: 0 0 24px rgba(234, 88, 12, .28); }
+        .action-accept:hover { background: #f97316; }
+        .action-ready { background: #059669; color: white; box-shadow: 0 0 20px rgba(16, 185, 129, .30); }
+        .action-ready:hover { background: #10b981; }
+        .action-disabled { background: rgba(255, 255, 255, .05); color: #6b7280; cursor: not-allowed; }
+        button:disabled { opacity: .62; }
+
         /* Tactical Priority States */
         .status-fresh { border-left: 5px solid #10b981; }
         .status-warning { border-left: 5px solid var(--brand-primary); }
@@ -150,9 +173,23 @@ require_kitchen_login();
 
     <!-- Command Center Grid -->
     <main class="container mx-auto p-6 pt-8">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-7">
-            <div class="flex gap-2 bg-black/20 p-1.5 rounded-2xl" role="tablist"><template x-for="tab in ['all','new','preparing']"><button @click="stageFilter=tab" class="px-5 py-2.5 rounded-xl text-sm font-bold capitalize" :class="stageFilter===tab?'bg-orange-600 text-white':'text-gray-400'" x-text="tab"></button></template></div>
-            <div class="flex items-center gap-2"><span class="text-xs text-gray-500 font-bold uppercase">Station</span><select x-model="stationFilter" class="bg-[#24201c] border border-white/10 rounded-xl px-4 py-2.5 text-sm"><option>All</option><option>Kitchen</option><option>Bar</option><option>Dessert</option></select></div>
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-7">
+            <div class="flex flex-wrap gap-2 bg-black/20 p-1.5 rounded-2xl" role="tablist" aria-label="Kitchen queue status">
+                <template x-for="tab in queueTabs" :key="tab.value">
+                    <button type="button" role="tab" :aria-selected="stageFilter === tab.value" @click="stageFilter=tab.value" class="px-4 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center gap-2" :class="stageFilter===tab.value?'bg-orange-600 text-white shadow-lg':'text-gray-400 hover:text-white'">
+                        <span x-text="tab.label"></span>
+                        <span class="queue-count h-6 px-1.5 rounded-lg text-[11px] font-mono inline-flex items-center justify-center" :class="stageFilter===tab.value?'bg-white/20':'bg-white/5'" x-text="tab.count"></span>
+                    </button>
+                </template>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2 px-3 py-2 rounded-xl border" aria-live="polite" :class="feedError?'feed-error':'feed-ok'">
+                    <span class="w-2 h-2 rounded-full" :class="feedError?'feed-dot-error':'feed-dot-ok animate-pulse'"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider" x-text="feedError || (lastSynced ? 'Live · updated ' + lastSynced : 'Connecting…')"></span>
+                    <button x-show="feedError" type="button" @click="syncFeed()" class="text-[10px] font-black underline">Retry</button>
+                </div>
+                <div class="flex items-center gap-2"><span class="text-xs text-gray-500 font-bold uppercase">Station</span><select x-model="stationFilter" class="bg-[#24201c] border border-white/10 rounded-xl px-4 py-2.5 text-sm"><option>All</option><option>Kitchen</option><option>Bar</option><option>Dessert</option></select></div>
+            </div>
         </div>
         
         <!-- Loading UI -->
@@ -165,12 +202,12 @@ require_kitchen_login();
         </div>
 
         <!-- Empty Desk -->
-        <div x-show="!loading && orders.length === 0" class="flex flex-col items-center justify-center py-40" style="display: none;">
+        <div x-cloak x-show="!loading && visibleOrders.length === 0" class="flex flex-col items-center justify-center py-40">
             <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center border border-white/5 mb-8">
                 <i class="fas fa-check-circle text-4xl text-emerald-500 opacity-40"></i>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-300">All caught up</h2>
-            <p class="text-gray-500 mt-2">New orders will appear here automatically.</p>
+            <h2 class="text-2xl font-semibold text-gray-300" x-text="orders.length ? 'No orders in this view' : 'All caught up'"></h2>
+            <p class="text-gray-500 mt-2" x-text="orders.length ? 'Choose another queue or station.' : 'New orders will appear here automatically.'"></p>
         </div>
 
         <!-- Grid -->
@@ -179,18 +216,24 @@ require_kitchen_login();
                 
                 <div :id="'order-' + order.id" 
                      class="glass-panel rounded-2xl flex flex-col transition-all duration-300 relative overflow-hidden group"
-                     :class="getPriorityClass(order.created_at)">
+                     :class="[getPriorityClass(order.created_at), order.status === 'pending_approval' ? 'ticket-pending' : 'ticket-preparing']">
+
+                    <div class="h-1.5 w-full" :class="order.status === 'pending_approval' ? 'status-strip-pending' : 'status-strip-preparing'"></div>
                     
                     <!-- Card ID & Timer -->
                     <div class="px-5 py-4 flex justify-between items-start bg-white/[0.02] border-b border-white/5">
                         <div>
                             <div class="flex items-center space-x-2">
                                 <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping" x-show="isCritical(order.created_at)"></span>
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Order</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest" x-text="order.order_type === 'qr' ? 'Table order' : (order.order_type === 'pos' ? 'POS order' : 'Online order')"></span>
                             </div>
                             <h2 class="text-4xl font-black text-white tracking-tighter mt-1">#<span x-text="order.id"></span></h2>
                         </div>
                         <div class="text-right">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2" :class="order.status === 'pending_approval' ? 'status-badge-pending' : 'status-badge-preparing'">
+                                <i class="fas mr-1.5" :class="order.status === 'pending_approval' ? 'fa-bell' : 'fa-fire-burner'"></i>
+                                <span x-text="order.status === 'pending_approval' ? 'Pending' : 'Preparing'"></span>
+                            </span>
                             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-1">Waiting</span>
                             <span class="text-xl font-mono font-black tracking-tighter" :class="getTimeColor(order.created_at)" x-text="getTimeDiff(order.created_at)"></span>
                         </div>
@@ -211,9 +254,9 @@ require_kitchen_login();
                     <div class="p-5 flex-grow">
                         <div class="space-y-3">
                             <template x-for="(item, index) in order.items" :key="index">
-                                <div @click="toggleItemStatus(order.id, index)" 
-                                     class="flex items-center p-3 rounded-xl border border-white/5 transition-all cursor-pointer select-none"
-                                     :class="isPrepped(order.id, index) ? 'item-prepped bg-black/50' : 'bg-white/[0.03] hover:bg-white/10'">
+                                <button type="button" @click="toggleItemStatus(order, index)" :disabled="order.status !== 'processing'"
+                                     class="w-full text-left flex items-center p-3 rounded-xl border border-white/5 transition-all select-none"
+                                     :class="order.status !== 'processing' ? 'bg-black/10 cursor-default' : (isPrepped(order.id, index) ? 'item-prepped bg-black/50' : 'bg-white/[0.03] hover:bg-white/10 cursor-pointer')">
                                     
                                     <div class="w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center mr-4 border transition-colors"
                                          :class="isPrepped(order.id, index) ? 'bg-emerald-500 border-emerald-500 text-black' : 'bg-orange-600/20 border-orange-600/40 text-orange-500'">
@@ -227,7 +270,7 @@ require_kitchen_login();
                                             <p class="text-[10px] text-red-400 font-medium italic mt-1" x-text="'* ' + item.notes"></p>
                                         </template>
                                     </div>
-                                </div>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -235,15 +278,21 @@ require_kitchen_login();
                     <!-- Bottom Action -->
                     <div class="p-5 bg-black/40 border-t border-white/5">
                         <button @click="printTicket(order)" class="w-full mb-2 py-2 text-xs font-bold text-gray-400 hover:text-white"><i class="fas fa-print mr-2"></i>Print ticket</button>
-                        <button @click="bumpOrder(order.id)" 
-                                class="w-full py-4 rounded-xl text-white font-black uppercase tracking-[0.3em] text-[11px] transition-all active:scale-95 flex items-center justify-center relative overflow-hidden group/btn"
-                                :class="allPrepped(order) ? 'bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-500'">
-                            
-                            <i class="fas fa-bolt-lightning mr-2 text-[10px]" :class="allPrepped(order) ? 'animate-pulse' : ''"></i> 
-                            <span x-text="allPrepped(order) ? 'Mark ready' : 'Complete items first'"></span>
-
-                            <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
-                        </button>
+                        <template x-if="order.status === 'pending_approval'">
+                            <button type="button" @click="acceptOrder(order)" :disabled="isBusy(order.id)"
+                                    class="action-accept w-full py-4 rounded-xl text-white font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 flex items-center justify-center">
+                                <i class="fas mr-2" :class="isBusy(order.id) ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                                <span x-text="isBusy(order.id) ? 'Accepting…' : 'Accept order'"></span>
+                            </button>
+                        </template>
+                        <template x-if="order.status === 'processing'">
+                            <button type="button" @click="bumpOrder(order)" :disabled="!allPrepped(order) || isBusy(order.id)"
+                                    class="w-full py-4 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 flex items-center justify-center"
+                                    :class="allPrepped(order) ? 'action-ready' : 'action-disabled'">
+                                <i class="fas mr-2 text-[10px]" :class="isBusy(order.id) ? 'fa-spinner fa-spin' : (allPrepped(order) ? 'fa-check-double' : 'fa-list-check')"></i>
+                                <span x-text="isBusy(order.id) ? 'Updating…' : (allPrepped(order) ? 'Mark ready' : 'Complete items first')"></span>
+                            </button>
+                        </template>
                     </div>
                 </div>
 
@@ -261,9 +310,13 @@ require_kitchen_login();
                 now: Date.now(),
                 lastPacketIds: new Set(),
                 prepLocal: {}, // { orderId: [preppedIndices] }
+                busyOrders: {},
                 stageFilter: 'all',
                 stationFilter: 'All',
                 soundEnabled: localStorage.getItem('kitchen-sound') !== '0',
+                syncing: false,
+                feedError: '',
+                lastSynced: '',
                 
                 init() {
                     this.refreshClock();
@@ -277,13 +330,30 @@ require_kitchen_login();
                 },
 
                 get sortedOrders() {
-                    // Critical/Oldest orders always first
-                    return [...this.orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    // Waiting acknowledgements stay ahead of in-progress tickets.
+                    return [...this.orders].sort((a, b) => {
+                        if (a.status !== b.status) return a.status === 'pending_approval' ? -1 : 1;
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    });
+                },
+                get pendingCount() {
+                    return this.orders.filter(order => order.status === 'pending_approval').length;
+                },
+                get preparingCount() {
+                    return this.orders.filter(order => order.status === 'processing').length;
+                },
+                get queueTabs() {
+                    return [
+                        { value: 'all', label: 'All orders', count: this.orders.length },
+                        { value: 'pending', label: 'Pending', count: this.pendingCount },
+                        { value: 'preparing', label: 'Preparing', count: this.preparingCount },
+                    ];
                 },
                 get visibleOrders() {
                     return this.sortedOrders.filter(order => {
-                        const started = Boolean(this.prepLocal[order.id] && this.prepLocal[order.id].length);
-                        const stageMatch = this.stageFilter === 'all' || (this.stageFilter === 'new' && !started) || (this.stageFilter === 'preparing' && started);
+                        const stageMatch = this.stageFilter === 'all'
+                            || (this.stageFilter === 'pending' && order.status === 'pending_approval')
+                            || (this.stageFilter === 'preparing' && order.status === 'processing');
                         if (!stageMatch || this.stationFilter === 'All') return stageMatch;
                         return order.items.some(item => {
                             const category = String(item.category_name || '').toLowerCase();
@@ -295,7 +365,7 @@ require_kitchen_login();
                 },
 
                 get totalItemsInQueue() {
-                    return this.orders.reduce((acc, order) => acc + order.items.length, 0);
+                    return this.orders.reduce((total, order) => total + order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0), 0);
                 },
 
                 get loadPercent() {
@@ -336,7 +406,9 @@ require_kitchen_login();
                 },
 
                 // Item Tracking Logic
-                toggleItemStatus(orderId, idx) {
+                toggleItemStatus(order, idx) {
+                    if (order.status !== 'processing') return;
+                    const orderId = order.id;
                     if (!this.prepLocal[orderId]) this.prepLocal[orderId] = [];
                     const pos = this.prepLocal[orderId].indexOf(idx);
                     if (pos > -1) {
@@ -351,12 +423,22 @@ require_kitchen_login();
                 },
 
                 allPrepped(order) {
-                    return this.prepLocal[order.id] && this.prepLocal[order.id].length === order.items.length;
+                    return order.items.length > 0 && this.prepLocal[order.id] && this.prepLocal[order.id].length === order.items.length;
+                },
+
+                isBusy(orderId) {
+                    return Boolean(this.busyOrders[orderId]);
                 },
 
                 syncFeed() {
+                    if (this.syncing) return;
+                    this.syncing = true;
                     fetch('/api/get_new_orders.php')
-                        .then(res => res.json())
+                        .then(async res => {
+                            const data = await res.json();
+                            if (!res.ok || data.status === 'error') throw new Error(data.message || 'Unable to refresh orders.');
+                            return data;
+                        })
                         .then(data => {
                             const incoming = Array.isArray(data) ? data : (data.orders || []);
                             
@@ -369,12 +451,16 @@ require_kitchen_login();
                             
                             this.orders = incoming;
                             this.lastPacketIds = new Set(incoming.map(o => o.id));
+                            this.feedError = '';
+                            this.lastSynced = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                             this.loading = false;
                         })
                         .catch(err => {
                             console.error('Kitchen order sync failed:', err);
+                            this.feedError = err.message || 'Queue offline';
                             this.loading = false;
-                        });
+                        })
+                        .finally(() => { this.syncing = false; });
                 },
 
                 triggerIncomingAlert(id) {
@@ -405,27 +491,72 @@ require_kitchen_login();
                     popup.document.close(); popup.focus(); popup.print();
                 },
 
-                bumpOrder(id) {
-                    const el = document.getElementById('order-' + id);
-                    if(el) el.classList.add('order-exit');
-
-                    fetch('/api/complete_order.php', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ order_id: id }) 
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            setTimeout(() => {
-                                this.orders = this.orders.filter(o => o.id !== id);
-                                delete this.prepLocal[id];
-                            }, 500);
-                        } else {
-                            if(el) el.classList.remove('order-exit');
-                            alert('Could not complete order: ' + data.message);
+                showToast(message, type = 'success') {
+                    Toastify({
+                        text: message,
+                        duration: 3500,
+                        gravity: 'top',
+                        position: 'right',
+                        style: {
+                            background: type === 'error' ? '#b91c1c' : '#047857',
+                            fontWeight: '700',
+                            borderRadius: '12px'
                         }
-                    });
+                    }).showToast();
+                },
+
+                async acceptOrder(order) {
+                    if (order.status !== 'pending_approval' || this.isBusy(order.id)) return;
+                    this.busyOrders[order.id] = true;
+
+                    try {
+                        const response = await fetch('/api/accept_order.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ order_id: order.id })
+                        });
+                        const data = await response.json();
+                        if (!response.ok || data.status !== 'success') throw new Error(data.message || 'Could not accept order.');
+
+                        order.status = 'processing';
+                        order.updated_at = new Date().toISOString();
+                        this.showToast(`Order #${order.id} accepted — start preparing.`);
+                    } catch (error) {
+                        this.showToast(error.message || 'Could not accept order.', 'error');
+                        this.syncFeed();
+                    } finally {
+                        delete this.busyOrders[order.id];
+                    }
+                },
+
+                async bumpOrder(order) {
+                    const id = order.id;
+                    if (!this.allPrepped(order) || this.isBusy(id)) return;
+                    this.busyOrders[id] = true;
+                    const el = document.getElementById('order-' + id);
+
+                    try {
+                        const response = await fetch('/api/complete_order.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ order_id: id })
+                        });
+                        const data = await response.json();
+                        if (!response.ok || data.status !== 'success') throw new Error(data.message || 'Could not mark order ready.');
+
+                        if (el) el.classList.add('order-exit');
+                        this.showToast(`Order #${id} is ready for pickup.`);
+                        setTimeout(() => {
+                            this.orders = this.orders.filter(o => o.id !== id);
+                            delete this.prepLocal[id];
+                            delete this.busyOrders[id];
+                        }, 500);
+                    } catch (error) {
+                        if (el) el.classList.remove('order-exit');
+                        delete this.busyOrders[id];
+                        this.showToast(error.message || 'Could not mark order ready.', 'error');
+                        this.syncFeed();
+                    }
                 }
             }
         }
