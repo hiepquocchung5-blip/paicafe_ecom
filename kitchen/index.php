@@ -220,14 +220,15 @@ require_kitchen_login();
 
                     <div class="h-1.5 w-full" :class="order.status === 'pending_approval' ? 'status-strip-pending' : 'status-strip-preparing'"></div>
                     
-                    <!-- Card ID & Timer -->
+                    <!-- Table/source, order ID, status and timer -->
                     <div class="px-5 py-4 flex justify-between items-start bg-white/[0.02] border-b border-white/5">
-                        <div>
+                        <div class="min-w-0 pr-3">
                             <div class="flex items-center space-x-2">
                                 <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping" x-show="isCritical(order.created_at)"></span>
                                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest" x-text="order.order_type === 'qr' ? 'Table order' : (order.order_type === 'pos' ? 'POS order' : 'Online order')"></span>
                             </div>
-                            <h2 class="text-4xl font-black text-white tracking-tighter mt-1">#<span x-text="order.id"></span></h2>
+                            <h2 class="text-3xl font-black text-white tracking-tighter mt-1 truncate" x-text="orderLocation(order)"></h2>
+                            <p class="mt-1 text-xs font-mono font-bold text-orange-400 uppercase tracking-widest">Order <span class="text-white">#<span x-text="order.id"></span></span></p>
                         </div>
                         <div class="text-right">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2" :class="order.status === 'pending_approval' ? 'status-badge-pending' : 'status-badge-preparing'">
@@ -239,15 +240,20 @@ require_kitchen_login();
                         </div>
                     </div>
 
-                    <!-- Origin Tag -->
-                    <div class="px-5 pt-4 flex justify-between items-center">
-                        <div class="inline-flex items-center px-3 py-1 bg-white/5 rounded-lg border border-white/5">
-                            <i class="fas mr-2 text-[10px] opacity-60" :class="order.table_number ? 'fa-chair' : 'fa-globe-americas'"></i>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-300" x-text="order.table_number ? 'Table ' + order.table_number : 'Web Order'"></span>
+                    <!-- Preparation progress -->
+                    <div class="px-5 pt-4">
+                        <div class="flex justify-between items-center gap-3">
+                            <div class="inline-flex items-center px-3 py-1.5 bg-white/5 rounded-lg border border-white/5">
+                                <i class="fas fa-list-check mr-2 text-[10px] opacity-60"></i>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-300" x-text="itemProgressLabel(order)"></span>
+                            </div>
+                            <template x-if="isCritical(order.created_at)">
+                                <span class="text-[10px] font-black text-red-500 uppercase animate-pulse">Delayed</span>
+                            </template>
                         </div>
-                        <template x-if="isCritical(order.created_at)">
-                            <span class="text-[10px] font-black text-red-500 uppercase animate-pulse">!! Delayed !!</span>
-                        </template>
+                        <div class="h-1.5 mt-3 bg-white/5 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="prepProgress(order)" aria-valuemin="0" aria-valuemax="100">
+                            <div class="h-full rounded-full transition-all duration-500" :class="order.status === 'pending_approval' ? 'status-strip-pending' : 'status-strip-preparing'" :style="`width: ${prepProgress(order)}%`"></div>
+                        </div>
                     </div>
 
                     <!-- Interactive Item List -->
@@ -385,6 +391,38 @@ require_kitchen_login();
                     const mm = Math.floor(diff / 60);
                     const ss = diff % 60;
                     return `${mm}:${ss.toString().padStart(2, '0')}`;
+                },
+
+                orderLocation(order) {
+                    if (order.table_number) {
+                        const table = String(order.table_number).trim();
+                        return /^table\b/i.test(table) ? table : `Table ${table}`;
+                    }
+                    return order.order_type === 'pos' ? 'Counter' : 'Online';
+                },
+
+                totalUnits(order) {
+                    return order.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+                },
+
+                remainingUnits(order) {
+                    if (order.status !== 'processing') return this.totalUnits(order);
+                    return order.items.reduce((total, item, index) => {
+                        return total + (this.isPrepped(order.id, index) ? 0 : Number(item.quantity || 0));
+                    }, 0);
+                },
+
+                prepProgress(order) {
+                    const total = this.totalUnits(order);
+                    if (!total || order.status !== 'processing') return 0;
+                    return Math.round(((total - this.remainingUnits(order)) / total) * 100);
+                },
+
+                itemProgressLabel(order) {
+                    const remaining = this.remainingUnits(order);
+                    if (order.status === 'pending_approval') return `${remaining} ${remaining === 1 ? 'item' : 'items'} waiting`;
+                    if (remaining === 0) return 'All items prepared';
+                    return `${remaining} ${remaining === 1 ? 'item' : 'items'} remaining`;
                 },
 
                 getPriorityClass(createdAt) {
